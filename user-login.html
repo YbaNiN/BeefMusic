@@ -2,402 +2,405 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <!-- 👇 ESTA LÍNEA ES LA CLAVE PARA MÓVIL -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BeefMusic – Acceso usuarios</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
- <style>
-  body {
-    background: radial-gradient(circle at top left, #31112f 0, #050509 45%, #050509 100%);
-  }
-
-  .auth-shell {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 32px 16px;
-  }
-
-  .auth-card {
-    max-width: 860px;
-    width: 100%;
-    border-radius: 28px;
-    padding: 1px; /* borde degradado */
-    background: linear-gradient(
-      135deg,
-      rgba(255,39,87,0.9),
-      rgba(138,77,255,0.9),
-      rgba(255,255,255,0.1)
-    );
-    box-shadow: 0 28px 80px rgba(0,0,0,0.85);
-  }
-
-  .auth-inner {
-    background: radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 55%),
-                rgba(5,5,9,0.96);
-    border-radius: 26px;
-    padding: 22px 22px 24px;
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-    gap: 22px;
-  }
-
-  .auth-left {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .auth-left-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-    gap: 12px;
-  }
-
-  .auth-badge {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.28);
-    color: var(--fg-muted);
-    background: rgba(0,0,0,0.6);
-    white-space: nowrap;
-  }
-
-  .auth-title {
-    font-size: 1.8rem;
-    margin-bottom: 4px;
-  }
-
-  .auth-subtitle {
-    font-size: 0.92rem;
-    color: var(--fg-muted);
-    max-width: 340px;
-  }
-
-  .auth-pill-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-
-  .auth-pill {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: var(--fg-muted);
-  }
-
-  .auth-status {
-    font-size: 0.8rem;
-    color: var(--fg-muted);
-    min-height: 18px;
-    margin-top: 10px;
-    margin-bottom: 8px;
-  }
-
-  .auth-toggle {
-    margin-top: 10px;
-    font-size: 0.8rem;
-    color: var(--fg-muted);
-  }
-
-  .auth-toggle button {
-    background: none;
-    border: none;
-    color: var(--accent-pink);
-    cursor: pointer;
-    padding: 0;
-    font: inherit;
-  }
-
-  .auth-footer-links {
-    margin-top: 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.78rem;
-    color: var(--fg-muted);
-    flex-wrap: wrap;
-  }
-
-  .auth-footer-links a {
-    text-decoration: none;
-    color: var(--fg-muted);
-    opacity: 0.9;
-  }
-
-  .auth-footer-links a:hover {
-    opacity: 1;
-  }
-
-  /* Lado derecho: bloque visual */
-  .auth-right {
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background:
-      radial-gradient(circle at 0 0, rgba(255,39,87,0.6), transparent 55%),
-      radial-gradient(circle at 100% 0, rgba(138,77,255,0.7), transparent 55%),
-      linear-gradient(140deg, #050509, #11111c);
-    position: relative;
-    overflow: hidden;
-    padding: 16px 16px 18px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
-  .auth-tag-top {
-    align-self: flex-start;
-    font-size: 0.75rem;
-    padding: 3px 9px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.4);
-    background: rgba(5,5,9,0.85);
-  }
-
-  .auth-right-main {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-  }
-
-  .auth-orb {
-    width: 170px;
-    height: 170px;
-    border-radius: 50%;
-    background:
-      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.9), transparent 55%),
-      radial-gradient(circle at 80% 80%, rgba(255,39,87,0.9), transparent 55%),
-      radial-gradient(circle at 0 100%, rgba(138,77,255,0.9), transparent 55%);
-    filter: blur(4px);
-    position: relative;
-    box-shadow: 0 0 50px rgba(255,39,87,0.9);
-  }
-
-  .auth-orb::after {
-    content: "BM";
-    position: absolute;
-    inset: 24%;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    color: #050509;
-    background: rgba(255,255,255,0.9);
-  }
-
-  .auth-right-bottom {
-    font-size: 0.8rem;
-    color: rgba(230,230,240,0.9);
-  }
-
-  .auth-right-bottom strong {
-    color: #ffffff;
-  }
-
-  .auth-meta-chip {
-    margin-top: 6px;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: rgba(220,220,235,0.9);
-  }
-
-  /* ====== RESPONSIVE ====== */
-
-  /* Portátiles medianos */
-  @media (max-width: 1024px) {
-    .auth-card {
-      max-width: 720px;
+  <style>
+    body {
+      background: radial-gradient(circle at top left, #31112f 0, #050509 45%, #050509 100%);
     }
-    .auth-inner {
-      padding: 20px 18px 22px;
-      gap: 18px;
-    }
-  }
 
-  /* Tablets y pantallas medianas: columnas apiladas */
-  @media (max-width: 780px) {
     .auth-shell {
-      padding: 24px 12px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
     }
 
     .auth-card {
-      max-width: 720px;
+      max-width: 860px;
+      width: 100%;
+      border-radius: 28px;
+      padding: 1px; /* borde degradado */
+      background: linear-gradient(
+        135deg,
+        rgba(255,39,87,0.9),
+        rgba(138,77,255,0.9),
+        rgba(255,255,255,0.1)
+      );
+      box-shadow: 0 28px 80px rgba(0,0,0,0.85);
     }
 
     .auth-inner {
-      grid-template-columns: minmax(0, 1fr);
-      padding: 18px 16px 18px;
-      gap: 18px;
+      background: radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 55%),
+                  rgba(5,5,9,0.96);
+      border-radius: 26px;
+      padding: 22px 22px 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 22px;
     }
 
-    .auth-right {
-      order: -1;              /* visual arriba */
-      min-height: 200px;
+    .auth-left {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .auth-left-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      gap: 12px;
+    }
+
+    .auth-badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.28);
+      color: var(--fg-muted);
+      background: rgba(0,0,0,0.6);
+      white-space: nowrap;
     }
 
     .auth-title {
-      font-size: 1.6rem;
+      font-size: 1.8rem;
+      margin-bottom: 4px;
     }
 
     .auth-subtitle {
-      max-width: 100%;
+      font-size: 0.92rem;
+      color: var(--fg-muted);
+      max-width: 340px;
     }
-  }
-/* Móviles pequeños (tipo 360–480px) */
-@media (max-width: 480px) {
-  html, body {
-    height: 100%;
-  }
 
-  .auth-shell {
-    padding: 0 0 24px;
-    align-items: flex-start;
-  }
+    .auth-pill-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
 
-  .auth-card {
-    max-width: 100%;
-    border-radius: 0;
-    padding: 0;
-    background: none; /* sin borde degradado para look de app */
-    box-shadow: none;
-  }
+    .auth-pill {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--fg-muted);
+    }
 
-  .auth-inner {
-    border-radius: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    background: transparent;
-  }
+    .auth-status {
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+      min-height: 18px;
+      margin-top: 10px;
+      margin-bottom: 8px;
+    }
 
-  /* HERO superior en móvil */
-  .auth-right {
-    order: -1;
-    border-radius: 0 0 32px 32px;
-    border: none;
-    padding: 32px 18px 72px;
-    align-items: center;
-    text-align: center;
-  }
+    .auth-toggle {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
 
-  .auth-tag-top {
-    font-size: 0.7rem;
-    padding: 3px 10px;
-  }
+    .auth-toggle button {
+      background: none;
+      border: none;
+      color: var(--accent-pink);
+      cursor: pointer;
+      padding: 0;
+      font: inherit;
+    }
 
-  .auth-orb {
-    width: 150px;
-    height: 150px;
-    box-shadow: 0 0 40px rgba(255,39,87,0.9);
-  }
+    .auth-footer-links {
+      margin-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.78rem;
+      color: var(--fg-muted);
+      flex-wrap: wrap;
+    }
 
-  .auth-right-bottom {
-    font-size: 0.8rem;
-    max-width: 280px;
-    text-align: center;
-  }
+    .auth-footer-links a {
+      text-decoration: none;
+      color: var(--fg-muted);
+      opacity: 0.9;
+    }
 
-  .auth-meta-chip {
-    font-size: 0.7rem;
-  }
+    .auth-footer-links a:hover {
+      opacity: 1;
+    }
 
-  /* Card de login flotando encima del fondo (más grande y legible) */
-  .auth-left {
-    position: relative;
-    margin-top: -56px;
-    margin-inline: 16px;
-    padding: 20px 16px 20px;
-    border-radius: 20px;
-    background: rgba(5,5,12,0.98);
-    border: 1px solid rgba(255,255,255,0.14);
-    box-shadow: 0 18px 42px rgba(0,0,0,0.9);
-  }
+    /* Lado derecho: bloque visual */
+    .auth-right {
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background:
+        radial-gradient(circle at 0 0, rgba(255,39,87,0.6), transparent 55%),
+        radial-gradient(circle at 100% 0, rgba(138,77,255,0.7), transparent 55%),
+        linear-gradient(140deg, #050509, #11111c);
+      position: relative;
+      overflow: hidden;
+      padding: 16px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
 
-  .auth-left-header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
+    .auth-tag-top {
+      align-self: flex-start;
+      font-size: 0.75rem;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.4);
+      background: rgba(5,5,9,0.85);
+    }
 
-  .auth-title {
-    font-size: 1.55rem;
-  }
+    .auth-right-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
 
-  .auth-subtitle {
-    font-size: 0.9rem;
-    max-width: 100%;
-  }
+    .auth-orb {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255,255,255,0.9), transparent 55%),
+        radial-gradient(circle at 80% 80%, rgba(255,39,87,0.9), transparent 55%),
+        radial-gradient(circle at 0 100%, rgba(138,77,255,0.9), transparent 55%);
+      filter: blur(4px);
+      position: relative;
+      box-shadow: 0 0 50px rgba(255,39,87,0.9);
+    }
 
-  .auth-pill-row {
-    margin-top: 10px;
-  }
+    .auth-orb::after {
+      content: "BM";
+      position: absolute;
+      inset: 24%;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      color: #050509;
+      background: rgba(255,255,255,0.9);
+    }
 
-  .auth-status {
-    margin-top: 10px;
-    font-size: 0.8rem;
-  }
+    .auth-right-bottom {
+      font-size: 0.8rem;
+      color: rgba(230,230,240,0.9);
+    }
 
-  /* Inputs más grandes y cómodos */
-  .auth-left .field label {
-    font-size: 0.9rem;
-  }
+    .auth-right-bottom strong {
+      color: #ffffff;
+    }
 
-  .auth-left .field input,
-  .auth-left .field textarea {
-    padding: 11px 12px;
-    font-size: 0.96rem;
-  }
+    .auth-meta-chip {
+      margin-top: 6px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: rgba(220,220,235,0.9);
+    }
 
-  /* Botón grande y a ancho completo */
-  .auth-left .modal-footer {
-    margin-top: 16px !important;
-    justify-content: center !important;
-  }
+    /* ====== RESPONSIVE ====== */
 
-  .auth-left .btn.btn-primary {
-    width: 100%;
-    justify-content: center;
-    padding: 11px 0;
-    font-size: 0.96rem;
-  }
+    /* Portátiles medianos */
+    @media (max-width: 1024px) {
+      .auth-card {
+        max-width: 720px;
+      }
+      .auth-inner {
+        padding: 20px 18px 22px;
+        gap: 18px;
+      }
+    }
 
-  .auth-toggle {
-    margin-top: 12px;
-    font-size: 0.85rem;
-  }
+    /* Tablets y pantallas medianas: columnas apiladas */
+    @media (max-width: 780px) {
+      .auth-shell {
+        padding: 24px 12px;
+      }
 
-  .auth-footer-links {
-    margin-top: 14px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    font-size: 0.8rem;
-  }
-}
-</style>
+      .auth-card {
+        max-width: 720px;
+      }
+
+      .auth-inner {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 18px 16px 18px;
+        gap: 18px;
+      }
+
+      .auth-right {
+        order: -1;              /* visual arriba */
+        min-height: 200px;
+      }
+
+      .auth-title {
+        font-size: 1.6rem;
+      }
+
+      .auth-subtitle {
+        max-width: 100%;
+      }
+    }
+
+    /* Móviles pequeños (tipo 360–480px) */
+    @media (max-width: 480px) {
+      html, body {
+        height: 100%;
+      }
+
+      .auth-shell {
+        padding: 0 0 24px;
+        align-items: flex-start;
+      }
+
+      .auth-card {
+        max-width: 100%;
+        border-radius: 0;
+        padding: 0;
+        background: none; /* sin borde degradado para look de app */
+        box-shadow: none;
+      }
+
+      .auth-inner {
+        border-radius: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        background: transparent;
+      }
+
+      /* HERO superior en móvil */
+      .auth-right {
+        order: -1;
+        border-radius: 0 0 32px 32px;
+        border: none;
+        padding: 32px 18px 72px;
+        align-items: center;
+        text-align: center;
+      }
+
+      .auth-tag-top {
+        font-size: 0.7rem;
+        padding: 3px 10px;
+      }
+
+      .auth-orb {
+        width: 150px;
+        height: 150px;
+        box-shadow: 0 0 40px rgba(255,39,87,0.9);
+      }
+
+      .auth-right-bottom {
+        font-size: 0.8rem;
+        max-width: 280px;
+        text-align: center;
+      }
+
+      .auth-meta-chip {
+        font-size: 0.7rem;
+      }
+
+      /* Card de login flotando encima del fondo (más grande y legible) */
+      .auth-left {
+        position: relative;
+        margin-top: -56px;
+        margin-inline: 16px;
+        padding: 20px 16px 20px;
+        border-radius: 20px;
+        background: rgba(5,5,12,0.98);
+        border: 1px solid rgba(255,255,255,0.14);
+        box-shadow: 0 18px 42px rgba(0,0,0,0.9);
+      }
+
+      .auth-left-header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+
+      .auth-title {
+        font-size: 1.55rem;
+      }
+
+      .auth-subtitle {
+        font-size: 0.9rem;
+        max-width: 100%;
+      }
+
+      .auth-pill-row {
+        margin-top: 10px;
+      }
+
+      .auth-status {
+        margin-top: 10px;
+        font-size: 0.8rem;
+      }
+
+      /* Inputs más grandes y cómodos */
+      .auth-left .field label {
+        font-size: 0.9rem;
+      }
+
+      .auth-left .field input,
+      .auth-left .field textarea {
+        padding: 11px 12px;
+        font-size: 0.96rem;
+      }
+
+      /* Botón grande y a ancho completo */
+      .auth-left .modal-footer {
+        margin-top: 16px !important;
+        justify-content: center !important;
+      }
+
+      .auth-left .btn.btn-primary {
+        width: 100%;
+        justify-content: center;
+        padding: 11px 0;
+        font-size: 0.96rem;
+      }
+
+      .auth-toggle {
+        margin-top: 12px;
+        font-size: 0.85rem;
+      }
+
+      .auth-footer-links {
+        margin-top: 14px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="auth-shell">
@@ -443,12 +446,11 @@
           </form>
 
           <div class="auth-toggle">
-          <span>¿No tienes cuenta?</span>
-          <a href="registro-usuario.html" style="color: var(--accent-pink); text-decoration: none;">
-          Registrarme
-          </a>
+            <span>¿No tienes cuenta?</span>
+            <a href="registro-usuario.html" style="color: var(--accent-pink); text-decoration: none;">
+              Registrarme
+            </a>
           </div>
-
 
           <div class="auth-footer-links">
             <a href="index.html">← Ir a la portada</a>
@@ -473,62 +475,60 @@
     </div>
   </div>
   <script>
-  const API_URL = "https://beefmusic-backend.onrender.com";
+    const API_URL = "https://beefmusic-backend.onrender.com";
 
-  // Si ya estás logueado como usuario, manda directo al home
-  (function () {
-    const userToken = localStorage.getItem("beefmusic_user_token");
-    if (userToken) {
-      window.location.href = "index.html";
-    }
-  })();
-
-  const form = document.getElementById("auth-form");
-  const statusEl = document.getElementById("auth-status");
-  const submitBtn = document.getElementById("auth-submit-btn");
-
-  form.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    statusEl.textContent = "Comprobando credenciales...";
-
-    const data = {
-      username: this.username.value,
-      password: this.password.value,
-    };
-
-    // 🔥 Ahora apunta a Render, no a localhost
-    const url = API_URL + "/api/login-user";
-
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      const json = await res.json();
-
-      if (!res.ok) {
-        statusEl.textContent =
-          "❌ " + (json.error || "Usuario o contraseña incorrectos");
-        return;
-      }
-
-      // guardar token de usuario
-      localStorage.setItem("beefmusic_user_token", json.token);
-      localStorage.setItem("beefmusic_user_name", json.username);
-
-      statusEl.textContent = "✅ Login correcto, redirigiendo...";
-      submitBtn.disabled = true;
-
-      setTimeout(() => {
+    // Si ya estás logueado como usuario, manda directo al home
+    (function () {
+      const userToken = localStorage.getItem("beefmusic_user_token");
+      if (userToken) {
         window.location.href = "index.html";
-      }, 800);
-    } catch (err) {
-      console.error(err);
-      statusEl.textContent = "❌ Error conectando con el servidor.";
-    }
-  });
-</script>
+      }
+    })();
+
+    const form = document.getElementById("auth-form");
+    const statusEl = document.getElementById("auth-status");
+    const submitBtn = document.getElementById("auth-submit-btn");
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      statusEl.textContent = "Comprobando credenciales...";
+
+      const data = {
+        username: this.username.value,
+        password: this.password.value,
+      };
+
+      const url = API_URL + "/api/login-user";
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        const json = await res.json();
+
+        if (!res.ok) {
+          statusEl.textContent =
+            "❌ " + (json.error || "Usuario o contraseña incorrectos");
+          return;
+        }
+
+        localStorage.setItem("beefmusic_user_token", json.token);
+        localStorage.setItem("beefmusic_user_name", json.username);
+
+        statusEl.textContent = "✅ Login correcto, redirigiendo...";
+        submitBtn.disabled = true;
+
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 800);
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "❌ Error conectando con el servidor.";
+      }
+    });
+  </script>
 </body>
 </html>
