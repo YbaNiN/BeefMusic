@@ -263,106 +263,140 @@
       max-width: 100%;
     }
   }
-
-  /* Móviles pequeños (tipo 360–480px) */
-  @media (max-width: 480px) {
-    .auth-shell {
-      padding: 0 0 24px;
-    }
-
-    .auth-card {
-      max-width: 100%;
-      border-radius: 0;
-      padding: 0;
-      background: none; /* sin borde degradado para look de app */
-      box-shadow: none;
-    }
-
-    .auth-inner {
-      border-radius: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      background: transparent;
-    }
-
-    /* HERO superior en móvil */
-    .auth-right {
-      order: -1;
-      border-radius: 0 0 32px 32px;
-      border: none;
-      padding: 32px 18px 72px;
-      align-items: center;
-      text-align: center;
-    }
-
-    .auth-tag-top {
-      font-size: 0.7rem;
-      padding: 3px 10px;
-    }
-
-    .auth-orb {
-      width: 150px;
-      height: 150px;
-      box-shadow: 0 0 40px rgba(255,39,87,0.9);
-    }
-
-    .auth-right-bottom {
-      font-size: 0.78rem;
-      max-width: 260px;
-      text-align: center;
-    }
-
-    .auth-meta-chip {
-      font-size: 0.68rem;
-    }
-
-    /* Card de login flotando encima del fondo */
-    .auth-left {
-      position: relative;
-      margin-top: -48px;
-      margin-inline: 14px;
-      padding: 16px 14px 18px;
-      border-radius: 18px;
-      background: rgba(5,5,12,0.96);
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.85);
-    }
-
-    .auth-left-header {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .auth-title {
-      font-size: 1.35rem;
-    }
-
-    .auth-subtitle {
-      font-size: 0.85rem;
-      max-width: 100%;
-    }
-
-    .auth-pill-row {
-      margin-top: 10px;
-    }
-
-    .auth-status {
-      margin-top: 10px;
-      font-size: 0.78rem;
-    }
-
-    .auth-footer-links {
-      margin-top: 12px;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 6px;
-    }
+/* Móviles pequeños (tipo 360–480px) */
+@media (max-width: 480px) {
+  html, body {
+    height: 100%;
   }
+
+  .auth-shell {
+    padding: 0 0 24px;
+    align-items: flex-start;
+  }
+
+  .auth-card {
+    max-width: 100%;
+    border-radius: 0;
+    padding: 0;
+    background: none; /* sin borde degradado para look de app */
+    box-shadow: none;
+  }
+
+  .auth-inner {
+    border-radius: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: transparent;
+  }
+
+  /* HERO superior en móvil */
+  .auth-right {
+    order: -1;
+    border-radius: 0 0 32px 32px;
+    border: none;
+    padding: 32px 18px 72px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .auth-tag-top {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+  }
+
+  .auth-orb {
+    width: 150px;
+    height: 150px;
+    box-shadow: 0 0 40px rgba(255,39,87,0.9);
+  }
+
+  .auth-right-bottom {
+    font-size: 0.8rem;
+    max-width: 280px;
+    text-align: center;
+  }
+
+  .auth-meta-chip {
+    font-size: 0.7rem;
+  }
+
+  /* Card de login flotando encima del fondo (más grande y legible) */
+  .auth-left {
+    position: relative;
+    margin-top: -56px;
+    margin-inline: 16px;
+    padding: 20px 16px 20px;
+    border-radius: 20px;
+    background: rgba(5,5,12,0.98);
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: 0 18px 42px rgba(0,0,0,0.9);
+  }
+
+  .auth-left-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .auth-title {
+    font-size: 1.55rem;
+  }
+
+  .auth-subtitle {
+    font-size: 0.9rem;
+    max-width: 100%;
+  }
+
+  .auth-pill-row {
+    margin-top: 10px;
+  }
+
+  .auth-status {
+    margin-top: 10px;
+    font-size: 0.8rem;
+  }
+
+  /* Inputs más grandes y cómodos */
+  .auth-left .field label {
+    font-size: 0.9rem;
+  }
+
+  .auth-left .field input,
+  .auth-left .field textarea {
+    padding: 11px 12px;
+    font-size: 0.96rem;
+  }
+
+  /* Botón grande y a ancho completo */
+  .auth-left .modal-footer {
+    margin-top: 16px !important;
+    justify-content: center !important;
+  }
+
+  .auth-left .btn.btn-primary {
+    width: 100%;
+    justify-content: center;
+    padding: 11px 0;
+    font-size: 0.96rem;
+  }
+
+  .auth-toggle {
+    margin-top: 12px;
+    font-size: 0.85rem;
+  }
+
+  .auth-footer-links {
+    margin-top: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 0.8rem;
+  }
+}
 </style>
 </head>
 <body>
@@ -439,6 +473,8 @@
     </div>
   </div>
   <script>
+  const API_URL = "https://beefmusic-backend.onrender.com";
+
   // Si ya estás logueado como usuario, manda directo al home
   (function () {
     const userToken = localStorage.getItem("beefmusic_user_token");
@@ -460,7 +496,8 @@
       password: this.password.value,
     };
 
-    const url = "http://localhost:4000/api/login-user";
+    // 🔥 Ahora apunta a Render, no a localhost
+    const url = API_URL + "/api/login-user";
 
     try {
       const res = await fetch(url, {
@@ -472,7 +509,8 @@
       const json = await res.json();
 
       if (!res.ok) {
-        statusEl.textContent = "❌ " + (json.error || "Usuario o contraseña incorrectos");
+        statusEl.textContent =
+          "❌ " + (json.error || "Usuario o contraseña incorrectos");
         return;
       }
 
