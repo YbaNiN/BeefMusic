@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>BeefMusic – Login admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .login-page {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 60px 20px;
+    }
+    .login-card {
+      background: var(--bg-card);
+      border-radius: 24px;
+      border: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      padding: 22px 20px 24px;
+    }
+    .login-title {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+    .login-subtitle {
+      font-size: 0.9rem;
+      color: var(--fg-muted);
+      margin-bottom: 16px;
+    }
+    .login-status {
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+      min-height: 18px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-page">
+    <header style="margin-bottom:16px;">
+      <div class="logo">
+        <div class="logo-mark"></div>
+        <span>BeefMusic</span>
+      </div>
+    </header>
+
+    <div class="login-card">
+      <h1 class="login-title">Login admin</h1>
+      <p class="login-subtitle">Acceso privado para ver y gestionar las peticiones.</p>
+
+      <div class="login-status" id="login-status"></div>
+
+      <form id="login-form">
+        <div class="field">
+          <label for="username">Usuario</label>
+          <input id="username" name="username" type="text" required />
+        </div>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input id="password" name="password" type="password" required />
+        </div>
+        <div class="modal-footer" style="margin-top:14px; justify-content:flex-end;">
+          <button class="btn btn-primary" type="submit">Entrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("login-form");
+    const statusEl = document.getElementById("login-status");
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      statusEl.textContent = "Comprobando credenciales...";
+
+      const data = {
+        username: this.username.value,
+        password: this.password.value,
+      };
+
+      try {
+        const res = await fetch("http://localhost:4000/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        const json = await res.json();
+
+        if (!res.ok) {
+          statusEl.textContent = "❌ " + (json.error || "Error de login");
+          return;
+        }
+
+        // guardar token y pasar a admin
+        localStorage.setItem("beefmusic_token", json.token);
+        statusEl.textContent = "✅ Acceso concedido, entrando...";
+        setTimeout(() => {
+          window.location.href = "admin.html";
+        }, 500);
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "❌ Error conectando con el servidor.";
+      }
+    });
+  </script>
+</body>
+</html>
