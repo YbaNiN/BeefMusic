@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BeefMusic – Admin de peticiones</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
@@ -12,17 +13,21 @@
       margin: 0 auto;
       padding: 24px 20px 80px;
     }
+
     .admin-header {
       margin: 32px 0 16px;
     }
+
     .admin-header h1 {
       font-size: 1.6rem;
       margin-bottom: 4px;
     }
+
     .admin-header p {
       font-size: 0.9rem;
       color: var(--fg-muted);
     }
+
     .admin-filters {
       margin-bottom: 16px;
       display: flex;
@@ -30,6 +35,7 @@
       flex-wrap: wrap;
       align-items: center;
     }
+
     .admin-table-wrapper {
       border-radius: 20px;
       background: var(--bg-card);
@@ -37,29 +43,35 @@
       box-shadow: var(--shadow-soft);
       overflow: hidden;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.85rem;
     }
+
     thead {
       background: rgba(255,255,255,0.03);
     }
+
     th, td {
       padding: 10px 12px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
       text-align: left;
       vertical-align: top;
     }
+
     th {
       text-transform: uppercase;
       letter-spacing: 0.14em;
       font-size: 0.7rem;
       color: var(--fg-muted);
     }
+
     tbody tr:hover {
       background: rgba(255,255,255,0.02);
     }
+
     .badge-estado {
       display: inline-block;
       padding: 3px 8px;
@@ -70,27 +82,48 @@
       border: 1px solid rgba(255,255,255,0.18);
       background: rgba(255,255,255,0.04);
     }
+
     .badge-estado.en_produccion {
-    border-color: var(--accent-purple);
-  }
+      border-color: var(--accent-purple);
+    }
 
     .badge-estado.terminada {
-    border-color: #3dd68c;
-  }
+      border-color: #3dd68c;
+    }
 
     .badge-estado.pendiente {
       border-color: var(--accent-pink);
-  }
+    }
+
     .admin-empty {
       padding: 18px;
       font-size: 0.9rem;
       color: var(--fg-muted);
     }
+
+    /* Responsive: header y tabla en pantallas pequeñas */
+    @media (max-width: 900px) {
+      .admin-page {
+        padding: 20px 14px 60px;
+      }
+    }
+
     @media (max-width: 720px) {
+      header {
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+      }
+
+      .admin-header {
+        margin: 24px 0 14px;
+      }
+
       .admin-table-wrapper {
         border-radius: 16px;
         overflow-x: auto;
       }
+
       table {
         min-width: 700px; /* para no apretar demasiado columnas en móvil */
       }
@@ -100,15 +133,16 @@
 <body>
   <div class="admin-page">
     <header>
-  <div class="logo">
-    <div class="logo-mark"></div>
-    <span>BeefMusic</span>
-  </div>
-  <div class="header-actions">
-    <a href="index.html" class="btn btn-ghost">← Web pública</a>
-    <button class="btn btn-ghost" id="logout-btn">Cerrar sesión</button>
-  </div>
-</header>
+      <div class="logo">
+        <div class="logo-mark"></div>
+        <span>BeefMusic</span>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-ghost">← Web pública</a>
+        <button class="btn btn-ghost" id="logout-btn">Cerrar sesión</button>
+      </div>
+    </header>
+
     <section class="admin-header">
       <h1>Peticiones de canciones</h1>
       <p>Vista interna para ver rápidamente lo que la gente está pidiendo.</p>
@@ -138,160 +172,161 @@
       </table>
     </section>
   </div>
- <script>
-  const tbody = document.getElementById("admin-tbody");
-  const countEl = document.getElementById("admin-count");
 
-  function formatearFecha(fechaIso) {
-    const d = new Date(fechaIso);
-    if (isNaN(d.getTime())) return "-";
-    return d.toLocaleString("es-ES", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
+  <script>
+    const API_URL = "https://beefmusic-backend.onrender.com";
+    const tbody = document.getElementById("admin-tbody");
+    const countEl = document.getElementById("admin-count");
 
-  async function cargarPeticiones() {
-    const token = localStorage.getItem("beefmusic_token");
-
-    if (!token) {
-      // si no hay token, manda al login
-      window.location.href = "login.html";
-      return;
+    function formatearFecha(fechaIso) {
+      const d = new Date(fechaIso);
+      if (isNaN(d.getTime())) return "-";
+      return d.toLocaleString("es-ES", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     }
 
-    tbody.innerHTML = `
-      <tr><td colspan="6" class="admin-empty">Cargando peticiones...</td></tr>
-    `;
+    async function cargarPeticiones() {
+      const token = localStorage.getItem("beefmusic_token");
 
-    try {
-      const res = await fetch("http://localhost:4000/api/peticiones", {
-        headers: {
-          Authorization: "Bearer " + token,
-        },
-      });
-
-      if (res.status === 401 || res.status === 403) {
-        // token inválido / expirado → borrar y pedir login
-        localStorage.removeItem("beefmusic_token");
+      if (!token) {
+        // si no hay token, manda al login
         window.location.href = "login.html";
         return;
       }
 
-      const data = await res.json();
-      console.log("Respuesta /api/peticiones:", data);
+      tbody.innerHTML = `
+        <tr><td colspan="6" class="admin-empty">Cargando peticiones...</td></tr>
+      `;
 
-      if (!Array.isArray(data) || data.length === 0) {
-        tbody.innerHTML = `
-          <tr><td colspan="6" class="admin-empty">No hay peticiones para mostrar.</td></tr>
-        `;
-        countEl.textContent = "";
-        return;
-      }
+      try {
+        const res = await fetch(API_URL + "/api/peticiones", {
+          headers: {
+            Authorization: "Bearer " + token,
+          },
+        });
 
-      tbody.innerHTML = "";
-      data.forEach((p) => {
-        const estadoActual = p.estado || "pendiente";
+        if (res.status === 401 || res.status === 403) {
+          // token inválido / expirado → borrar y pedir login
+          localStorage.removeItem("beefmusic_token");
+          window.location.href = "login.html";
+          return;
+        }
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${p.id}</td>
-          <td>${p.nick}</td>
-          <td>${p.estilo}</td>
-          <td>${p.idea}</td>
-          <td>
-            <span class="badge-estado ${estadoActual}">
-              ${estadoActual}
-            </span>
-            <br/>
-            <select class="estado-select" data-id="${p.id}" style="margin-top:6px;font-size:0.75rem;">
-              <option value="pendiente" ${estadoActual === "pendiente" ? "selected" : ""}>pendiente</option>
-              <option value="en_produccion" ${estadoActual === "en_produccion" ? "selected" : ""}>en_producción</option>
-              <option value="terminada" ${estadoActual === "terminada" ? "selected" : ""}>terminada</option>
-            </select>
-          </td>
-          <td>${formatearFecha(p.created_at)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+        const data = await res.json();
+        console.log("Respuesta /api/peticiones:", data);
 
-      // enganchar selects de estado después de pintar las filas
-      const selects = tbody.querySelectorAll(".estado-select");
-      selects.forEach((select) => {
-        select.addEventListener("change", async function () {
-          const token = localStorage.getItem("beefmusic_token");
-          if (!token) {
-            window.location.href = "login.html";
-            return;
-          }
+        if (!Array.isArray(data) || data.length === 0) {
+          tbody.innerHTML = `
+            <tr><td colspan="6" class="admin-empty">No hay peticiones para mostrar.</td></tr>
+          `;
+          countEl.textContent = "";
+          return;
+        }
 
-          const id = this.getAttribute("data-id");
-          const nuevoEstado = this.value;
-          this.disabled = true;
+        tbody.innerHTML = "";
+        data.forEach((p) => {
+          const estadoActual = p.estado || "pendiente";
 
-          try {
-            const res = await fetch(
-              "http://localhost:4000/api/peticiones/" + id + "/estado",
-              {
-                method: "PATCH",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: "Bearer " + token,
-                },
-                body: JSON.stringify({ estado: nuevoEstado }),
-              }
-            );
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${p.id}</td>
+            <td>${p.nick}</td>
+            <td>${p.estilo}</td>
+            <td>${p.idea}</td>
+            <td>
+              <span class="badge-estado ${estadoActual}">
+                ${estadoActual}
+              </span>
+              <br/>
+              <select class="estado-select" data-id="${p.id}" style="margin-top:6px;font-size:0.75rem;">
+                <option value="pendiente" ${estadoActual === "pendiente" ? "selected" : ""}>pendiente</option>
+                <option value="en_produccion" ${estadoActual === "en_produccion" ? "selected" : ""}>en_producción</option>
+                <option value="terminada" ${estadoActual === "terminada" ? "selected" : ""}>terminada</option>
+              </select>
+            </td>
+            <td>${formatearFecha(p.created_at)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
 
-            const json = await res.json();
-
-            if (!res.ok) {
-              console.error("Error al actualizar estado:", json);
-              alert("No se pudo actualizar el estado: " + (json.error || "error"));
-              this.disabled = false;
+        // enganchar selects de estado después de pintar las filas
+        const selects = tbody.querySelectorAll(".estado-select");
+        selects.forEach((select) => {
+          select.addEventListener("change", async function () {
+            const token = localStorage.getItem("beefmusic_token");
+            if (!token) {
+              window.location.href = "login.html";
               return;
             }
 
-            // actualizar badge
-            const badge = this.parentElement.querySelector(".badge-estado");
-            if (badge) {
-              badge.textContent = nuevoEstado;
-              badge.className = "badge-estado " + nuevoEstado;
+            const id = this.getAttribute("data-id");
+            const nuevoEstado = this.value;
+            this.disabled = true;
+
+            try {
+              const res = await fetch(
+                API_URL + "/api/peticiones/" + id + "/estado",
+                {
+                  method: "PATCH",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer " + token,
+                  },
+                  body: JSON.stringify({ estado: nuevoEstado }),
+                }
+              );
+
+              const json = await res.json();
+
+              if (!res.ok) {
+                console.error("Error al actualizar estado:", json);
+                alert("No se pudo actualizar el estado: " + (json.error || "error"));
+                this.disabled = false;
+                return;
+              }
+
+              // actualizar badge
+              const badge = this.parentElement.querySelector(".badge-estado");
+              if (badge) {
+                badge.textContent = nuevoEstado;
+                badge.className = "badge-estado " + nuevoEstado;
+              }
+            } catch (err) {
+              console.error(err);
+              alert("Error de conexión al actualizar el estado");
+            } finally {
+              this.disabled = false;
             }
-          } catch (err) {
-            console.error(err);
-            alert("Error de conexión al actualizar el estado");
-          } finally {
-            this.disabled = false;
-          }
+          });
         });
-      });
 
-      countEl.textContent = data.length + " peticiones";
-    } catch (err) {
-      console.error(err);
-      tbody.innerHTML = `
-        <tr><td colspan="6" class="admin-empty">
-          Error cargando las peticiones (revisa si el servidor está encendido).
-        </td></tr>
-      `;
-      countEl.textContent = "";
+        countEl.textContent = data.length + " peticiones";
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `
+          <tr><td colspan="6" class="admin-empty">
+            Error cargando las peticiones (revisa si el servidor está encendido).
+          </td></tr>
+        `;
+        countEl.textContent = "";
+      }
     }
-  }
 
-  // Botón cerrar sesión
-  const logoutBtn = document.getElementById("logout-btn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("beefmusic_token");
-      window.location.href = "login.html";
-    });
-  }
+    // Botón cerrar sesión
+    const logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("beefmusic_token");
+        window.location.href = "login.html";
+      });
+    }
 
-  cargarPeticiones();
-</script>
-
+    cargarPeticiones();
+  </script>
 </body>
 </html>
