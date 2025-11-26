@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BeefMusic – Crear cuenta</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
@@ -251,8 +252,13 @@
 
     /* Móviles pequeños (tipo 360–480px) */
     @media (max-width: 480px) {
+      html, body {
+        height: 100%;
+      }
+
       .auth-shell {
         padding: 0 0 24px;
+        align-items: flex-start;
       }
 
       .auth-card {
@@ -303,12 +309,12 @@
         font-size: 0.68rem;
       }
 
-      /* Card de registro flotando encima del fondo */
+      /* Card de registro flotando encima del fondo (más grande y legible) */
       .auth-left {
         position: relative;
         margin-top: -48px;
         margin-inline: 14px;
-        padding: 16px 14px 18px;
+        padding: 18px 14px 18px;
         border-radius: 18px;
         background: rgba(5,5,12,0.96);
         border: 1px solid rgba(255,255,255,0.1);
@@ -324,17 +330,40 @@
       }
 
       .auth-title {
-        font-size: 1.35rem;
+        font-size: 1.45rem;
       }
 
       .auth-subtitle {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
         max-width: 100%;
       }
 
       .auth-status {
         margin-top: 10px;
-        font-size: 0.78rem;
+        font-size: 0.8rem;
+      }
+
+      /* Inputs más cómodos */
+      .auth-left .field label {
+        font-size: 0.9rem;
+      }
+
+      .auth-left .field input {
+        padding: 11px 12px;
+        font-size: 0.96rem;
+      }
+
+      /* Botón ancho */
+      .auth-left .modal-footer {
+        margin-top: 16px !important;
+        justify-content: center !important;
+      }
+
+      .auth-left .btn.btn-primary {
+        width: 100%;
+        justify-content: center;
+        padding: 11px 0;
+        font-size: 0.96rem;
       }
 
       .auth-footer-links {
@@ -345,6 +374,7 @@
       }
     }
   </style>
+</head>
 <body>
   <div class="auth-shell">
     <div class="auth-card">
@@ -391,7 +421,7 @@
 
           <div class="auth-footer-links">
             <a href="user-login.html">Ya tengo cuenta → Entrar</a>
-            <a href="home.html">← Volver a la portada</a>
+            <a href="index.html">← Volver a la portada</a>
           </div>
         </div>
 
@@ -413,11 +443,13 @@
   </div>
 
   <script>
+    const API_URL = "https://beefmusic-backend.onrender.com";
+
     // Si ya estás logueado como usuario, manda directo al home
     (function () {
       const userToken = localStorage.getItem("beefmusic_user_token");
       if (userToken) {
-        window.location.href = "home.html";
+        window.location.href = "index.html";
       }
     })();
 
@@ -434,7 +466,7 @@
         password: this.password.value,
       };
 
-      const url = "http://localhost:4000/api/register";
+      const url = API_URL + "/api/register";
 
       try {
         const res = await fetch(url, {
@@ -450,7 +482,6 @@
           return;
         }
 
-        // guardar token de usuario
         localStorage.setItem("beefmusic_user_token", json.token);
         localStorage.setItem("beefmusic_user_name", json.username);
 
@@ -467,3 +498,4 @@
     });
   </script>
 </body>
+</html>
