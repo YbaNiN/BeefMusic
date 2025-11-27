@@ -40,7 +40,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
-      align-items: center;
+      align-items: flex-end;
     }
 
     .songs-tools .field {
@@ -77,7 +77,12 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border 0.2s ease, color 0.2s ease;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease,
+        border 0.2s ease,
+        color 0.2s ease;
     }
 
     .songs-filter-btn::before {
@@ -105,9 +110,12 @@
       background: #ffffff;
     }
 
-    /* Ajustes de las cards de canciones para resaltar título + género + usuario */
+    /* Ajustes de las cards: título + género + usuario + player */
     .song-card {
-      min-height: 170px;
+      min-height: 190px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
 
     .song-card .song-title {
@@ -137,7 +145,26 @@
       color: var(--fg-muted);
     }
 
-    /* Pequeños ajustes responsive */
+    /* Player de audio */
+    .song-player {
+      margin-top: 10px;
+    }
+
+    .song-player audio {
+      width: 100%;
+      outline: none;
+    }
+
+    .song-player--noaudio {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px dashed rgba(255,255,255,0.08);
+    }
+
     @media (max-width: 900px) {
       .songs-page {
         padding: 20px 16px 60px;
@@ -147,6 +174,9 @@
     @media (max-width: 600px) {
       .songs-header-main {
         margin-top: 24px;
+      }
+      .songs-tools {
+        align-items: flex-start;
       }
     }
   </style>
@@ -171,7 +201,8 @@
         <h1>Canciones creadas desde las peticiones</h1>
         <p>
           Aquí se irán sumando los temas que vayáis pidiendo desde la web.
-          Cada canción muestra su título, el género y quién la pidió.
+          Cada canción muestra su título, el género y quién la pidió, y puedes
+          reproducirla directamente desde aquí.
         </p>
       </div>
       <div class="songs-count" id="songs-count">
@@ -196,7 +227,7 @@
           Todos
         </button>
         <button class="songs-filter-btn" data-style="drill">
-          Pop
+          Drill
         </button>
         <button class="songs-filter-btn" data-style="trap">
           Trap
@@ -207,7 +238,7 @@
         <button class="songs-filter-btn" data-style="reggaeton">
           Reggaetón
         </button>
-        <button class="songs-filter-btn" data-style="boom bap">
+        <button class="songs-filter-btn" data-style="rap">
           Rap
         </button>
       </div>
@@ -216,7 +247,7 @@
     <!-- GRID DE CANCIONES -->
     <section>
       <div class="songs-grid" id="songs-grid">
-        <!-- Se rellenará por JS -->
+        <!-- Se rellena por JS -->
       </div>
     </section>
   </div>
@@ -233,8 +264,6 @@
     let currentStyleFilter = ""; // "" = todos
 
     function crearCardCancion(song) {
-      // Campos esperados (adaptables a tu API):
-      // id, titulo, estilo, duracion, descripcion, autor/nick, estado, url_audio...
       const titulo = song.titulo || song.title || "Tema sin título";
       const estilo = song.estilo || song.style || "Sin género";
       const duracion = song.duracion || song.duration || "";
@@ -246,6 +275,7 @@
       const autor =
         song.autor || song.requester || song.nick || "@anónimo";
       const estado = song.estado || "publicada";
+      const urlAudio = song.url_audio || song.audio_url || "";
 
       return `
         <article class="song-card">
@@ -256,7 +286,7 @@
             <!-- TÍTULO DEL TEMA -->
             <div class="song-title">${titulo}</div>
 
-            <!-- GÉNERO + USUARIO -->
+            <!-- GÉNERO + USUARIO + DURACIÓN -->
             <div class="song-meta">
               <span class="song-badge">${estilo}</span>
               <span class="song-req-author">${autor}</span>
@@ -270,15 +300,27 @@
                 : ""
             }
 
-            <!-- ESTADO / ENLACE -->
+            <!-- ESTADO + AUDIO -->
             <div class="song-meta" style="margin-top:6px;">
               <span class="song-badge">${estado}</span>
-              ${
-                song.url_audio
-                  ? `<a href="${song.url_audio}" target="_blank" rel="noopener noreferrer">Escuchar →</a>`
-                  : `<span>Más info pronto</span>`
-              }
             </div>
+
+            ${
+              urlAudio
+                ? `
+              <div class="song-player">
+                <audio controls preload="none" class="song-audio">
+                  <source src="${urlAudio}" type="audio/mpeg" />
+                  Tu navegador no soporta audio HTML5.
+                </audio>
+              </div>
+            `
+                : `
+              <div class="song-player song-player--noaudio">
+                El audio de este tema todavía no está disponible.
+              </div>
+            `
+            }
           </div>
         </article>
       `;
@@ -361,11 +403,9 @@
 
     filterPills.forEach((btn) => {
       btn.addEventListener("click", () => {
-        // actualizar estado activo visual
         filterPills.forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
 
-        // actualizar filtro actual
         currentStyleFilter = btn.getAttribute("data-style") || "";
         aplicarFiltros();
       });
