@@ -60,11 +60,10 @@
             <span class="btn-icon">✉</span>
             Enviar petición ahora
           </button>
-          <button class="btn btn-ghost">
-            Ver últimas canciones
-          </button>
+         <a href="canciones.html" class="btn btn-ghost">
+          Ver últimas canciones
+        </a>
         </div>
-
         <div class="hero-meta">
           <div class="hero-meta-item">
             <span>Comunidad</span>
@@ -284,7 +283,7 @@
           <button class="btn btn-primary" id="open-request-3">
             Enviar mi primera petición
           </button>
-          <button class="btn btn-ghost">
+          <button class="btn btn-ghost" id="discord-join-btn">
             Unirme al servidor de Discord
           </button>
         </div>
@@ -440,6 +439,13 @@
       window.location.href = "user-login.html";
     });
   }
+
+  const discordBtn = document.getElementById("discord-join-btn");
+if (discordBtn) {
+  discordBtn.addEventListener("click", () => {
+    window.open("https://discord.gg/DywmTT78Wx", "_blank");
+  });
+}
 </script>
 </body>
 </html>
