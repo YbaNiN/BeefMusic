@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeefMusic – Canciones de la colección</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    .songs-page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 20px 80px;
+    }
+
+    .songs-header-main {
+      margin: 32px 0 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .songs-header-main h1 {
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+    }
+
+    .songs-header-main p {
+      font-size: 0.95rem;
+      color: var(--fg-muted);
+      max-width: 520px;
+    }
+
+    .songs-tools {
+      margin-bottom: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .songs-tools .field {
+      margin-bottom: 0;
+    }
+
+    .songs-tools input {
+      min-height: 38px;
+      font-size: 0.85rem;
+    }
+
+    .songs-count {
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+    }
+
+    /* Píldoras de filtro */
+    .songs-filter-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .songs-filter-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.03);
+      padding: 6px 12px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--fg-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border 0.2s ease, color 0.2s ease;
+    }
+
+    .songs-filter-btn::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.35);
+    }
+
+    .songs-filter-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.6);
+      border-color: rgba(255,255,255,0.24);
+    }
+
+    .songs-filter-btn.active {
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      color: #ffffff;
+      box-shadow: 0 12px 32px rgba(255,39,87,0.7);
+      border-color: transparent;
+    }
+
+    .songs-filter-btn.active::before {
+      background: #ffffff;
+    }
+
+    /* Ajustes de las cards de canciones para resaltar título + género + usuario */
+    .song-card {
+      min-height: 170px;
+    }
+
+    .song-card .song-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .song-card .song-meta {
+      font-size: 0.8rem;
+    }
+
+    .song-card .song-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .song-card .song-req-author {
+      font-weight: 500;
+      color: var(--fg-primary);
+    }
+
+    .song-card .song-req {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: var(--fg-muted);
+    }
+
+    /* Pequeños ajustes responsive */
+    @media (max-width: 900px) {
+      .songs-page {
+        padding: 20px 16px 60px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .songs-header-main {
+        margin-top: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="songs-page">
+    <!-- HEADER SIMPLE -->
+    <header style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+      <div class="logo">
+        <div class="logo-mark"></div>
+        <span>BeefMusic</span>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-ghost">← Volver al inicio</a>
+      </div>
+    </header>
+
+    <!-- TITULAR -->
+    <section class="songs-header-main">
+      <div>
+        <div class="section-kicker">Colección BeefMusic</div>
+        <h1>Canciones creadas desde las peticiones</h1>
+        <p>
+          Aquí se irán sumando los temas que vayáis pidiendo desde la web.
+          Cada canción muestra su título, el género y quién la pidió.
+        </p>
+      </div>
+      <div class="songs-count" id="songs-count">
+        Cargando canciones...
+      </div>
+    </section>
+
+    <!-- BUSCADOR / FILTROS -->
+    <section class="songs-tools">
+      <div class="field" style="max-width:260px;flex:1;">
+        <label for="songs-search">Buscar por título o usuario</label>
+        <input
+          id="songs-search"
+          type="text"
+          placeholder="Ej: Código de Barrio, @user_404..."
+        />
+      </div>
+
+      <!-- Píldoras de filtro por estilo -->
+      <div class="songs-filter-pills" id="songs-filter-pills">
+        <button class="songs-filter-btn active" data-style="">
+          Todos
+        </button>
+        <button class="songs-filter-btn" data-style="drill">
+          Pop
+        </button>
+        <button class="songs-filter-btn" data-style="trap">
+          Trap
+        </button>
+        <button class="songs-filter-btn" data-style="dembow">
+          Dembow
+        </button>
+        <button class="songs-filter-btn" data-style="reggaeton">
+          Reggaetón
+        </button>
+        <button class="songs-filter-btn" data-style="boom bap">
+          Rap
+        </button>
+      </div>
+    </section>
+
+    <!-- GRID DE CANCIONES -->
+    <section>
+      <div class="songs-grid" id="songs-grid">
+        <!-- Se rellenará por JS -->
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API_URL = "https://beefmusic-backend.onrender.com";
+
+    const grid = document.getElementById("songs-grid");
+    const countEl = document.getElementById("songs-count");
+    const searchInput = document.getElementById("songs-search");
+    const filterPills = document.querySelectorAll(".songs-filter-btn");
+
+    let allSongs = [];
+    let currentStyleFilter = ""; // "" = todos
+
+    function crearCardCancion(song) {
+      // Campos esperados (adaptables a tu API):
+      // id, titulo, estilo, duracion, descripcion, autor/nick, estado, url_audio...
+      const titulo = song.titulo || song.title || "Tema sin título";
+      const estilo = song.estilo || song.style || "Sin género";
+      const duracion = song.duracion || song.duration || "";
+      const descripcion =
+        song.descripcion ||
+        song.descripcion_peticion ||
+        song.description ||
+        "";
+      const autor =
+        song.autor || song.requester || song.nick || "@anónimo";
+      const estado = song.estado || "publicada";
+
+      return `
+        <article class="song-card">
+          <div class="song-thumb">
+            <div class="song-wave"></div>
+          </div>
+          <div class="song-body">
+            <!-- TÍTULO DEL TEMA -->
+            <div class="song-title">${titulo}</div>
+
+            <!-- GÉNERO + USUARIO -->
+            <div class="song-meta">
+              <span class="song-badge">${estilo}</span>
+              <span class="song-req-author">${autor}</span>
+              ${duracion ? `<span>${duracion}</span>` : ""}
+            </div>
+
+            <!-- DESCRIPCIÓN / RESUMEN -->
+            ${
+              descripcion
+                ? `<div class="song-req">${descripcion}</div>`
+                : ""
+            }
+
+            <!-- ESTADO / ENLACE -->
+            <div class="song-meta" style="margin-top:6px;">
+              <span class="song-badge">${estado}</span>
+              ${
+                song.url_audio
+                  ? `<a href="${song.url_audio}" target="_blank" rel="noopener noreferrer">Escuchar →</a>`
+                  : `<span>Más info pronto</span>`
+              }
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderSongs(list) {
+      if (!list || list.length === 0) {
+        grid.innerHTML = `
+          <div class="admin-empty" style="grid-column:1/-1;">
+            Todavía no hay canciones publicadas. Cuando las subas desde tu backend, se verán aquí.
+          </div>
+        `;
+        countEl.textContent = "";
+        return;
+      }
+
+      grid.innerHTML = list.map(crearCardCancion).join("");
+      countEl.textContent = list.length + " canciones";
+    }
+
+    function aplicarFiltros() {
+      const text = (searchInput.value || "").toLowerCase().trim();
+      const estiloFiltro = (currentStyleFilter || "").toLowerCase();
+
+      const filtradas = allSongs.filter((song) => {
+        const titulo = (song.titulo || song.title || "").toLowerCase();
+        const autor = (song.autor || song.requester || song.nick || "").toLowerCase();
+        const estilo = (song.estilo || song.style || "").toLowerCase();
+
+        const pasaTexto =
+          !text ||
+          titulo.includes(text) ||
+          autor.includes(text);
+
+        const pasaEstilo =
+          !estiloFiltro || estilo.includes(estiloFiltro);
+
+        return pasaTexto && pasaEstilo;
+      });
+
+      renderSongs(filtradas);
+    }
+
+    async function cargarCanciones() {
+      grid.innerHTML = `
+        <div class="admin-empty" style="grid-column:1/-1;">
+          Cargando canciones...
+        </div>
+      `;
+      countEl.textContent = "Cargando canciones...";
+
+      try {
+        const res = await fetch(API_URL + "/api/canciones");
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Error al cargar canciones");
+        }
+
+        if (!Array.isArray(data)) {
+          throw new Error("La API de canciones no devolvió una lista");
+        }
+
+        allSongs = data;
+        aplicarFiltros();
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = `
+          <div class="admin-empty" style="grid-column:1/-1;">
+            Error cargando las canciones desde el servidor.
+            Cuando tengas listo el endpoint <code>/api/canciones</code>, se mostrarán aquí.
+          </div>
+        `;
+        countEl.textContent = "";
+      }
+    }
+
+    // Listeners de filtros
+    searchInput.addEventListener("input", aplicarFiltros);
+
+    filterPills.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        // actualizar estado activo visual
+        filterPills.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        // actualizar filtro actual
+        currentStyleFilter = btn.getAttribute("data-style") || "";
+        aplicarFiltros();
+      });
+    });
+
+    // Carga inicial
+    cargarCanciones();
+  </script>
+</body>
+</html>
