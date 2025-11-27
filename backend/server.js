@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 const { createClient } = require("@supabase/supabase-js");
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -71,7 +72,7 @@ function authAdmin(req, res, next) {
     }
     next();
   } catch (err) {
-    console.error("Error verificando token:", err.message);
+    console.error("Error verificando token admin:", err.message);
     return res.status(401).json({ error: "Token no válido o expirado" });
   }
 }
@@ -125,48 +126,6 @@ app.post("/api/register", async (req, res) => {
         .status(400)
         .json({ error: "La contraseña debe tener al menos 6 caracteres" });
     }
-  
-// === LOGIN USUARIO NORMAL ===
-app.post("/api/login-user", async (req, res) => {
-  try {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-      return res.status(400).json({ error: "Faltan campos" });
-    }
-
-    const { data: user, error } = await supabase
-      .from("usuarios")
-      .select("id, username, password_hash")
-      .eq("username", username)
-      .maybeSingle();
-
-    if (error && error.code !== "PGRST116") {
-      console.error("Supabase error (login user):", error);
-      return res.status(500).json({ error: "Error buscando usuario" });
-    }
-
-    if (!user) {
-      return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
-    }
-
-    const ok = await bcrypt.compare(password, user.password_hash);
-    if (!ok) {
-      return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
-    }
-
-    const token = crearTokenUser(user);
-
-    res.json({
-      message: "Login correcto",
-      token,
-      username: user.username,
-    });
-  } catch (err) {
-    console.error("Error en POST /api/login-user:", err);
-    res.status(500).json({ error: "Error en el servidor" });
-  }
-});
 
     // ¿ya existe?
     const { data: existente, error: errorCheck } = await supabase
@@ -212,8 +171,49 @@ app.post("/api/login-user", async (req, res) => {
   }
 });
 
+// === LOGIN USUARIO NORMAL ===
+app.post("/api/login-user", async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-// === CREAR PETICIÓN ===
+    if (!username || !password) {
+      return res.status(400).json({ error: "Faltan campos" });
+    }
+
+    const { data: user, error } = await supabase
+      .from("usuarios")
+      .select("id, username, password_hash")
+      .eq("username", username)
+      .maybeSingle();
+
+    if (error && error.code !== "PGRST116") {
+      console.error("Supabase error (login user):", error);
+      return res.status(500).json({ error: "Error buscando usuario" });
+    }
+
+    if (!user) {
+      return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
+    }
+
+    const ok = await bcrypt.compare(password, user.password_hash);
+    if (!ok) {
+      return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
+    }
+
+    const token = crearTokenUser(user);
+
+    res.json({
+      message: "Login correcto",
+      token,
+      username: user.username,
+    });
+  } catch (err) {
+    console.error("Error en POST /api/login-user:", err);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// === CREAR PETICIÓN (PÚBLICO) ===
 app.post("/api/peticiones", async (req, res) => {
   try {
     const { nick, style, idea } = req.body;
@@ -228,12 +228,13 @@ app.post("/api/peticiones", async (req, res) => {
         nick,
         estilo: style,
         idea,
+        // estado: "pendiente", si no lo tienes como default en la tabla
       })
       .select()
       .single();
 
     if (error) {
-      console.error("Supabase error (insert):", error);
+      console.error("Supabase error (insert peticion):", error);
       return res.status(500).json({ error: "Error guardando la petición" });
     }
 
@@ -256,11 +257,28 @@ app.post("/api/peticiones", async (req, res) => {
 });
 
 // === LISTAR PETICIONES (ADMIN) ===
-app.get("/api/peticiones", async (req, res) => {
+app.get("/api/peticiones", authAdmin, async (req, res) => {
   try {
-    console.log("GET /api/peticiones");
+    const { data, error } = await supabase
+      .from("peticiones")
+      .select("id, nick, estilo, idea, estado, created_at")
+      .order("created_at", { ascending: false });
 
-    // === ACTUALIZAR ESTADO DE UNA PETICIÓN ===
+    if (error) {
+      console.error("Supabase error (select peticiones):", error);
+      return res
+        .status(500)
+        .json({ error: "Error al obtener las peticiones" });
+    }
+
+    res.json(data);
+  } catch (error) {
+    console.error("Error en GET /api/peticiones:", error);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// === ACTUALIZAR ESTADO DE UNA PETICIÓN (ADMIN) ===
 app.patch("/api/peticiones/:id/estado", authAdmin, async (req, res) => {
   try {
     const { id } = req.params;
@@ -298,21 +316,72 @@ app.patch("/api/peticiones/:id/estado", authAdmin, async (req, res) => {
   }
 });
 
+// === LISTAR CANCIONES (PÚBLICO) ===
+app.get("/api/canciones", async (req, res) => {
+  try {
     const { data, error } = await supabase
-      .from("peticiones")
-      .select("id, nick, estilo, idea, estado, created_at")
+      .from("canciones")
+      .select(
+        "id, titulo, estilo, duracion, descripcion, autor, estado, url_audio, created_at"
+      )
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Supabase error (select):", error);
+      console.error("Supabase error (select canciones):", error);
       return res
         .status(500)
-        .json({ error: "Error al obtener las peticiones" });
+        .json({ error: "Error al obtener las canciones" });
     }
 
-    res.json(data); // siempre devolvemos JSON
-  } catch (error) {
-    console.error("Error en GET /api/peticiones:", error);
+    res.json(data);
+  } catch (err) {
+    console.error("Error en GET /api/canciones:", err);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// === CREAR CANCIÓN (ADMIN) ===
+app.post("/api/canciones", authAdmin, async (req, res) => {
+  try {
+    const {
+      titulo,
+      estilo,
+      duracion,
+      descripcion,
+      autor,
+      estado = "publicada",
+      url_audio,
+    } = req.body;
+
+    if (!titulo || !estilo || !autor) {
+      return res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+
+    const { data, error } = await supabase
+      .from("canciones")
+      .insert({
+        titulo,
+        estilo,
+        duracion,
+        descripcion,
+        autor,
+        estado,
+        url_audio,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Supabase error (insert cancion):", error);
+      return res.status(500).json({ error: "Error creando la canción" });
+    }
+
+    res.status(201).json({
+      message: "Canción creada correctamente",
+      cancion: data,
+    });
+  } catch (err) {
+    console.error("Error en POST /api/canciones:", err);
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
