@@ -340,6 +340,63 @@ app.get("/api/canciones", async (req, res) => {
   }
 });
 
+// === VOTAR CANCIÓN (like / dislike) ===
+app.post("/api/canciones/:id/vote", authUser, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tipo } = req.body; // 'like' o 'dislike'
+
+    if (tipo !== "like" && tipo !== "dislike") {
+      return res
+        .status(400)
+        .json({ error: "Tipo de voto no válido. Usa 'like' o 'dislike'." });
+    }
+
+    // 1) leer canción actual
+    const { data: song, error: errorSelect } = await supabase
+      .from("canciones")
+      .select("id, likes, dislikes")
+      .eq("id", id)
+      .single();
+
+    if (errorSelect || !song) {
+      console.error("Supabase error (select cancion para voto):", errorSelect);
+      return res.status(404).json({ error: "Canción no encontrada" });
+    }
+
+    // 2) calcular nuevos valores
+    const newLikes = song.likes + (tipo === "like" ? 1 : 0);
+    const newDislikes = song.dislikes + (tipo === "dislike" ? 1 : 0);
+
+    // 3) actualizar
+    const { data: updated, error: errorUpdate } = await supabase
+      .from("canciones")
+      .update({
+        likes: newLikes,
+        dislikes: newDislikes,
+      })
+      .eq("id", id)
+      .select("id, likes, dislikes")
+      .single();
+
+    if (errorUpdate) {
+      console.error("Supabase error (update voto):", errorUpdate);
+      return res
+        .status(500)
+        .json({ error: "Error actualizando los votos de la canción" });
+    }
+
+    res.json({
+      message: "Voto registrado",
+      likes: updated.likes,
+      dislikes: updated.dislikes,
+    });
+  } catch (err) {
+    console.error("Error en POST /api/canciones/:id/vote:", err);
+    res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
 // === CREAR CANCIÓN (ADMIN) ===
 app.post("/api/canciones", authAdmin, async (req, res) => {
   try {
