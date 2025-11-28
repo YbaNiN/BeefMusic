@@ -110,9 +110,9 @@
       background: #ffffff;
     }
 
-    /* Ajustes de las cards: título + género + usuario + player */
+    /* Ajustes cards: título + género + usuario + player + votos */
     .song-card {
-      min-height: 190px;
+      min-height: 210px;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -165,6 +165,70 @@
       border: 1px dashed rgba(255,255,255,0.08);
     }
 
+    /* Votos (Me gusta / No me gusta) */
+    .song-votes {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
+
+    .vote-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(5,5,12,0.85);
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: var(--fg-muted);
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease,
+        border 0.2s ease,
+        color 0.2s ease;
+    }
+
+    .vote-btn span.vote-count {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .vote-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.7);
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    .vote-btn.like {
+      border-color: rgba(61, 214, 140, 0.5);
+    }
+
+    .vote-btn.dislike {
+      border-color: rgba(255, 99, 132, 0.5);
+    }
+
+    .vote-btn.voted {
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      color: #fff;
+      box-shadow: 0 10px 26px rgba(255,39,87,0.8);
+      border-color: transparent;
+    }
+
+    .vote-btn.voted span.vote-count {
+      color: #fff;
+    }
+
+    .songs-vote-hint {
+      font-size: 0.78rem;
+      color: var(--fg-muted);
+      margin-top: 4px;
+    }
+
     @media (max-width: 900px) {
       .songs-page {
         padding: 20px 16px 60px;
@@ -201,9 +265,12 @@
         <h1>Canciones creadas desde las peticiones</h1>
         <p>
           Aquí se irán sumando los temas que vayáis pidiendo desde la web.
-          Cada canción muestra su título, el género y quién la pidió, y puedes
-          reproducirla directamente desde aquí.
+          Cada canción muestra su título, el género y quién la pidió, la puedes
+          reproducir y votar con Me gusta / No me gusta.
         </p>
+        <div class="songs-vote-hint">
+          Para votar necesitas haber iniciado sesión como usuario BeefMusic.
+        </div>
       </div>
       <div class="songs-count" id="songs-count">
         Cargando canciones...
@@ -276,6 +343,8 @@
         song.autor || song.requester || song.nick || "@anónimo";
       const estado = song.estado || "publicada";
       const urlAudio = song.url_audio || song.audio_url || "";
+      const likes = song.likes ?? 0;
+      const dislikes = song.dislikes ?? 0;
 
       return `
         <article class="song-card">
@@ -294,17 +363,14 @@
             </div>
 
             <!-- DESCRIPCIÓN / RESUMEN -->
-            ${
-              descripcion
-                ? `<div class="song-req">${descripcion}</div>`
-                : ""
-            }
+            ${descripcion ? `<div class="song-req">${descripcion}</div>` : ""}
 
-            <!-- ESTADO + AUDIO -->
+            <!-- ESTADO -->
             <div class="song-meta" style="margin-top:6px;">
               <span class="song-badge">${estado}</span>
             </div>
 
+            <!-- AUDIO -->
             ${
               urlAudio
                 ? `
@@ -321,6 +387,16 @@
               </div>
             `
             }
+
+            <!-- VOTOS -->
+            <div class="song-votes" data-id="${song.id}">
+              <button class="vote-btn like" data-type="like">
+                👍 <span class="vote-count">${likes}</span>
+              </button>
+              <button class="vote-btn dislike" data-type="dislike">
+                👎 <span class="vote-count">${dislikes}</span>
+              </button>
+            </div>
           </div>
         </article>
       `;
@@ -409,6 +485,66 @@
         currentStyleFilter = btn.getAttribute("data-style") || "";
         aplicarFiltros();
       });
+    });
+
+    // Votos (delegación de eventos)
+    grid.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".vote-btn");
+      if (!btn) return;
+
+      const token = localStorage.getItem("beefmusic_user_token");
+      if (!token) {
+        alert("Necesitas iniciar sesión como usuario BeefMusic para votar canciones.");
+        return;
+      }
+
+      const votesWrapper = btn.closest(".song-votes");
+      const songId = votesWrapper.getAttribute("data-id");
+      const tipo = btn.getAttribute("data-type"); // 'like' o 'dislike'
+
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(API_URL + "/api/canciones/" + songId + "/vote", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+          body: JSON.stringify({ tipo }),
+        });
+
+        const json = await res.json();
+
+        if (!res.ok) {
+          console.error("Error votando:", json);
+          alert(json.error || "No se pudo registrar el voto");
+          btn.disabled = false;
+          return;
+        }
+
+        // Actualizar contadores en la UI
+        const likeBtn = votesWrapper.querySelector(".vote-btn.like .vote-count");
+        const dislikeBtn = votesWrapper.querySelector(".vote-btn.dislike .vote-count");
+
+        if (likeBtn && typeof json.likes === "number") {
+          likeBtn.textContent = json.likes;
+        }
+        if (dislikeBtn && typeof json.dislikes === "number") {
+          dislikeBtn.textContent = json.dislikes;
+        }
+
+        // Marcar el botón pulsado (no bloqueamos el otro, sólo efecto visual)
+        votesWrapper
+          .querySelectorAll(".vote-btn")
+          .forEach((b) => b.classList.remove("voted"));
+        btn.classList.add("voted");
+      } catch (err) {
+        console.error(err);
+        alert("Error de conexión al votar la canción.");
+      } finally {
+        btn.disabled = false;
+      }
     });
 
     // Carga inicial
