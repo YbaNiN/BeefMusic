@@ -399,6 +399,9 @@
                   👎 <span class="vote-count">${dislikes}</span>
                 </button>
               </div>
+              <div class="songs-vote-hint">
+                Likes totales: ${likes} · Dislikes totales: ${dislikes}
+              </div>
             </div>
           </article>
         `;
@@ -511,13 +514,6 @@
             const songId = votesWrapper.getAttribute("data-id");
             const tipo = btn.getAttribute("data-type"); // 'like' o 'dislike'
 
-            const currentUserVote = votesWrapper.getAttribute("data-user-vote") || "";
-
-            // Si ya tiene ese mismo voto, no hacemos nada (no puede acumular likes/dislikes)
-            if (currentUserVote === tipo) {
-                return;
-            }
-
             btn.disabled = true;
 
             try {
@@ -527,7 +523,7 @@
                         "Content-Type": "application/json",
                         Authorization: "Bearer " + token,
                     },
-                    body: JSON.stringify({ tipo }), // el backend se encarga de cambiar like<->dislike
+                    body: JSON.stringify({ tipo }), // el backend se encarga de poner/quitar/cambiar
                 });
 
                 const json = await res.json();
@@ -539,7 +535,7 @@
                     return;
                 }
 
-                // Actualizar contadores en la UI
+                // Actualizar contadores en la UI (likes/dislikes TOTALES)
                 const likeCountEl = votesWrapper.querySelector(".vote-btn.like .vote-count");
                 const dislikeCountEl = votesWrapper.querySelector(".vote-btn.dislike .vote-count");
 
@@ -550,21 +546,27 @@
                     dislikeCountEl.textContent = json.dislikes;
                 }
 
-                // Actualizar voto del usuario
-                const newUserVote = json.userVote || tipo; // si el backend devuelve userVote, mejor
-                votesWrapper.setAttribute("data-user-vote", newUserVote);
+                // Actualizar voto del usuario ('like', 'dislike' o null)
+                const newUserVote = json.userVote ?? null;
+                votesWrapper.setAttribute("data-user-vote", newUserVote || "");
 
-                // Marcar el botón pulsado, desmarcar el otro
+                // Marcar / desmarcar botones
                 votesWrapper
                     .querySelectorAll(".vote-btn")
                     .forEach((b) => {
                         const bType = b.getAttribute("data-type");
-                        if (bType === newUserVote) {
+                        if (newUserVote && bType === newUserVote) {
                             b.classList.add("voted");
                         } else {
                             b.classList.remove("voted");
                         }
                     });
+
+                // Actualizar la línea de texto de totales, si existe
+                const hint = votesWrapper.parentElement.querySelector(".songs-vote-hint");
+                if (hint) {
+                    hint.textContent = `Likes totales: ${json.likes} · Dislikes totales: ${json.dislikes}`;
+                }
             } catch (err) {
                 console.error(err);
                 alert("Error de conexión al votar la canción.");
