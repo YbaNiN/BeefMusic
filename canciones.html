@@ -145,25 +145,53 @@
       color: var(--fg-muted);
     }
 
-    /* Player de audio */
-    .song-player {
-      margin-top: 10px;
-    }
+      /* Player de audio – estilo BeefMusic */
+      .song-player {
+          margin-top: 10px;
+          padding: 2px;
+          border-radius: 999px;
+          background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+          box-shadow: 0 10px 30px rgba(255, 39, 87, 0.35);
+      }
 
-    .song-player audio {
-      width: 100%;
-      outline: none;
-    }
+          .song-player audio {
+              width: 100%;
+              outline: none;
+              border-radius: 999px;
+              background: rgba(5, 5, 12, 0.95);
+          }
 
-    .song-player--noaudio {
-      margin-top: 10px;
-      font-size: 0.8rem;
-      color: var(--fg-muted);
-      padding: 8px 10px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.03);
-      border: 1px dashed rgba(255,255,255,0.08);
-    }
+              /* Estilos específicos para navegadores WebKit (Chrome, Edge, Safari) */
+              .song-player audio::-webkit-media-controls-panel {
+                  background: transparent;
+                  border-radius: 999px;
+              }
+
+              /* Botón de play */
+              .song-player audio::-webkit-media-controls-play-button {
+                  background: rgba(255, 255, 255, 0.08);
+                  border-radius: 999px;
+              }
+
+                  .song-player audio::-webkit-media-controls-play-button:hover {
+                      background: rgba(255, 255, 255, 0.18);
+                  }
+
+              /* Barra de progreso */
+              .song-player audio::-webkit-media-controls-timeline {
+                  border-radius: 999px;
+                  background: rgba(255, 255, 255, 0.06);
+              }
+
+                  /* Parte reproducida de la barra */
+                  .song-player audio::-webkit-media-controls-timeline::-webkit-media-controls-played-track {
+                      background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+                  }
+
+                  /* Parte no reproducida */
+                  .song-player audio::-webkit-media-controls-timeline::-webkit-media-controls-unplayed-track {
+                      background: transparent;
+                  }
 
     /* Votos (Me gusta / No me gusta) */
     .song-votes {
