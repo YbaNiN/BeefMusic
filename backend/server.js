@@ -99,18 +99,58 @@ function getUserFromToken(req) {
 
 // === DISCORD WEBHOOK ===
 async function enviarAPeticionDiscord({ nick, style, idea, idPeticion }) {
-  const url = process.env.DISCORD_WEBHOOK_URL;
-  if (!url) return;
+    // === DISCORD WEBHOOKS ===
+    const DISCORD_WEBHOOK_PETICIONES =
+        process.env.DISCORD_WEBHOOK_PETICIONES || process.env.DISCORD_WEBHOOK_URL;
 
-  const content =
-    `🎵 **Nueva petición de canción**\n` +
-    `👤 Nick: ${nick}\n` +
-    `🎧 Estilo: ${style}\n` +
-    `📝 Idea:\n${idea}\n\n` +
-    `🆔 ID petición: ${idPeticion}`;
+    const DISCORD_WEBHOOK_SUGERENCIAS =
+        process.env.DISCORD_WEBHOOK_SUGERENCIAS || process.env.DISCORD_WEBHOOK_URL;
 
-  await axios.post(url, { content });
-}
+    const DISCORD_WEBHOOK_REPORTES =
+        process.env.DISCORD_WEBHOOK_REPORTES || process.env.DISCORD_WEBHOOK_URL;
+
+    // === DISCORD: PETICIONES ===
+    async function enviarAPeticionDiscord({ nick, style, idea, idPeticion }) {
+        const url = DISCORD_WEBHOOK_PETICIONES;
+        if (!url) return;
+
+        const content =
+            `🎵 **Nueva petición de canción**\n` +
+            `👤 Nick: ${nick}\n` +
+            `🎧 Estilo: ${style}\n` +
+            `📝 Idea:\n${idea}\n\n` +
+            `🆔 ID petición: ${idPeticion}`;
+
+        await axios.post(url, { content });
+    }
+
+    // === DISCORD: SUGERENCIAS ===
+    async function enviarASugerenciaDiscord({ nick, mensaje, idSugerencia }) {
+        const url = DISCORD_WEBHOOK_SUGERENCIAS;
+        if (!url) return;
+
+        const content =
+            `💡 **Nueva sugerencia para BeefMusic**\n` +
+            `👤 Nick: ${nick || "Anónimo"}\n` +
+            `📝 Sugerencia:\n${mensaje}\n\n` +
+            `🆔 ID sugerencia: ${idSugerencia}`;
+
+        await axios.post(url, { content });
+    }
+
+    // === DISCORD: REPORTES ===
+    async function enviarAReporteDiscord({ nick, mensaje, idReporte }) {
+        const url = DISCORD_WEBHOOK_REPORTES;
+        if (!url) return;
+
+        const content =
+            `🐛 **Nuevo reporte de problema en BeefMusic**\n` +
+            `👤 Nick: ${nick || "Anónimo"}\n` +
+            `📝 Detalle del problema:\n${mensaje}\n\n` +
+            `🆔 ID reporte: ${idReporte}`;
+
+        await axios.post(url, { content });
+    }
 
 // === RUTA TEST ===
 app.get("/", (req, res) => {
@@ -275,6 +315,90 @@ app.post("/api/peticiones", async (req, res) => {
     res.status(500).json({ error: "Error en el servidor" });
   }
 });
+
+    // === CREAR SUGERENCIA (PÚBLICO) ===
+    app.post("/api/sugerencias", async (req, res) => {
+        try {
+            const { nick, mensaje } = req.body;
+
+            if (!mensaje) {
+                return res.status(400).json({ error: "Falta el campo 'mensaje' de la sugerencia" });
+            }
+
+            const { data, error } = await supabase
+                .from("sugerencias")
+                .insert({
+                    nick: nick || null,
+                    mensaje,
+                })
+                .select()
+                .single();
+
+            if (error) {
+                console.error("Supabase error (insert sugerencia):", error);
+                return res.status(500).json({ error: "Error guardando la sugerencia" });
+            }
+
+            const idSugerencia = data.id;
+
+            try {
+                await enviarASugerenciaDiscord({ nick, mensaje, idSugerencia });
+            } catch (err) {
+                console.error("Error enviando sugerencia a Discord:", err.message);
+                // No rompemos la respuesta al usuario aunque falle Discord
+            }
+
+            res.status(201).json({
+                message: "Sugerencia enviada correctamente",
+                id: idSugerencia,
+            });
+        } catch (error) {
+            console.error("Error en POST /api/sugerencias:", error);
+            res.status(500).json({ error: "Error en el servidor" });
+        }
+    });
+
+    // === CREAR REPORTE (PÚBLICO) ===
+    app.post("/api/reportes", async (req, res) => {
+        try {
+            const { nick, mensaje } = req.body;
+
+            if (!mensaje) {
+                return res.status(400).json({ error: "Falta el campo 'mensaje' del reporte" });
+            }
+
+            const { data, error } = await supabase
+                .from("reportes")
+                .insert({
+                    nick: nick || null,
+                    mensaje,
+                })
+                .select()
+                .single();
+
+            if (error) {
+                console.error("Supabase error (insert reporte):", error);
+                return res.status(500).json({ error: "Error guardando el reporte" });
+            }
+
+            const idReporte = data.id;
+
+            try {
+                await enviarAReporteDiscord({ nick, mensaje, idReporte });
+            } catch (err) {
+                console.error("Error enviando reporte a Discord:", err.message);
+                // Igual que antes: no rompemos la respuesta al usuario
+            }
+
+            res.status(201).json({
+                message: "Reporte enviado correctamente",
+                id: idReporte,
+            });
+        } catch (error) {
+            console.error("Error en POST /api/reportes:", error);
+            res.status(500).json({ error: "Error en el servidor" });
+        }
+    });
 
 // === LISTAR PETICIONES (ADMIN) ===
 app.get("/api/peticiones", authAdmin, async (req, res) => {
