@@ -15,6 +15,21 @@
       padding: 24px 20px 80px;
     }
 
+    /* HEADER */
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
     .songs-header-main {
       margin: 32px 0 18px;
       display: flex;
@@ -39,12 +54,15 @@
       margin-bottom: 22px;
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 12px 16px;
       align-items: flex-end;
     }
 
     .songs-tools .field {
       margin-bottom: 0;
+      flex: 1;
+      min-width: 230px;
+      max-width: 320px;
     }
 
     .songs-tools input {
@@ -83,6 +101,7 @@
         background 0.2s ease,
         border 0.2s ease,
         color 0.2s ease;
+      white-space: nowrap;
     }
 
     .songs-filter-btn::before {
@@ -108,6 +127,13 @@
 
     .songs-filter-btn.active::before {
       background: #ffffff;
+    }
+
+    /* GRID RESPONSIVE DE CANCIONES */
+    .songs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
     }
 
     /* Ajustes cards: título + género + usuario + player + votos */
@@ -145,112 +171,107 @@
       color: var(--fg-muted);
     }
 
-      /* Player de audio – estilo BeefMusic */
-      .song-player {
-          margin-top: 12px;
-      }
+    /* Player de audio – estilo BeefMusic */
+    .song-player {
+      margin-top: 12px;
+    }
 
-      /* Contenedor principal del player custom */
-      .bm-player {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 10px 14px;
-          border-radius: 18px;
-          background: radial-gradient(circle at top left, rgba(255, 39, 87, 0.28), transparent 55%), radial-gradient(circle at bottom right, rgba(160, 54, 255, 0.28), transparent 55%), rgba(5, 5, 12, 0.96);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 18px 45px rgba(0, 0, 0, 0.9);
-      }
+    .bm-player {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at top left, rgba(255, 39, 87, 0.28), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(160, 54, 255, 0.28), transparent 55%),
+        rgba(5, 5, 12, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.9);
+    }
 
-      /* Ocultamos los controles nativos, usamos el audio solo como motor */
-      .bm-audio {
-          display: none;
-      }
+    .bm-audio {
+      display: none;
+    }
 
-      /* Botón play / pausa */
-      .bm-play-btn {
-          flex-shrink: 0;
-          width: 40px;
-          height: 40px;
-          border-radius: 999px;
-          border: none;
-          cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
-          box-shadow: 0 0 18px rgba(255, 39, 87, 0.85);
-          transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-      }
+    .bm-play-btn {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      box-shadow: 0 0 18px rgba(255, 39, 87, 0.85);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
 
-          .bm-play-btn:hover {
-              transform: translateY(-1px) scale(1.03);
-              filter: brightness(1.1);
-          }
+    .bm-play-btn:hover {
+      transform: translateY(-1px) scale(1.03);
+      filter: brightness(1.1);
+    }
 
-          .bm-play-btn:active {
-              transform: translateY(0) scale(0.97);
-              box-shadow: 0 0 10px rgba(255, 39, 87, 0.5);
-          }
+    .bm-play-btn:active {
+      transform: translateY(0) scale(0.97);
+      box-shadow: 0 0 10px rgba(255, 39, 87, 0.5);
+    }
 
-      /* Iconos play / pause */
-      .bm-play-icon,
-      .bm-pause-icon {
-          font-size: 16px;
-          line-height: 1;
-          color: #ffffff;
-      }
+    .bm-play-icon,
+    .bm-pause-icon {
+      font-size: 16px;
+      line-height: 1;
+      color: #ffffff;
+    }
 
-      .bm-pause-icon {
-          display: none;
-      }
+    .bm-pause-icon {
+      display: none;
+    }
 
-      /* Cuando está reproduciendo, intercambiamos iconos */
-      .bm-player.is-playing .bm-play-icon {
-          display: none;
-      }
+    .bm-player.is-playing .bm-play-icon {
+      display: none;
+    }
 
-      .bm-player.is-playing .bm-pause-icon {
-          display: inline;
-      }
+    .bm-player.is-playing .bm-pause-icon {
+      display: inline;
+    }
 
-      .bm-player-main {
-          flex: 1;
-          min-width: 0;
-      }
+    .bm-player-main {
+      flex: 1;
+      min-width: 0;
+    }
 
-      /* Tiempos (actual / duración) */
-      .bm-time-row {
-          display: flex;
-          justify-content: space-between;
-          margin-bottom: 4px;
-          font-size: 0.75rem;
-          color: var(--fg-muted);
-      }
+    .bm-time-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-size: 0.75rem;
+      color: var(--fg-muted);
+    }
 
-      .bm-time {
-          font-variant-numeric: tabular-nums;
-      }
+    .bm-time {
+      font-variant-numeric: tabular-nums;
+    }
 
-      /* Barra de progreso */
-      .bm-timeline {
-          position: relative;
-          height: 6px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.08);
-          overflow: hidden;
-          cursor: pointer;
-      }
+    .bm-timeline {
+      position: relative;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      cursor: pointer;
+    }
 
-      /* Progreso reproducido */
-      .bm-timeline-progress {
-          position: absolute;
-          inset: 0;
-          width: 0%;
-          background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
-          box-shadow: 0 0 12px rgba(255, 39, 87, 0.7);
-          transition: width 0.08s linear;
-      }
+    .bm-timeline-progress {
+      position: absolute;
+      inset: 0;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+      box-shadow: 0 0 12px rgba(255, 39, 87, 0.7);
+      transition: width 0.08s linear;
+    }
 
     /* Votos (Me gusta / No me gusta) */
     .song-votes {
@@ -259,6 +280,7 @@
       align-items: center;
       gap: 8px;
       font-size: 0.8rem;
+      flex-wrap: wrap;
     }
 
     .vote-btn {
@@ -316,533 +338,572 @@
       margin-top: 4px;
     }
 
+    /* BREAKPOINTS */
     @media (max-width: 900px) {
       .songs-page {
         padding: 20px 16px 60px;
       }
-    }
 
-    @media (max-width: 600px) {
       .songs-header-main {
         margin-top: 24px;
       }
-      .songs-tools {
+    }
+
+    @media (max-width: 768px) {
+      .site-header {
+        flex-direction: column;
         align-items: flex-start;
+      }
+
+      .header-actions {
+        width: 100%;
+      }
+
+      .header-actions .btn {
+        width: 100%;
+        text-align: center;
+      }
+
+      .songs-header-main {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .songs-tools {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .songs-tools .field {
+        max-width: 100%;
+      }
+
+      .songs-filter-pills {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+
+      .songs-filter-pills::-webkit-scrollbar {
+        height: 4px;
+      }
+
+      .songs-filter-pills::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.4);
+        border-radius: 999px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .songs-page {
+        padding: 16px 12px 48px;
+      }
+
+      .songs-header-main h1 {
+        font-size: 1.5rem;
+      }
+
+      .bm-player {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .bm-play-btn {
+        width: 44px;
+        height: 44px;
       }
     }
   </style>
 </head>
 <body>
-    <div class="songs-page">
-        <!-- HEADER SIMPLE -->
-        <header style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-            <div class="logo">
-                <div class="logo-mark"></div>
-                <span>BeefMusic</span>
-            </div>
-            <div class="header-actions">
-                <a href="index.html" class="btn btn-ghost">← Volver al inicio</a>
-            </div>
-        </header>
+  <div class="songs-page">
+    <!-- HEADER SIMPLE -->
+    <header class="site-header">
+      <div class="logo">
+        <div class="logo-mark"></div>
+        <span>BeefMusic</span>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-ghost">← Volver al inicio</a>
+      </div>
+    </header>
 
-        <!-- TITULAR -->
-        <section class="songs-header-main">
-            <div>
-                <div class="section-kicker">Colección BeefMusic</div>
-                <h1>Canciones creadas desde las peticiones</h1>
-                <p>
-                    Aquí se irán sumando los temas que vayáis pidiendo desde la web.
-                    Cada canción muestra su título, el género y quién la pidió, la puedes
-                    reproducir y votar con Me gusta / No me gusta.
-                </p>
-                <div class="songs-vote-hint">
-                    Para votar necesitas haber iniciado sesión como usuario BeefMusic.
-                </div>
-            </div>
-            <div class="songs-count" id="songs-count">
-                Cargando canciones...
-            </div>
-        </section>
-
-        <!-- BUSCADOR / FILTROS -->
-        <section class="songs-tools">
-            <div class="field" style="max-width:260px;flex:1;">
-                <label for="songs-search">Buscar por título o usuario</label>
-                <input id="songs-search"
-                       type="text"
-                       placeholder="Ej: Código de Barrio, @user_404..." />
-            </div>
-
-            <section class="songs-tools">
-                <!-- BUSCADOR -->
-                <div class="field" style="max-width:260px;flex:1;">
-                    <label for="songs-search">Buscar por título, usuario o estilo</label>
-                    <input id="songs-search"
-                           type="text"
-                           placeholder="Ej: Código de Barrio, @user_404, drill..." />
-                </div>
-
-                <!-- Píldoras de filtro por estilo -->
-                <div class="songs-filter-pills" id="songs-filter-pills">
-                    <button class="songs-filter-btn active" data-style="">
-                        Todos
-                    </button>
-                    <button class="songs-filter-btn" data-style="drill">
-                        Drill
-                    </button>
-                    <button class="songs-filter-btn" data-style="trap">
-                        Trap
-                    </button>
-                    <button class="songs-filter-btn" data-style="dembow">
-                        Dembow
-                    </button>
-                    <button class="songs-filter-btn" data-style="reggaeton">
-                        Reggaetón
-                    </button>
-                    <button class="songs-filter-btn" data-style="rap">
-                        Rap
-                    </button>
-                </div>
-
-                <!-- Píldoras de ORDEN (Recientes / Top Likes) -->
-                <div class="songs-filter-pills" id="songs-sort-pills">
-                    <button class="songs-filter-btn active" data-sort="recientes">
-                        Recientes
-                    </button>
-                    <button class="songs-filter-btn" data-sort="top">
-                        Top Likes
-                    </button>
-                </div>
-            </section>
-
-
-            <!-- GRID DE CANCIONES -->
-            <section>
-                <div class="songs-grid" id="songs-grid">
-                    <!-- Se rellena por JS -->
-                </div>
-            </section>
-    </div>
-
-    <script>
-        const API_URL = "https://beefmusic-backend.onrender.com";
-
-        const grid = document.getElementById("songs-grid");
-        const countEl = document.getElementById("songs-count");
-        const searchInput = document.getElementById("songs-search");
-
-        // Píldoras de estilo y de orden
-        const filterPills = document.querySelectorAll("#songs-filter-pills .songs-filter-btn");
-        const sortPills = document.querySelectorAll("#songs-sort-pills .songs-filter-btn");
-
-        let allSongs = [];
-        let currentStyleFilter = "";      // "" = todos
-        let currentSortMode = "recientes"; // 'recientes' | 'top'
-
-        function crearCardCancion(song) {
-            const titulo = song.titulo || song.title || "Tema sin título";
-            const estilo = song.estilo || song.style || "Sin género";
-            const duracion = song.duracion || song.duration || "";
-            const descripcion =
-                song.descripcion ||
-                song.descripcion_peticion ||
-                song.description ||
-                "";
-            const autor =
-                song.autor || song.requester || song.nick || "@anónimo";
-            const estado = song.estado || "publicada";
-            const urlAudio = song.url_audio || song.audio_url || "";
-
-            const likes = song.likes ?? 0;
-            const dislikes = song.dislikes ?? 0;
-            // Voto del usuario autenticado, si el backend lo manda
-            const userVote = song.userVote || song.votoUsuario || "";
-
-            return `
-          <article class="song-card">
-            <div class="song-thumb">
-              <div class="song-wave"></div>
-            </div>
-            <div class="song-body">
-              <!-- TÍTULO DEL TEMA -->
-              <div class="song-title">${titulo}</div>
-
-              <!-- GÉNERO + USUARIO + DURACIÓN -->
-              <div class="song-meta">
-                <span class="song-badge">${estilo}</span>
-                <span class="song-req-author">${autor}</span>
-                ${duracion ? `<span>${duracion}</span>` : ""}
-              </div>
-
-              <!-- DESCRIPCIÓN / RESUMEN -->
-              ${descripcion ? `<div class="song-req">${descripcion}</div>` : ""}
-
-              <!-- ESTADO -->
-              <div class="song-meta" style="margin-top:6px;">
-                <span class="song-badge">${estado}</span>
-              </div>
-
-              ${urlAudio
-                    ? `
-    <div class="song-player">
-      <div class="bm-player">
-        <audio preload="none" class="bm-audio">
-          <source src="${urlAudio}" type="audio/mpeg" />
-          Tu navegador no soporta audio HTML5.
-        </audio>
-
-        <button
-          class="bm-play-btn"
-          type="button"
-          aria-label="Reproducir / Pausar">
-          <span class="bm-play-icon">▶</span>
-          <span class="bm-pause-icon">❚❚</span>
-        </button>
-
-        <div class="bm-player-main">
-          <div class="bm-time-row">
-            <span class="bm-time bm-current">0:00</span>
-            <span class="bm-time bm-duration">0:00</span>
-          </div>
-          <div class="bm-timeline">
-            <div class="bm-timeline-progress"></div>
-          </div>
+    <!-- TITULAR -->
+    <section class="songs-header-main">
+      <div>
+        <div class="section-kicker">Colección BeefMusic</div>
+        <h1>Canciones creadas desde las peticiones</h1>
+        <p>
+          Aquí se irán sumando los temas que vayáis pidiendo desde la web.
+          Cada canción muestra su título, el género y quién la pidió, la puedes
+          reproducir y votar con Me gusta / No me gusta.
+        </p>
+        <div class="songs-vote-hint">
+          Para votar necesitas haber iniciado sesión como usuario BeefMusic.
         </div>
       </div>
-    </div>
-  `
-                    : `
-    <div class="song-player song-player--noaudio">
-      El audio de este tema todavía no está disponible.
-    </div>
-  `
-}
-              <!-- VOTOS -->
-              <div class="song-votes"
-                   data-id="${song.id}"
-                   data-user-vote="${userVote}">
-                <button class="vote-btn like ${userVote === "like" ? "voted" : ""}" data-type="like">
-                  👍 <span class="vote-count">${likes}</span>
-                </button>
-                <button class="vote-btn dislike ${userVote === "dislike" ? "voted" : ""}" data-type="dislike">
-                  👎 <span class="vote-count">${dislikes}</span>
-                </button>
-              </div>
-              <div class="songs-vote-hint">
-                Likes totales: ${likes} · Dislikes totales: ${dislikes}
-              </div>
-            </div>
-          </article>
-        `;
-        }
-
-        function renderSongs(list) {
-            if (!list || list.length === 0) {
-                grid.innerHTML = `
-      <div class="admin-empty" style="grid-column:1/-1;">
-        Todavía no hay canciones publicadas. Cuando las subas desde tu backend, se verán aquí.
+      <div class="songs-count" id="songs-count">
+        Cargando canciones...
       </div>
-    `;
-                countEl.textContent = "";
-                return;
+    </section>
+
+    <!-- BUSCADOR / FILTROS -->
+    <section class="songs-tools">
+      <!-- BUSCADOR -->
+      <div class="field">
+        <label for="songs-search">Buscar por título, usuario o estilo</label>
+        <input id="songs-search"
+               type="text"
+               placeholder="Ej: Código de Barrio, @user_404, drill..." />
+      </div>
+
+      <!-- Píldoras de filtro por estilo -->
+      <div class="songs-filter-pills" id="songs-filter-pills">
+        <button class="songs-filter-btn active" data-style="">
+          Todos
+        </button>
+        <button class="songs-filter-btn" data-style="drill">
+          Drill
+        </button>
+        <button class="songs-filter-btn" data-style="trap">
+          Trap
+        </button>
+        <button class="songs-filter-btn" data-style="dembow">
+          Dembow
+        </button>
+        <button class="songs-filter-btn" data-style="reggaeton">
+          Reggaetón
+        </button>
+        <button class="songs-filter-btn" data-style="rap">
+          Rap
+        </button>
+      </div>
+
+      <!-- Píldoras de ORDEN (Recientes / Top Likes) -->
+      <div class="songs-filter-pills" id="songs-sort-pills">
+        <button class="songs-filter-btn active" data-sort="recientes">
+          Recientes
+        </button>
+        <button class="songs-filter-btn" data-sort="top">
+          Top Likes
+        </button>
+      </div>
+    </section>
+
+    <!-- GRID DE CANCIONES -->
+    <section>
+      <div class="songs-grid" id="songs-grid">
+        <!-- Se rellena por JS -->
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API_URL = "https://beefmusic-backend.onrender.com";
+
+    const grid = document.getElementById("songs-grid");
+    const countEl = document.getElementById("songs-count");
+    const searchInput = document.getElementById("songs-search");
+
+    // Píldoras de estilo y de orden
+    const filterPills = document.querySelectorAll("#songs-filter-pills .songs-filter-btn");
+    const sortPills = document.querySelectorAll("#songs-sort-pills .songs-filter-btn");
+
+    let allSongs = [];
+    let currentStyleFilter = "";      // "" = todos
+    let currentSortMode = "recientes"; // 'recientes' | 'top'
+
+    function crearCardCancion(song) {
+      const titulo = song.titulo || song.title || "Tema sin título";
+      const estilo = song.estilo || song.style || "Sin género";
+      const duracion = song.duracion || song.duration || "";
+      const descripcion =
+        song.descripcion ||
+        song.descripcion_peticion ||
+        song.description ||
+        "";
+      const autor =
+        song.autor || song.requester || song.nick || "@anónimo";
+      const estado = song.estado || "publicada";
+      const urlAudio = song.url_audio || song.audio_url || "";
+
+      const likes = song.likes ?? 0;
+      const dislikes = song.dislikes ?? 0;
+      const userVote = song.userVote || song.votoUsuario || "";
+
+      return `
+        <article class="song-card">
+          <div class="song-thumb">
+            <div class="song-wave"></div>
+          </div>
+          <div class="song-body">
+            <!-- TÍTULO DEL TEMA -->
+            <div class="song-title">${titulo}</div>
+
+            <!-- GÉNERO + USUARIO + DURACIÓN -->
+            <div class="song-meta">
+              <span class="song-badge">${estilo}</span>
+              <span class="song-req-author">${autor}</span>
+              ${duracion ? `<span>${duracion}</span>` : ""}
+            </div>
+
+            <!-- DESCRIPCIÓN / RESUMEN -->
+            ${descripcion ? `<div class="song-req">${descripcion}</div>` : ""}
+
+            <!-- ESTADO -->
+            <div class="song-meta" style="margin-top:6px;">
+              <span class="song-badge">${estado}</span>
+            </div>
+
+            ${urlAudio
+              ? `
+              <div class="song-player">
+                <div class="bm-player">
+                  <audio preload="none" class="bm-audio">
+                    <source src="${urlAudio}" type="audio/mpeg" />
+                    Tu navegador no soporta audio HTML5.
+                  </audio>
+
+                  <button
+                    class="bm-play-btn"
+                    type="button"
+                    aria-label="Reproducir / Pausar">
+                    <span class="bm-play-icon">▶</span>
+                    <span class="bm-pause-icon">❚❚</span>
+                  </button>
+
+                  <div class="bm-player-main">
+                    <div class="bm-time-row">
+                      <span class="bm-time bm-current">0:00</span>
+                      <span class="bm-time bm-duration">0:00</span>
+                    </div>
+                    <div class="bm-timeline">
+                      <div class="bm-timeline-progress"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `
+              : `
+              <div class="song-player song-player--noaudio">
+                El audio de este tema todavía no está disponible.
+              </div>
+            `
             }
 
-            grid.innerHTML = list.map(crearCardCancion).join("");
-            countEl.textContent = list.length + " canciones";
+            <!-- VOTOS -->
+            <div class="song-votes"
+                 data-id="${song.id}"
+                 data-user-vote="${userVote}">
+              <button class="vote-btn like ${userVote === "like" ? "voted" : ""}" data-type="like">
+                👍 <span class="vote-count">${likes}</span>
+              </button>
+              <button class="vote-btn dislike ${userVote === "dislike" ? "voted" : ""}" data-type="dislike">
+                👎 <span class="vote-count">${dislikes}</span>
+              </button>
+            </div>
+            <div class="songs-vote-hint">
+              Likes totales: ${likes} · Dislikes totales: ${dislikes}
+            </div>
+          </div>
+        </article>
+      `;
+    }
 
-            // Inicializar players custom después de pintar el HTML
-            inicializarReproductores();
-        }
-
-        function aplicarFiltros() {
-            const text = (searchInput.value || "").toLowerCase().trim();
-            const estiloFiltro = (currentStyleFilter || "").toLowerCase();
-
-            // 1) Filtro por texto + estilo
-            const filtradas = allSongs.filter((song) => {
-                const titulo = (song.titulo || song.title || "").toLowerCase();
-                const autor = (song.autor || song.requester || song.nick || "").toLowerCase();
-                const estilo = (song.estilo || song.style || "").toLowerCase();
-                const descripcion = (song.descripcion || song.descripcion_peticion || song.description || "").toLowerCase();
-
-                // Buscador más completo: título, autor, estilo y descripción
-                const pasaTexto =
-                    !text ||
-                    titulo.includes(text) ||
-                    autor.includes(text) ||
-                    estilo.includes(text) ||
-                    descripcion.includes(text);
-
-                const pasaEstilo =
-                    !estiloFiltro || estilo.includes(estiloFiltro);
-
-                return pasaTexto && pasaEstilo;
-            });
-
-            // 2) Ordenar según el modo seleccionado
-            let listOrdenada = [...filtradas];
-
-            if (currentSortMode === "top") {
-                // Top por likes (si empatan, por más recientes)
-                listOrdenada.sort((a, b) => {
-                    const likesA = a.likes ?? 0;
-                    const likesB = b.likes ?? 0;
-                    if (likesB !== likesA) return likesB - likesA;
-
-                    const dateA = a.created_at ? new Date(a.created_at) : 0;
-                    const dateB = b.created_at ? new Date(b.created_at) : 0;
-                    return dateB - dateA;
-                });
-            } else {
-                // Recientes por defecto (created_at descendente)
-                listOrdenada.sort((a, b) => {
-                    const dateA = a.created_at ? new Date(a.created_at) : 0;
-                    const dateB = b.created_at ? new Date(b.created_at) : 0;
-                    return dateB - dateA;
-                });
-            }
-
-            renderSongs(listOrdenada);
-        }
-
-        async function cargarCanciones() {
-            grid.innerHTML = `
+    function renderSongs(list) {
+      if (!list || list.length === 0) {
+        grid.innerHTML = `
           <div class="admin-empty" style="grid-column:1/-1;">
-            Cargando canciones...
+            Todavía no hay canciones publicadas. Cuando las subas desde tu backend, se verán aquí.
           </div>
         `;
-            countEl.textContent = "Cargando canciones...";
+        countEl.textContent = "";
+        return;
+      }
 
-            try {
-                const token = localStorage.getItem("beefmusic_user_token");
+      grid.innerHTML = list.map(crearCardCancion).join("");
+      countEl.textContent = list.length + " canciones";
 
-                const res = await fetch(API_URL + "/api/canciones", {
-                    headers: token
-                        ? { Authorization: "Bearer " + token }
-                        : {}
-                });
+      // Inicializar players custom después de pintar el HTML
+      inicializarReproductores();
+    }
 
-                const data = await res.json();
+    function aplicarFiltros() {
+      const text = (searchInput.value || "").toLowerCase().trim();
+      const estiloFiltro = (currentStyleFilter || "").toLowerCase();
 
-                if (!res.ok) {
-                    throw new Error(data.error || "Error al cargar canciones");
-                }
+      // 1) Filtro por texto + estilo
+      const filtradas = allSongs.filter((song) => {
+        const titulo = (song.titulo || song.title || "").toLowerCase();
+        const autor = (song.autor || song.requester || song.nick || "").toLowerCase();
+        const estilo = (song.estilo || song.style || "").toLowerCase();
+        const descripcion = (song.descripcion || song.descripcion_peticion || song.description || "").toLowerCase();
 
-                if (!Array.isArray(data)) {
-                    throw new Error("La API de canciones no devolvió una lista");
-                }
+        const pasaTexto =
+          !text ||
+          titulo.includes(text) ||
+          autor.includes(text) ||
+          estilo.includes(text) ||
+          descripcion.includes(text);
 
-                allSongs = data;
-                aplicarFiltros();
-            } catch (err) {
-                console.error(err);
-                grid.innerHTML = `
-            <div class="admin-empty" style="grid-column:1/-1;">
-              Error cargando las canciones desde el servidor.
-              Cuando tengas listo el endpoint <code>/api/canciones</code>, se mostrarán aquí.
-            </div>
-          `;
-                countEl.textContent = "";
-            }
+        const pasaEstilo =
+          !estiloFiltro || estilo.includes(estiloFiltro);
+
+        return pasaTexto && pasaEstilo;
+      });
+
+      // 2) Ordenar según el modo seleccionado
+      let listOrdenada = [...filtradas];
+
+      if (currentSortMode === "top") {
+        // Top por likes (si empatan, por más recientes)
+        listOrdenada.sort((a, b) => {
+          const likesA = a.likes ?? 0;
+          const likesB = b.likes ?? 0;
+          if (likesB !== likesA) return likesB - likesA;
+
+          const dateA = a.created_at ? new Date(a.created_at) : 0;
+          const dateB = b.created_at ? new Date(b.created_at) : 0;
+          return dateB - dateA;
+        });
+      } else {
+        // Recientes por defecto (created_at descendente)
+        listOrdenada.sort((a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at) : 0;
+          const dateB = b.created_at ? new Date(b.created_at) : 0;
+          return dateB - dateA;
+        });
+      }
+
+      renderSongs(listOrdenada);
+    }
+
+    async function cargarCanciones() {
+      grid.innerHTML = `
+        <div class="admin-empty" style="grid-column:1/-1;">
+          Cargando canciones...
+        </div>
+      `;
+      countEl.textContent = "Cargando canciones...";
+
+      try {
+        const token = localStorage.getItem("beefmusic_user_token");
+
+        const res = await fetch(API_URL + "/api/canciones", {
+          headers: token
+            ? { Authorization: "Bearer " + token }
+            : {}
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Error al cargar canciones");
         }
 
-        // === PLAYER CUSTOM BEEF MUSIC ===
-        function inicializarReproductores() {
-            const players = document.querySelectorAll(".bm-player");
-            const allAudios = [];
-
-            players.forEach((player) => {
-                const audio = player.querySelector(".bm-audio");
-                if (!audio) return;
-
-                allAudios.push(audio);
-
-                const playBtn = player.querySelector(".bm-play-btn");
-                const timeline = player.querySelector(".bm-timeline");
-                const progressBar = player.querySelector(".bm-timeline-progress");
-                const currentTimeEl = player.querySelector(".bm-time.bm-current");
-                const durationEl = player.querySelector(".bm-time.bm-duration");
-
-                function formatTime(sec) {
-                    if (!sec || isNaN(sec)) return "0:00";
-                    const total = Math.floor(sec);
-                    const minutes = Math.floor(total / 60);
-                    const seconds = total % 60;
-                    return minutes + ":" + String(seconds).padStart(2, "0");
-                }
-
-                // Duración al cargar metadata
-                audio.addEventListener("loadedmetadata", () => {
-                    durationEl.textContent = formatTime(audio.duration);
-                });
-
-                // Actualizar barra y tiempo actual
-                audio.addEventListener("timeupdate", () => {
-                    const current = audio.currentTime || 0;
-                    const duration = audio.duration || 0;
-                    currentTimeEl.textContent = formatTime(current);
-
-                    const percent = duration ? (current / duration) * 100 : 0;
-                    progressBar.style.width = percent + "%";
-                });
-
-                // Cuando termina, reseteamos
-                audio.addEventListener("ended", () => {
-                    player.classList.remove("is-playing");
-                    progressBar.style.width = "0%";
-                    currentTimeEl.textContent = "0:00";
-                });
-
-                // Botón play/pause
-                playBtn.addEventListener("click", () => {
-                    if (audio.paused) {
-                        // Pausar cualquier otro audio que esté sonando
-                        allAudios.forEach((a) => {
-                            if (a !== audio) {
-                                a.pause();
-                                const p = a.closest(".bm-player");
-                                if (p) p.classList.remove("is-playing");
-                            }
-                        });
-
-                        audio.play();
-                        player.classList.add("is-playing");
-                    } else {
-                        audio.pause();
-                        player.classList.remove("is-playing");
-                    }
-                });
-
-                // Click en la barra para saltar en el tiempo
-                if (timeline) {
-                    timeline.addEventListener("click", (e) => {
-                        const rect = timeline.getBoundingClientRect();
-                        const clickX = e.clientX - rect.left;
-                        const percent = clickX / rect.width;
-                        const duration = audio.duration || 0;
-
-                        if (duration) {
-                            audio.currentTime = duration * percent;
-                        }
-                    });
-                }
-            });
+        if (!Array.isArray(data)) {
+          throw new Error("La API de canciones no devolvió una lista");
         }
 
+        allSongs = data;
+        aplicarFiltros();
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = `
+          <div class="admin-empty" style="grid-column:1/-1;">
+            Error cargando las canciones desde el servidor.
+            Cuando tengas listo el endpoint <code>/api/canciones</code>, se mostrarán aquí.
+          </div>
+        `;
+        countEl.textContent = "";
+      }
+    }
 
-        // Buscador
-        searchInput.addEventListener("input", aplicarFiltros);
+    // === PLAYER CUSTOM BEEF MUSIC ===
+    function inicializarReproductores() {
+      const players = document.querySelectorAll(".bm-player");
+      const allAudios = [];
 
-        // Filtro por estilo (píldoras)
-        filterPills.forEach((btn) => {
-            btn.addEventListener("click", () => {
-                filterPills.forEach((b) => b.classList.remove("active"));
-                btn.classList.add("active");
+      players.forEach((player) => {
+        const audio = player.querySelector(".bm-audio");
+        if (!audio) return;
 
-                currentStyleFilter = btn.getAttribute("data-style") || "";
-                aplicarFiltros();
+        allAudios.push(audio);
+
+        const playBtn = player.querySelector(".bm-play-btn");
+        const timeline = player.querySelector(".bm-timeline");
+        const progressBar = player.querySelector(".bm-timeline-progress");
+        const currentTimeEl = player.querySelector(".bm-time.bm-current");
+        const durationEl = player.querySelector(".bm-time.bm-duration");
+
+        function formatTime(sec) {
+          if (!sec || isNaN(sec)) return "0:00";
+          const total = Math.floor(sec);
+          const minutes = Math.floor(total / 60);
+          const seconds = total % 60;
+          return minutes + ":" + String(seconds).padStart(2, "0");
+        }
+
+        audio.addEventListener("loadedmetadata", () => {
+          durationEl.textContent = formatTime(audio.duration);
+        });
+
+        audio.addEventListener("timeupdate", () => {
+          const current = audio.currentTime || 0;
+          const duration = audio.duration || 0;
+          currentTimeEl.textContent = formatTime(current);
+
+          const percent = duration ? (current / duration) * 100 : 0;
+          progressBar.style.width = percent + "%";
+        });
+
+        audio.addEventListener("ended", () => {
+          player.classList.remove("is-playing");
+          progressBar.style.width = "0%";
+          currentTimeEl.textContent = "0:00";
+        });
+
+        playBtn.addEventListener("click", () => {
+          if (audio.paused) {
+            // Pausar cualquier otro audio
+            allAudios.forEach((a) => {
+              if (a !== audio) {
+                a.pause();
+                const p = a.closest(".bm-player");
+                if (p) p.classList.remove("is-playing");
+              }
             });
+
+            audio.play();
+            player.classList.add("is-playing");
+          } else {
+            audio.pause();
+            player.classList.remove("is-playing");
+          }
         });
 
-        // Orden (Recientes / Top Likes)
-        sortPills.forEach((btn) => {
-            btn.addEventListener("click", () => {
-                sortPills.forEach((b) => b.classList.remove("active"));
-                btn.classList.add("active");
+        if (timeline) {
+          timeline.addEventListener("click", (e) => {
+            const rect = timeline.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percent = clickX / rect.width;
+            const duration = audio.duration || 0;
 
-                currentSortMode = btn.getAttribute("data-sort") || "recientes";
-                aplicarFiltros();
-            });
-        });
-
-        // Votos (delegación de eventos)
-        grid.addEventListener("click", async (e) => {
-            const btn = e.target.closest(".vote-btn");
-            if (!btn) return;
-
-            const token = localStorage.getItem("beefmusic_user_token");
-            if (!token) {
-                alert("Necesitas iniciar sesión como usuario BeefMusic para votar canciones.");
-                return;
+            if (duration) {
+              audio.currentTime = duration * percent;
             }
+          });
+        }
+      });
+    }
 
-            const votesWrapper = btn.closest(".song-votes");
-            const songId = votesWrapper.getAttribute("data-id");
-            const tipo = btn.getAttribute("data-type"); // 'like' o 'dislike'
+    // Buscador
+    searchInput.addEventListener("input", aplicarFiltros);
 
-            btn.disabled = true;
+    // Filtro por estilo
+    filterPills.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filterPills.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
 
-            try {
-                const res = await fetch(API_URL + "/api/canciones/" + songId + "/vote", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + token,
-                    },
-                    body: JSON.stringify({ tipo }), // el backend se encarga de poner/quitar/cambiar
-                });
+        currentStyleFilter = btn.getAttribute("data-style") || "";
+        aplicarFiltros();
+      });
+    });
 
-                const json = await res.json();
+    // Orden (Recientes / Top Likes)
+    sortPills.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        sortPills.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
 
-                if (!res.ok) {
-                    console.error("Error votando:", json);
-                    alert(json.error || "No se pudo registrar el voto");
-                    btn.disabled = false;
-                    return;
-                }
+        currentSortMode = btn.getAttribute("data-sort") || "recientes";
+        aplicarFiltros();
+      });
+    });
 
-                // Actualizar contadores en la UI (likes/dislikes TOTALES)
-                const likeCountEl = votesWrapper.querySelector(".vote-btn.like .vote-count");
-                const dislikeCountEl = votesWrapper.querySelector(".vote-btn.dislike .vote-count");
+    // Votos
+    grid.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".vote-btn");
+      if (!btn) return;
 
-                if (likeCountEl && typeof json.likes === "number") {
-                    likeCountEl.textContent = json.likes;
-                }
-                if (dislikeCountEl && typeof json.dislikes === "number") {
-                    dislikeCountEl.textContent = json.dislikes;
-                }
+      const token = localStorage.getItem("beefmusic_user_token");
+      if (!token) {
+        alert("Necesitas iniciar sesión como usuario BeefMusic para votar canciones.");
+        return;
+      }
 
-                // Actualizar voto del usuario ('like', 'dislike' o null)
-                const newUserVote = json.userVote ?? null;
-                votesWrapper.setAttribute("data-user-vote", newUserVote || "");
+      const votesWrapper = btn.closest(".song-votes");
+      const songId = votesWrapper.getAttribute("data-id");
+      const tipo = btn.getAttribute("data-type"); // 'like' o 'dislike'
 
-                // Marcar / desmarcar botones
-                votesWrapper
-                    .querySelectorAll(".vote-btn")
-                    .forEach((b) => {
-                        const bType = b.getAttribute("data-type");
-                        if (newUserVote && bType === newUserVote) {
-                            b.classList.add("voted");
-                        } else {
-                            b.classList.remove("voted");
-                        }
-                    });
+      btn.disabled = true;
 
-                // Actualizar la línea de texto de totales, si existe
-                const hint = votesWrapper.parentElement.querySelector(".songs-vote-hint");
-                if (hint) {
-                    hint.textContent = `Likes totales: ${json.likes} · Dislikes totales: ${json.dislikes}`;
-                }
-
-                // Opcional: actualizar allSongs en memoria para que el orden "Top Likes" se refresque coherente
-                const songIndex = allSongs.findIndex((s) => String(s.id) === String(songId));
-                if (songIndex !== -1) {
-                    allSongs[songIndex].likes = json.likes;
-                    allSongs[songIndex].dislikes = json.dislikes;
-                }
-
-                // Reaplicar filtros y orden (por si estás en "Top Likes")
-                aplicarFiltros();
-            } catch (err) {
-                console.error(err);
-                alert("Error de conexión al votar la canción.");
-            } finally {
-                btn.disabled = false;
-            }
+      try {
+        const res = await fetch(API_URL + "/api/canciones/" + songId + "/vote", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+          body: JSON.stringify({ tipo }),
         });
 
-        // Carga inicial
-        cargarCanciones();
-    </script>
+        const json = await res.json();
+
+        if (!res.ok) {
+          console.error("Error votando:", json);
+          alert(json.error || "No se pudo registrar el voto");
+          btn.disabled = false;
+          return;
+        }
+
+        const likeCountEl = votesWrapper.querySelector(".vote-btn.like .vote-count");
+        const dislikeCountEl = votesWrapper.querySelector(".vote-btn.dislike .vote-count");
+
+        if (likeCountEl && typeof json.likes === "number") {
+          likeCountEl.textContent = json.likes;
+        }
+        if (dislikeCountEl && typeof json.dislikes === "number") {
+          dislikeCountEl.textContent = json.dislikes;
+        }
+
+        const newUserVote = json.userVote ?? null;
+        votesWrapper.setAttribute("data-user-vote", newUserVote || "");
+
+        votesWrapper
+          .querySelectorAll(".vote-btn")
+          .forEach((b) => {
+            const bType = b.getAttribute("data-type");
+            if (newUserVote && bType === newUserVote) {
+              b.classList.add("voted");
+            } else {
+              b.classList.remove("voted");
+            }
+          });
+
+        const hint = votesWrapper.parentElement.querySelector(".songs-vote-hint");
+        if (hint) {
+          hint.textContent = `Likes totales: ${json.likes} · Dislikes totales: ${json.dislikes}`;
+        }
+
+        const songIndex = allSongs.findIndex((s) => String(s.id) === String(songId));
+        if (songIndex !== -1) {
+          allSongs[songIndex].likes = json.likes;
+          allSongs[songIndex].dislikes = json.dislikes;
+        }
+
+        aplicarFiltros();
+      } catch (err) {
+        console.error(err);
+        alert("Error de conexión al votar la canción.");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    // Carga inicial
+    cargarCanciones();
+  </script>
 </body>
 </html>
