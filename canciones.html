@@ -286,35 +286,55 @@
                        placeholder="Ej: Código de Barrio, @user_404..." />
             </div>
 
-            <!-- Píldoras de filtro por estilo -->
-            <div class="songs-filter-pills" id="songs-filter-pills">
-                <button class="songs-filter-btn active" data-style="">
-                    Todos
-                </button>
-                <button class="songs-filter-btn" data-style="drill">
-                    Drill
-                </button>
-                <button class="songs-filter-btn" data-style="trap">
-                    Trap
-                </button>
-                <button class="songs-filter-btn" data-style="dembow">
-                    Dembow
-                </button>
-                <button class="songs-filter-btn" data-style="reggaeton">
-                    Reggaetón
-                </button>
-                <button class="songs-filter-btn" data-style="rap">
-                    Rap
-                </button>
-            </div>
-        </section>
+            <section class="songs-tools">
+                <!-- BUSCADOR -->
+                <div class="field" style="max-width:260px;flex:1;">
+                    <label for="songs-search">Buscar por título, usuario o estilo</label>
+                    <input id="songs-search"
+                           type="text"
+                           placeholder="Ej: Código de Barrio, @user_404, drill..." />
+                </div>
 
-        <!-- GRID DE CANCIONES -->
-        <section>
-            <div class="songs-grid" id="songs-grid">
-                <!-- Se rellena por JS -->
-            </div>
-        </section>
+                <!-- Píldoras de filtro por estilo -->
+                <div class="songs-filter-pills" id="songs-filter-pills">
+                    <button class="songs-filter-btn active" data-style="">
+                        Todos
+                    </button>
+                    <button class="songs-filter-btn" data-style="drill">
+                        Drill
+                    </button>
+                    <button class="songs-filter-btn" data-style="trap">
+                        Trap
+                    </button>
+                    <button class="songs-filter-btn" data-style="dembow">
+                        Dembow
+                    </button>
+                    <button class="songs-filter-btn" data-style="reggaeton">
+                        Reggaetón
+                    </button>
+                    <button class="songs-filter-btn" data-style="rap">
+                        Rap
+                    </button>
+                </div>
+
+                <!-- Píldoras de ORDEN (Recientes / Top Likes) -->
+                <div class="songs-filter-pills" id="songs-sort-pills">
+                    <button class="songs-filter-btn active" data-sort="recientes">
+                        Recientes
+                    </button>
+                    <button class="songs-filter-btn" data-sort="top">
+                        Top Likes
+                    </button>
+                </div>
+            </section>
+
+
+            <!-- GRID DE CANCIONES -->
+            <section>
+                <div class="songs-grid" id="songs-grid">
+                    <!-- Se rellena por JS -->
+                </div>
+            </section>
     </div>
 
     <script>
@@ -323,10 +343,14 @@
         const grid = document.getElementById("songs-grid");
         const countEl = document.getElementById("songs-count");
         const searchInput = document.getElementById("songs-search");
-        const filterPills = document.querySelectorAll(".songs-filter-btn");
+
+        // Píldoras de estilo y de orden
+        const filterPills = document.querySelectorAll("#songs-filter-pills .songs-filter-btn");
+        const sortPills = document.querySelectorAll("#songs-sort-pills .songs-filter-btn");
 
         let allSongs = [];
-        let currentStyleFilter = ""; // "" = todos
+        let currentStyleFilter = "";      // "" = todos
+        let currentSortMode = "recientes"; // 'recientes' | 'top'
 
         function crearCardCancion(song) {
             const titulo = song.titulo || song.title || "Tema sin título";
@@ -426,15 +450,20 @@
             const text = (searchInput.value || "").toLowerCase().trim();
             const estiloFiltro = (currentStyleFilter || "").toLowerCase();
 
+            // 1) Filtro por texto + estilo
             const filtradas = allSongs.filter((song) => {
                 const titulo = (song.titulo || song.title || "").toLowerCase();
                 const autor = (song.autor || song.requester || song.nick || "").toLowerCase();
                 const estilo = (song.estilo || song.style || "").toLowerCase();
+                const descripcion = (song.descripcion || song.descripcion_peticion || song.description || "").toLowerCase();
 
+                // Buscador más completo: título, autor, estilo y descripción
                 const pasaTexto =
                     !text ||
                     titulo.includes(text) ||
-                    autor.includes(text);
+                    autor.includes(text) ||
+                    estilo.includes(text) ||
+                    descripcion.includes(text);
 
                 const pasaEstilo =
                     !estiloFiltro || estilo.includes(estiloFiltro);
@@ -442,7 +471,30 @@
                 return pasaTexto && pasaEstilo;
             });
 
-            renderSongs(filtradas);
+            // 2) Ordenar según el modo seleccionado
+            let listOrdenada = [...filtradas];
+
+            if (currentSortMode === "top") {
+                // Top por likes (si empatan, por más recientes)
+                listOrdenada.sort((a, b) => {
+                    const likesA = a.likes ?? 0;
+                    const likesB = b.likes ?? 0;
+                    if (likesB !== likesA) return likesB - likesA;
+
+                    const dateA = a.created_at ? new Date(a.created_at) : 0;
+                    const dateB = b.created_at ? new Date(b.created_at) : 0;
+                    return dateB - dateA;
+                });
+            } else {
+                // Recientes por defecto (created_at descendente)
+                listOrdenada.sort((a, b) => {
+                    const dateA = a.created_at ? new Date(a.created_at) : 0;
+                    const dateB = b.created_at ? new Date(b.created_at) : 0;
+                    return dateB - dateA;
+                });
+            }
+
+            renderSongs(listOrdenada);
         }
 
         async function cargarCanciones() {
@@ -486,15 +538,27 @@
             }
         }
 
-        // Listeners de filtros
+        // Buscador
         searchInput.addEventListener("input", aplicarFiltros);
 
+        // Filtro por estilo (píldoras)
         filterPills.forEach((btn) => {
             btn.addEventListener("click", () => {
                 filterPills.forEach((b) => b.classList.remove("active"));
                 btn.classList.add("active");
 
                 currentStyleFilter = btn.getAttribute("data-style") || "";
+                aplicarFiltros();
+            });
+        });
+
+        // Orden (Recientes / Top Likes)
+        sortPills.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                sortPills.forEach((b) => b.classList.remove("active"));
+                btn.classList.add("active");
+
+                currentSortMode = btn.getAttribute("data-sort") || "recientes";
                 aplicarFiltros();
             });
         });
@@ -567,6 +631,16 @@
                 if (hint) {
                     hint.textContent = `Likes totales: ${json.likes} · Dislikes totales: ${json.dislikes}`;
                 }
+
+                // Opcional: actualizar allSongs en memoria para que el orden "Top Likes" se refresque coherente
+                const songIndex = allSongs.findIndex((s) => String(s.id) === String(songId));
+                if (songIndex !== -1) {
+                    allSongs[songIndex].likes = json.likes;
+                    allSongs[songIndex].dislikes = json.dislikes;
+                }
+
+                // Reaplicar filtros y orden (por si estás en "Top Likes")
+                aplicarFiltros();
             } catch (err) {
                 console.error(err);
                 alert("Error de conexión al votar la canción.");
