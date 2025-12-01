@@ -423,12 +423,12 @@ app.get("/api/canciones", async (req, res) => {
     }
 });
 
-// === VOTAR CANCIÓN (like / dislike, 1 voto por usuario) ===
+// === VOTAR CANCIÓN (like / dislike, 1 voto por usuario, posibilidad de quitar) ===
 app.post("/api/canciones/:id/vote", authUser, async (req, res) => {
     try {
         const { id } = req.params;
         const { tipo } = req.body; // 'like' o 'dislike'
-        const userId = req.user.userId;
+        const userId = req.user.userId; // viene del token (crearTokenUser)
 
         if (tipo !== "like" && tipo !== "dislike") {
             return res
@@ -469,7 +469,8 @@ app.post("/api/canciones/:id/vote", authUser, async (req, res) => {
                 .json({ error: "Error comprobando voto existente" });
         }
 
-        // 2) Insertar o actualizar voto
+        let userVoteResult = null;
+
         if (!existingVote) {
             // No había voto -> insert
             const { error: errorInsert } = await supabase
@@ -486,8 +487,10 @@ app.post("/api/canciones/:id/vote", authUser, async (req, res) => {
                     .status(500)
                     .json({ error: "Error guardando el voto" });
             }
+
+            userVoteResult = tipo;
         } else if (existingVote.tipo !== tipo) {
-            // Había voto distinto -> actualizar tipo
+            // Había voto distinto -> cambiar tipo
             const { error: errorUpdateVote } = await supabase
                 .from("votos_cancion")
                 .update({ tipo })
@@ -499,14 +502,26 @@ app.post("/api/canciones/:id/vote", authUser, async (req, res) => {
                     .status(500)
                     .json({ error: "Error actualizando el voto" });
             }
+
+            userVoteResult = tipo;
         } else {
-            // Ya había un voto igual -> no hacemos nada, devolvemos contadores
-            console.log(
-                `Usuario ${userId} ya tenía voto '${tipo}' en canción ${id}, no se cambia.`
-            );
+            // Ya había un voto igual -> QUITAR voto (toggle off)
+            const { error: errorDelete } = await supabase
+                .from("votos_cancion")
+                .delete()
+                .eq("id", existingVote.id);
+
+            if (errorDelete) {
+                console.error("Supabase error (delete voto):", errorDelete);
+                return res
+                    .status(500)
+                    .json({ error: "Error eliminando el voto" });
+            }
+
+            userVoteResult = null; // sin voto
         }
 
-        // 3) Recalcular likes/dislikes de esa canción
+        // 2) Recalcular likes/dislikes de esa canción
         const { data: votosSong, error: errorCounts } = await supabase
             .from("votos_cancion")
             .select("tipo")
@@ -531,7 +546,7 @@ app.post("/api/canciones/:id/vote", authUser, async (req, res) => {
             message: "Voto registrado",
             likes,
             dislikes,
-            userVote: tipo,
+            userVote: userVoteResult, // 'like', 'dislike' o null
         });
     } catch (err) {
         console.error("Error en POST /api/canciones/:id/vote:", err);
