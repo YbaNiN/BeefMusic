@@ -246,309 +246,335 @@
   </style>
 </head>
 <body>
-  <div class="songs-page">
-    <!-- HEADER SIMPLE -->
-    <header style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-      <div class="logo">
-        <div class="logo-mark"></div>
-        <span>BeefMusic</span>
-      </div>
-      <div class="header-actions">
-        <a href="index.html" class="btn btn-ghost">← Volver al inicio</a>
-      </div>
-    </header>
+    <div class="songs-page">
+        <!-- HEADER SIMPLE -->
+        <header style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+            <div class="logo">
+                <div class="logo-mark"></div>
+                <span>BeefMusic</span>
+            </div>
+            <div class="header-actions">
+                <a href="index.html" class="btn btn-ghost">← Volver al inicio</a>
+            </div>
+        </header>
 
-    <!-- TITULAR -->
-    <section class="songs-header-main">
-      <div>
-        <div class="section-kicker">Colección BeefMusic</div>
-        <h1>Canciones creadas desde las peticiones</h1>
-        <p>
-          Aquí se irán sumando los temas que vayáis pidiendo desde la web.
-          Cada canción muestra su título, el género y quién la pidió, la puedes
-          reproducir y votar con Me gusta / No me gusta.
-        </p>
-        <div class="songs-vote-hint">
-          Para votar necesitas haber iniciado sesión como usuario BeefMusic.
-        </div>
-      </div>
-      <div class="songs-count" id="songs-count">
-        Cargando canciones...
-      </div>
-    </section>
+        <!-- TITULAR -->
+        <section class="songs-header-main">
+            <div>
+                <div class="section-kicker">Colección BeefMusic</div>
+                <h1>Canciones creadas desde las peticiones</h1>
+                <p>
+                    Aquí se irán sumando los temas que vayáis pidiendo desde la web.
+                    Cada canción muestra su título, el género y quién la pidió, la puedes
+                    reproducir y votar con Me gusta / No me gusta.
+                </p>
+                <div class="songs-vote-hint">
+                    Para votar necesitas haber iniciado sesión como usuario BeefMusic.
+                </div>
+            </div>
+            <div class="songs-count" id="songs-count">
+                Cargando canciones...
+            </div>
+        </section>
 
-    <!-- BUSCADOR / FILTROS -->
-    <section class="songs-tools">
-      <div class="field" style="max-width:260px;flex:1;">
-        <label for="songs-search">Buscar por título o usuario</label>
-        <input
-          id="songs-search"
-          type="text"
-          placeholder="Ej: Código de Barrio, @user_404..."
-        />
-      </div>
-
-      <!-- Píldoras de filtro por estilo -->
-      <div class="songs-filter-pills" id="songs-filter-pills">
-        <button class="songs-filter-btn active" data-style="">
-          Todos
-        </button>
-        <button class="songs-filter-btn" data-style="drill">
-          Drill
-        </button>
-        <button class="songs-filter-btn" data-style="trap">
-          Trap
-        </button>
-        <button class="songs-filter-btn" data-style="dembow">
-          Dembow
-        </button>
-        <button class="songs-filter-btn" data-style="reggaeton">
-          Reggaetón
-        </button>
-        <button class="songs-filter-btn" data-style="rap">
-          Rap
-        </button>
-      </div>
-    </section>
-
-    <!-- GRID DE CANCIONES -->
-    <section>
-      <div class="songs-grid" id="songs-grid">
-        <!-- Se rellena por JS -->
-      </div>
-    </section>
-  </div>
-
-  <script>
-    const API_URL = "https://beefmusic-backend.onrender.com";
-
-    const grid = document.getElementById("songs-grid");
-    const countEl = document.getElementById("songs-count");
-    const searchInput = document.getElementById("songs-search");
-    const filterPills = document.querySelectorAll(".songs-filter-btn");
-
-    let allSongs = [];
-    let currentStyleFilter = ""; // "" = todos
-
-    function crearCardCancion(song) {
-      const titulo = song.titulo || song.title || "Tema sin título";
-      const estilo = song.estilo || song.style || "Sin género";
-      const duracion = song.duracion || song.duration || "";
-      const descripcion =
-        song.descripcion ||
-        song.descripcion_peticion ||
-        song.description ||
-        "";
-      const autor =
-        song.autor || song.requester || song.nick || "@anónimo";
-      const estado = song.estado || "publicada";
-      const urlAudio = song.url_audio || song.audio_url || "";
-      const likes = song.likes ?? 0;
-      const dislikes = song.dislikes ?? 0;
-
-      return `
-        <article class="song-card">
-          <div class="song-thumb">
-            <div class="song-wave"></div>
-          </div>
-          <div class="song-body">
-            <!-- TÍTULO DEL TEMA -->
-            <div class="song-title">${titulo}</div>
-
-            <!-- GÉNERO + USUARIO + DURACIÓN -->
-            <div class="song-meta">
-              <span class="song-badge">${estilo}</span>
-              <span class="song-req-author">${autor}</span>
-              ${duracion ? `<span>${duracion}</span>` : ""}
+        <!-- BUSCADOR / FILTROS -->
+        <section class="songs-tools">
+            <div class="field" style="max-width:260px;flex:1;">
+                <label for="songs-search">Buscar por título o usuario</label>
+                <input id="songs-search"
+                       type="text"
+                       placeholder="Ej: Código de Barrio, @user_404..." />
             </div>
 
-            <!-- DESCRIPCIÓN / RESUMEN -->
-            ${descripcion ? `<div class="song-req">${descripcion}</div>` : ""}
-
-            <!-- ESTADO -->
-            <div class="song-meta" style="margin-top:6px;">
-              <span class="song-badge">${estado}</span>
+            <!-- Píldoras de filtro por estilo -->
+            <div class="songs-filter-pills" id="songs-filter-pills">
+                <button class="songs-filter-btn active" data-style="">
+                    Todos
+                </button>
+                <button class="songs-filter-btn" data-style="drill">
+                    Drill
+                </button>
+                <button class="songs-filter-btn" data-style="trap">
+                    Trap
+                </button>
+                <button class="songs-filter-btn" data-style="dembow">
+                    Dembow
+                </button>
+                <button class="songs-filter-btn" data-style="reggaeton">
+                    Reggaetón
+                </button>
+                <button class="songs-filter-btn" data-style="rap">
+                    Rap
+                </button>
             </div>
+        </section>
 
-            <!-- AUDIO -->
-            ${
-              urlAudio
-                ? `
-              <div class="song-player">
-                <audio controls preload="none" class="song-audio">
-                  <source src="${urlAudio}" type="audio/mpeg" />
-                  Tu navegador no soporta audio HTML5.
-                </audio>
+        <!-- GRID DE CANCIONES -->
+        <section>
+            <div class="songs-grid" id="songs-grid">
+                <!-- Se rellena por JS -->
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const API_URL = "https://beefmusic-backend.onrender.com";
+
+        const grid = document.getElementById("songs-grid");
+        const countEl = document.getElementById("songs-count");
+        const searchInput = document.getElementById("songs-search");
+        const filterPills = document.querySelectorAll(".songs-filter-btn");
+
+        let allSongs = [];
+        let currentStyleFilter = ""; // "" = todos
+
+        function crearCardCancion(song) {
+            const titulo = song.titulo || song.title || "Tema sin título";
+            const estilo = song.estilo || song.style || "Sin género";
+            const duracion = song.duracion || song.duration || "";
+            const descripcion =
+                song.descripcion ||
+                song.descripcion_peticion ||
+                song.description ||
+                "";
+            const autor =
+                song.autor || song.requester || song.nick || "@anónimo";
+            const estado = song.estado || "publicada";
+            const urlAudio = song.url_audio || song.audio_url || "";
+
+            const likes = song.likes ?? 0;
+            const dislikes = song.dislikes ?? 0;
+            // Voto del usuario autenticado, si el backend lo manda
+            const userVote = song.userVote || song.votoUsuario || "";
+
+            return `
+          <article class="song-card">
+            <div class="song-thumb">
+              <div class="song-wave"></div>
+            </div>
+            <div class="song-body">
+              <!-- TÍTULO DEL TEMA -->
+              <div class="song-title">${titulo}</div>
+
+              <!-- GÉNERO + USUARIO + DURACIÓN -->
+              <div class="song-meta">
+                <span class="song-badge">${estilo}</span>
+                <span class="song-req-author">${autor}</span>
+                ${duracion ? `<span>${duracion}</span>` : ""}
               </div>
-            `
-                : `
-              <div class="song-player song-player--noaudio">
-                El audio de este tema todavía no está disponible.
+
+              <!-- DESCRIPCIÓN / RESUMEN -->
+              ${descripcion ? `<div class="song-req">${descripcion}</div>` : ""}
+
+              <!-- ESTADO -->
+              <div class="song-meta" style="margin-top:6px;">
+                <span class="song-badge">${estado}</span>
               </div>
-            `
+
+              <!-- AUDIO -->
+              ${urlAudio
+                    ? `
+                <div class="song-player">
+                  <audio controls preload="none" class="song-audio">
+                    <source src="${urlAudio}" type="audio/mpeg" />
+                    Tu navegador no soporta audio HTML5.
+                  </audio>
+                </div>
+              `
+                    : `
+                <div class="song-player song-player--noaudio">
+                  El audio de este tema todavía no está disponible.
+                </div>
+              `
+                }
+
+              <!-- VOTOS -->
+              <div class="song-votes"
+                   data-id="${song.id}"
+                   data-user-vote="${userVote}">
+                <button class="vote-btn like ${userVote === "like" ? "voted" : ""}" data-type="like">
+                  👍 <span class="vote-count">${likes}</span>
+                </button>
+                <button class="vote-btn dislike ${userVote === "dislike" ? "voted" : ""}" data-type="dislike">
+                  👎 <span class="vote-count">${dislikes}</span>
+                </button>
+              </div>
+            </div>
+          </article>
+        `;
+        }
+
+        function renderSongs(list) {
+            if (!list || list.length === 0) {
+                grid.innerHTML = `
+            <div class="admin-empty" style="grid-column:1/-1;">
+              Todavía no hay canciones publicadas. Cuando las subas desde tu backend, se verán aquí.
+            </div>
+          `;
+                countEl.textContent = "";
+                return;
             }
 
-            <!-- VOTOS -->
-            <div class="song-votes" data-id="${song.id}">
-              <button class="vote-btn like" data-type="like">
-                👍 <span class="vote-count">${likes}</span>
-              </button>
-              <button class="vote-btn dislike" data-type="dislike">
-                👎 <span class="vote-count">${dislikes}</span>
-              </button>
+            grid.innerHTML = list.map(crearCardCancion).join("");
+            countEl.textContent = list.length + " canciones";
+        }
+
+        function aplicarFiltros() {
+            const text = (searchInput.value || "").toLowerCase().trim();
+            const estiloFiltro = (currentStyleFilter || "").toLowerCase();
+
+            const filtradas = allSongs.filter((song) => {
+                const titulo = (song.titulo || song.title || "").toLowerCase();
+                const autor = (song.autor || song.requester || song.nick || "").toLowerCase();
+                const estilo = (song.estilo || song.style || "").toLowerCase();
+
+                const pasaTexto =
+                    !text ||
+                    titulo.includes(text) ||
+                    autor.includes(text);
+
+                const pasaEstilo =
+                    !estiloFiltro || estilo.includes(estiloFiltro);
+
+                return pasaTexto && pasaEstilo;
+            });
+
+            renderSongs(filtradas);
+        }
+
+        async function cargarCanciones() {
+            grid.innerHTML = `
+          <div class="admin-empty" style="grid-column:1/-1;">
+            Cargando canciones...
+          </div>
+        `;
+            countEl.textContent = "Cargando canciones...";
+
+            try {
+                const token = localStorage.getItem("beefmusic_user_token");
+
+                const res = await fetch(API_URL + "/api/canciones", {
+                    headers: token
+                        ? { Authorization: "Bearer " + token }
+                        : {}
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Error al cargar canciones");
+                }
+
+                if (!Array.isArray(data)) {
+                    throw new Error("La API de canciones no devolvió una lista");
+                }
+
+                allSongs = data;
+                aplicarFiltros();
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = `
+            <div class="admin-empty" style="grid-column:1/-1;">
+              Error cargando las canciones desde el servidor.
+              Cuando tengas listo el endpoint <code>/api/canciones</code>, se mostrarán aquí.
             </div>
-          </div>
-        </article>
-      `;
-    }
-
-    function renderSongs(list) {
-      if (!list || list.length === 0) {
-        grid.innerHTML = `
-          <div class="admin-empty" style="grid-column:1/-1;">
-            Todavía no hay canciones publicadas. Cuando las subas desde tu backend, se verán aquí.
-          </div>
-        `;
-        countEl.textContent = "";
-        return;
-      }
-
-      grid.innerHTML = list.map(crearCardCancion).join("");
-      countEl.textContent = list.length + " canciones";
-    }
-
-    function aplicarFiltros() {
-      const text = (searchInput.value || "").toLowerCase().trim();
-      const estiloFiltro = (currentStyleFilter || "").toLowerCase();
-
-      const filtradas = allSongs.filter((song) => {
-        const titulo = (song.titulo || song.title || "").toLowerCase();
-        const autor = (song.autor || song.requester || song.nick || "").toLowerCase();
-        const estilo = (song.estilo || song.style || "").toLowerCase();
-
-        const pasaTexto =
-          !text ||
-          titulo.includes(text) ||
-          autor.includes(text);
-
-        const pasaEstilo =
-          !estiloFiltro || estilo.includes(estiloFiltro);
-
-        return pasaTexto && pasaEstilo;
-      });
-
-      renderSongs(filtradas);
-    }
-
-    async function cargarCanciones() {
-      grid.innerHTML = `
-        <div class="admin-empty" style="grid-column:1/-1;">
-          Cargando canciones...
-        </div>
-      `;
-      countEl.textContent = "Cargando canciones...";
-
-      try {
-        const res = await fetch(API_URL + "/api/canciones");
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error || "Error al cargar canciones");
+          `;
+                countEl.textContent = "";
+            }
         }
 
-        if (!Array.isArray(data)) {
-          throw new Error("La API de canciones no devolvió una lista");
-        }
+        // Listeners de filtros
+        searchInput.addEventListener("input", aplicarFiltros);
 
-        allSongs = data;
-        aplicarFiltros();
-      } catch (err) {
-        console.error(err);
-        grid.innerHTML = `
-          <div class="admin-empty" style="grid-column:1/-1;">
-            Error cargando las canciones desde el servidor.
-            Cuando tengas listo el endpoint <code>/api/canciones</code>, se mostrarán aquí.
-          </div>
-        `;
-        countEl.textContent = "";
-      }
-    }
+        filterPills.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                filterPills.forEach((b) => b.classList.remove("active"));
+                btn.classList.add("active");
 
-    // Listeners de filtros
-    searchInput.addEventListener("input", aplicarFiltros);
-
-    filterPills.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        filterPills.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        currentStyleFilter = btn.getAttribute("data-style") || "";
-        aplicarFiltros();
-      });
-    });
-
-    // Votos (delegación de eventos)
-    grid.addEventListener("click", async (e) => {
-      const btn = e.target.closest(".vote-btn");
-      if (!btn) return;
-
-      const token = localStorage.getItem("beefmusic_user_token");
-      if (!token) {
-        alert("Necesitas iniciar sesión como usuario BeefMusic para votar canciones.");
-        return;
-      }
-
-      const votesWrapper = btn.closest(".song-votes");
-      const songId = votesWrapper.getAttribute("data-id");
-      const tipo = btn.getAttribute("data-type"); // 'like' o 'dislike'
-
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(API_URL + "/api/canciones/" + songId + "/vote", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
-          },
-          body: JSON.stringify({ tipo }),
+                currentStyleFilter = btn.getAttribute("data-style") || "";
+                aplicarFiltros();
+            });
         });
 
-        const json = await res.json();
+        // Votos (delegación de eventos)
+        grid.addEventListener("click", async (e) => {
+            const btn = e.target.closest(".vote-btn");
+            if (!btn) return;
 
-        if (!res.ok) {
-          console.error("Error votando:", json);
-          alert(json.error || "No se pudo registrar el voto");
-          btn.disabled = false;
-          return;
-        }
+            const token = localStorage.getItem("beefmusic_user_token");
+            if (!token) {
+                alert("Necesitas iniciar sesión como usuario BeefMusic para votar canciones.");
+                return;
+            }
 
-        // Actualizar contadores en la UI
-        const likeBtn = votesWrapper.querySelector(".vote-btn.like .vote-count");
-        const dislikeBtn = votesWrapper.querySelector(".vote-btn.dislike .vote-count");
+            const votesWrapper = btn.closest(".song-votes");
+            const songId = votesWrapper.getAttribute("data-id");
+            const tipo = btn.getAttribute("data-type"); // 'like' o 'dislike'
 
-        if (likeBtn && typeof json.likes === "number") {
-          likeBtn.textContent = json.likes;
-        }
-        if (dislikeBtn && typeof json.dislikes === "number") {
-          dislikeBtn.textContent = json.dislikes;
-        }
+            const currentUserVote = votesWrapper.getAttribute("data-user-vote") || "";
 
-        // Marcar el botón pulsado (no bloqueamos el otro, sólo efecto visual)
-        votesWrapper
-          .querySelectorAll(".vote-btn")
-          .forEach((b) => b.classList.remove("voted"));
-        btn.classList.add("voted");
-      } catch (err) {
-        console.error(err);
-        alert("Error de conexión al votar la canción.");
-      } finally {
-        btn.disabled = false;
-      }
-    });
+            // Si ya tiene ese mismo voto, no hacemos nada (no puede acumular likes/dislikes)
+            if (currentUserVote === tipo) {
+                return;
+            }
 
-    // Carga inicial
-    cargarCanciones();
-  </script>
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(API_URL + "/api/canciones/" + songId + "/vote", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + token,
+                    },
+                    body: JSON.stringify({ tipo }), // el backend se encarga de cambiar like<->dislike
+                });
+
+                const json = await res.json();
+
+                if (!res.ok) {
+                    console.error("Error votando:", json);
+                    alert(json.error || "No se pudo registrar el voto");
+                    btn.disabled = false;
+                    return;
+                }
+
+                // Actualizar contadores en la UI
+                const likeCountEl = votesWrapper.querySelector(".vote-btn.like .vote-count");
+                const dislikeCountEl = votesWrapper.querySelector(".vote-btn.dislike .vote-count");
+
+                if (likeCountEl && typeof json.likes === "number") {
+                    likeCountEl.textContent = json.likes;
+                }
+                if (dislikeCountEl && typeof json.dislikes === "number") {
+                    dislikeCountEl.textContent = json.dislikes;
+                }
+
+                // Actualizar voto del usuario
+                const newUserVote = json.userVote || tipo; // si el backend devuelve userVote, mejor
+                votesWrapper.setAttribute("data-user-vote", newUserVote);
+
+                // Marcar el botón pulsado, desmarcar el otro
+                votesWrapper
+                    .querySelectorAll(".vote-btn")
+                    .forEach((b) => {
+                        const bType = b.getAttribute("data-type");
+                        if (bType === newUserVote) {
+                            b.classList.add("voted");
+                        } else {
+                            b.classList.remove("voted");
+                        }
+                    });
+            } catch (err) {
+                console.error(err);
+                alert("Error de conexión al votar la canción.");
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // Carga inicial
+        cargarCanciones();
+    </script>
 </body>
 </html>
