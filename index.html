@@ -8,6 +8,293 @@
     <!-- Fuente futurista y limpia -->
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+
+    <style>
+        /* LAYOUT GENERAL */
+        .page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 20px 80px;
+        }
+
+        /* HEADER CON BOTONES Y USER */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-right: auto;
+        }
+
+        .user-profile-text {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.8rem;
+        }
+
+        .user-profile-label {
+            opacity: 0.7;
+        }
+
+        .user-profile-name {
+            font-weight: 500;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* HERO */
+        .hero {
+            display: flex;
+            gap: 32px;
+            align-items: stretch;
+            margin-bottom: 56px;
+        }
+
+        .hero-left,
+        .hero-right {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 18px 0;
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .hero-meta-item {
+            min-width: 220px;
+        }
+
+        /* GRID SECCIONES */
+        .section {
+            margin-bottom: 56px;
+        }
+
+        .section-header {
+            max-width: 720px;
+            margin-bottom: 24px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 18px;
+        }
+
+        .songs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .song-card {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+        }
+
+        .song-thumb {
+            flex-shrink: 0;
+            width: 60px;
+        }
+
+        .song-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* STATS */
+        .stats-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        /* DISCORD CTA reutiliza .hero-actions */
+
+        /* FOOTER */
+        footer {
+            margin-top: 40px;
+            padding-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* MODALES */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none; /* se pasa a flex desde JS */
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 50;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .modal-status {
+            font-size: 0.8rem;
+            opacity: 0.85;
+        }
+
+        /* BREAKPOINTS */
+
+        @media (max-width: 960px) {
+            .hero {
+                flex-direction: column;
+            }
+
+            .hero-right {
+                order: -1; /* visual arriba si quieres, quita esta línea si no te mola */
+            }
+
+            .hero-meta {
+                flex-direction: column;
+            }
+
+            .stats-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page {
+                padding: 20px 16px 60px;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-actions .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .user-profile {
+                margin-right: 0;
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .song-card {
+                flex-direction: column;
+            }
+
+            .song-thumb {
+                width: 100%;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .hero-actions .btn {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page {
+                padding: 16px 12px 48px;
+            }
+
+            .hero-title {
+                font-size: 2.2rem;
+            }
+
+            .section-header {
+                margin-bottom: 18px;
+            }
+
+            .modal {
+                max-width: 100%;
+                border-radius: 16px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="page">
