@@ -147,51 +147,110 @@
 
       /* Player de audio – estilo BeefMusic */
       .song-player {
-          margin-top: 10px;
-          padding: 2px;
-          border-radius: 999px;
-          background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
-          box-shadow: 0 10px 30px rgba(255, 39, 87, 0.35);
+          margin-top: 12px;
       }
 
-          .song-player audio {
-              width: 100%;
-              outline: none;
-              border-radius: 999px;
-              background: rgba(5, 5, 12, 0.95);
+      /* Contenedor principal del player custom */
+      .bm-player {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 14px;
+          border-radius: 18px;
+          background: radial-gradient(circle at top left, rgba(255, 39, 87, 0.28), transparent 55%), radial-gradient(circle at bottom right, rgba(160, 54, 255, 0.28), transparent 55%), rgba(5, 5, 12, 0.96);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 18px 45px rgba(0, 0, 0, 0.9);
+      }
+
+      /* Ocultamos los controles nativos, usamos el audio solo como motor */
+      .bm-audio {
+          display: none;
+      }
+
+      /* Botón play / pausa */
+      .bm-play-btn {
+          flex-shrink: 0;
+          width: 40px;
+          height: 40px;
+          border-radius: 999px;
+          border: none;
+          cursor: pointer;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+          box-shadow: 0 0 18px rgba(255, 39, 87, 0.85);
+          transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+      }
+
+          .bm-play-btn:hover {
+              transform: translateY(-1px) scale(1.03);
+              filter: brightness(1.1);
           }
 
-              /* Estilos específicos para navegadores WebKit (Chrome, Edge, Safari) */
-              .song-player audio::-webkit-media-controls-panel {
-                  background: transparent;
-                  border-radius: 999px;
-              }
+          .bm-play-btn:active {
+              transform: translateY(0) scale(0.97);
+              box-shadow: 0 0 10px rgba(255, 39, 87, 0.5);
+          }
 
-              /* Botón de play */
-              .song-player audio::-webkit-media-controls-play-button {
-                  background: rgba(255, 255, 255, 0.08);
-                  border-radius: 999px;
-              }
+      /* Iconos play / pause */
+      .bm-play-icon,
+      .bm-pause-icon {
+          font-size: 16px;
+          line-height: 1;
+          color: #ffffff;
+      }
 
-                  .song-player audio::-webkit-media-controls-play-button:hover {
-                      background: rgba(255, 255, 255, 0.18);
-                  }
+      .bm-pause-icon {
+          display: none;
+      }
 
-              /* Barra de progreso */
-              .song-player audio::-webkit-media-controls-timeline {
-                  border-radius: 999px;
-                  background: rgba(255, 255, 255, 0.06);
-              }
+      /* Cuando está reproduciendo, intercambiamos iconos */
+      .bm-player.is-playing .bm-play-icon {
+          display: none;
+      }
 
-                  /* Parte reproducida de la barra */
-                  .song-player audio::-webkit-media-controls-timeline::-webkit-media-controls-played-track {
-                      background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
-                  }
+      .bm-player.is-playing .bm-pause-icon {
+          display: inline;
+      }
 
-                  /* Parte no reproducida */
-                  .song-player audio::-webkit-media-controls-timeline::-webkit-media-controls-unplayed-track {
-                      background: transparent;
-                  }
+      .bm-player-main {
+          flex: 1;
+          min-width: 0;
+      }
+
+      /* Tiempos (actual / duración) */
+      .bm-time-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 4px;
+          font-size: 0.75rem;
+          color: var(--fg-muted);
+      }
+
+      .bm-time {
+          font-variant-numeric: tabular-nums;
+      }
+
+      /* Barra de progreso */
+      .bm-timeline {
+          position: relative;
+          height: 6px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.08);
+          overflow: hidden;
+          cursor: pointer;
+      }
+
+      /* Progreso reproducido */
+      .bm-timeline-progress {
+          position: absolute;
+          inset: 0;
+          width: 0%;
+          background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+          box-shadow: 0 0 12px rgba(255, 39, 87, 0.7);
+          transition: width 0.08s linear;
+      }
 
     /* Votos (Me gusta / No me gusta) */
     .song-votes {
@@ -423,23 +482,41 @@
                 <span class="song-badge">${estado}</span>
               </div>
 
-              <!-- AUDIO -->
               ${urlAudio
                     ? `
-                <div class="song-player">
-                  <audio controls preload="none" class="song-audio">
-                    <source src="${urlAudio}" type="audio/mpeg" />
-                    Tu navegador no soporta audio HTML5.
-                  </audio>
-                </div>
-              `
-                    : `
-                <div class="song-player song-player--noaudio">
-                  El audio de este tema todavía no está disponible.
-                </div>
-              `
-                }
+    <div class="song-player">
+      <div class="bm-player">
+        <audio preload="none" class="bm-audio">
+          <source src="${urlAudio}" type="audio/mpeg" />
+          Tu navegador no soporta audio HTML5.
+        </audio>
 
+        <button
+          class="bm-play-btn"
+          type="button"
+          aria-label="Reproducir / Pausar">
+          <span class="bm-play-icon">▶</span>
+          <span class="bm-pause-icon">❚❚</span>
+        </button>
+
+        <div class="bm-player-main">
+          <div class="bm-time-row">
+            <span class="bm-time bm-current">0:00</span>
+            <span class="bm-time bm-duration">0:00</span>
+          </div>
+          <div class="bm-timeline">
+            <div class="bm-timeline-progress"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+                    : `
+    <div class="song-player song-player--noaudio">
+      El audio de este tema todavía no está disponible.
+    </div>
+  `
+}
               <!-- VOTOS -->
               <div class="song-votes"
                    data-id="${song.id}"
@@ -462,16 +539,19 @@
         function renderSongs(list) {
             if (!list || list.length === 0) {
                 grid.innerHTML = `
-            <div class="admin-empty" style="grid-column:1/-1;">
-              Todavía no hay canciones publicadas. Cuando las subas desde tu backend, se verán aquí.
-            </div>
-          `;
+      <div class="admin-empty" style="grid-column:1/-1;">
+        Todavía no hay canciones publicadas. Cuando las subas desde tu backend, se verán aquí.
+      </div>
+    `;
                 countEl.textContent = "";
                 return;
             }
 
             grid.innerHTML = list.map(crearCardCancion).join("");
             countEl.textContent = list.length + " canciones";
+
+            // Inicializar players custom después de pintar el HTML
+            inicializarReproductores();
         }
 
         function aplicarFiltros() {
@@ -565,6 +645,90 @@
                 countEl.textContent = "";
             }
         }
+
+        // === PLAYER CUSTOM BEEF MUSIC ===
+        function inicializarReproductores() {
+            const players = document.querySelectorAll(".bm-player");
+            const allAudios = [];
+
+            players.forEach((player) => {
+                const audio = player.querySelector(".bm-audio");
+                if (!audio) return;
+
+                allAudios.push(audio);
+
+                const playBtn = player.querySelector(".bm-play-btn");
+                const timeline = player.querySelector(".bm-timeline");
+                const progressBar = player.querySelector(".bm-timeline-progress");
+                const currentTimeEl = player.querySelector(".bm-time.bm-current");
+                const durationEl = player.querySelector(".bm-time.bm-duration");
+
+                function formatTime(sec) {
+                    if (!sec || isNaN(sec)) return "0:00";
+                    const total = Math.floor(sec);
+                    const minutes = Math.floor(total / 60);
+                    const seconds = total % 60;
+                    return minutes + ":" + String(seconds).padStart(2, "0");
+                }
+
+                // Duración al cargar metadata
+                audio.addEventListener("loadedmetadata", () => {
+                    durationEl.textContent = formatTime(audio.duration);
+                });
+
+                // Actualizar barra y tiempo actual
+                audio.addEventListener("timeupdate", () => {
+                    const current = audio.currentTime || 0;
+                    const duration = audio.duration || 0;
+                    currentTimeEl.textContent = formatTime(current);
+
+                    const percent = duration ? (current / duration) * 100 : 0;
+                    progressBar.style.width = percent + "%";
+                });
+
+                // Cuando termina, reseteamos
+                audio.addEventListener("ended", () => {
+                    player.classList.remove("is-playing");
+                    progressBar.style.width = "0%";
+                    currentTimeEl.textContent = "0:00";
+                });
+
+                // Botón play/pause
+                playBtn.addEventListener("click", () => {
+                    if (audio.paused) {
+                        // Pausar cualquier otro audio que esté sonando
+                        allAudios.forEach((a) => {
+                            if (a !== audio) {
+                                a.pause();
+                                const p = a.closest(".bm-player");
+                                if (p) p.classList.remove("is-playing");
+                            }
+                        });
+
+                        audio.play();
+                        player.classList.add("is-playing");
+                    } else {
+                        audio.pause();
+                        player.classList.remove("is-playing");
+                    }
+                });
+
+                // Click en la barra para saltar en el tiempo
+                if (timeline) {
+                    timeline.addEventListener("click", (e) => {
+                        const rect = timeline.getBoundingClientRect();
+                        const clickX = e.clientX - rect.left;
+                        const percent = clickX / rect.width;
+                        const duration = audio.duration || 0;
+
+                        if (duration) {
+                            audio.currentTime = duration * percent;
+                        }
+                    });
+                }
+            });
+        }
+
 
         // Buscador
         searchInput.addEventListener("input", aplicarFiltros);
