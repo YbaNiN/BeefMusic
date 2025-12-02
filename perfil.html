@@ -76,59 +76,62 @@
                     background: radial-gradient(circle at top left, rgba(139, 92, 246, 0.45), rgba(15, 23, 42, 0.9));
                 }
 
-        /* CONTENEDOR HEADER PERFIL (CARD GRANDE) */
+        /* CONTENEDOR HEADER PERFIL (CARD GRANDE, CUADRADA) */
         .sound-profile-header-card {
-            margin: 24px 0 26px;
-            padding: 16px 24px 26px;
-            border-radius: 0; /* <-- antes 32px */
-            border: 1px solid rgba(148, 163, 184, 0.18);
-            background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9)), linear-gradient(120deg, rgba(79, 70, 229, 0.2), rgba(236, 72, 153, 0.08));
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
-            overflow: visible;
+            margin: 24px 0 30px;
+            padding: 24px 28px 22px;
+            border-radius: 0; /* cuadrado total */
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.95)), linear-gradient(120deg, rgba(79, 70, 229, 0.20), rgba(236, 72, 153, 0.10));
+            box-shadow: 0 22px 55px rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            gap: 18px; /* espacio entre título+texto y las pills */
         }
 
         @media (max-width: 640px) {
             .sound-profile-header-card {
-                padding: 14px 16px 22px;
-                border-radius: 0; /* <-- antes 24px */
+                padding: 20px 18px 18px;
+                margin: 20px 0 24px;
             }
         }
 
         /* HEADER PERFIL SONORO (dentro de la card) */
         .sound-profile-header {
-            margin: 8px 0 14px; /* más separación del borde de la card */
+            margin: 0; /* la separación la maneja la card con gap */
         }
 
         .sound-profile-header-main {
             display: flex;
             flex-direction: column;
-            gap: 10px; /* más espacio entre título, tagline y estado */
+            gap: 10px; /* espacio entre fila de título, tagline y estado */
         }
 
         .sound-profile-title-row {
             display: flex;
             flex-wrap: wrap;
             align-items: baseline;
-            gap: 10px;
-            margin-bottom: 2px; /* un pelín de aire bajo la fila del título */
+            gap: 12px;
+            margin-bottom: 2px;
         }
 
         .sound-profile-header-main h1 {
             font-size: 2rem;
             margin: 0;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.10em;
             text-transform: uppercase;
         }
 
         .sound-profile-username {
             font-size: 0.95rem;
-            opacity: 0.8;
+            opacity: 0.85;
         }
 
         .sound-profile-tagline {
             font-size: 0.95rem;
-            margin: 2px 0 0;
-            line-height: 1.5; /* texto más respirado */
+            margin: 0;
+            margin-top: 4px;
+            line-height: 1.6; /* más respiración */
             color: #b7b7ff;
             max-width: 100%;
         }
@@ -136,8 +139,8 @@
         /* ESTADO (texto pequeño bajo la tagline) */
         .profile-status {
             font-size: 0.85rem;
-            opacity: 0.8;
-            margin-top: 4px;
+            opacity: 0.85;
+            margin-top: 6px; /* separación clara con la tagline */
         }
 
             .profile-status.error {
@@ -152,21 +155,21 @@
         .sound-profile-status-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin: 14px 0 0; /* un pelín más de separación respecto al texto */
+            gap: 12px;
+            margin: 0; /* ya tenemos gap en la card */
         }
 
         .sound-profile-pill {
-            padding: 7px 14px;
+            padding: 8px 16px;
             border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             font-size: 0.8rem;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            background: linear-gradient(120deg, rgba(147, 51, 234, 0.22), rgba(244, 63, 94, 0.26));
+            gap: 8px;
+            background: linear-gradient(120deg, rgba(147, 51, 234, 0.18), rgba(244, 63, 94, 0.22));
             backdrop-filter: blur(10px);
-            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.75); /* sombra visible dentro de la card */
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.7);
             max-width: 100%;
         }
 
@@ -176,12 +179,13 @@
 
         @media (max-width: 600px) {
             .sound-profile-status-row {
-                flex-direction: column;
-                align-items: stretch;
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: flex-start;
             }
 
                 .sound-profile-status-row .sound-profile-pill {
-                    justify-content: space-between;
+                    justify-content: flex-start;
                 }
         }
 
