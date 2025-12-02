@@ -736,14 +736,15 @@ function normalizarGenero(raw) {
         rap: "Rap",
         reggaeton: "Reggaetón",
         pop: "Pop",
-        boom bap: "Boom Bap",
-        reggaeton_dembow: "Reggaetón / Dembow",
+        "boom bap": "Boom Bap",       
+        "reggaeton_dembow": "Reggaetón / Dembow",
     };
 
     const label = mapa[base] || (base.charAt(0).toUpperCase() + base.slice(1));
 
     return { key: base, label };
 }
+
 
 // === PERFIL SONORO DEL USUARIO (USER) ===
 app.get("/api/sound-profile", authUser, async (req, res) => {
