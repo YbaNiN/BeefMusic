@@ -41,9 +41,11 @@
         }
 
         .site-logo-img {
-            height: 32px;
+            height: 40px; /* un poco más grande para que luzca el gif */
             width: auto;
             display: block;
+            border-radius: 10px;
+            box-shadow: 0 0 18px rgba(236, 72, 153, 0.4);
         }
 
         .site-nav {
@@ -57,48 +59,66 @@
             .site-nav a {
                 text-decoration: none;
                 color: inherit;
-                padding: 4px 8px;
+                padding: 6px 10px;
                 border-radius: 999px;
                 border: 1px solid transparent;
+                transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
             }
 
-                .site-nav a.active {
+                .site-nav a:hover {
+                    opacity: 1;
                     border-color: rgba(255, 255, 255, 0.18);
                     background: rgba(0, 0, 0, 0.35);
                 }
 
+                .site-nav a.active {
+                    border-color: rgba(255, 255, 255, 0.22);
+                    background: radial-gradient(circle at top left, rgba(139, 92, 246, 0.45), rgba(15, 23, 42, 0.9));
+                }
+
         /* HEADER PERFIL SONORO */
         .sound-profile-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            gap: 16px;
-            flex-wrap: wrap;
-            margin: 24px 0 28px;
+            margin: 24px 0 10px;
         }
 
-        .sound-profile-header-left h1 {
+        .sound-profile-header-main {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sound-profile-title-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .sound-profile-header-main h1 {
             font-size: 2rem;
-            margin: 0 0 6px;
-            letter-spacing: 0.04em;
+            margin: 0;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
         .sound-profile-username {
             font-size: 0.95rem;
-            opacity: 0.7;
+            opacity: 0.8;
         }
 
         .sound-profile-tagline {
             font-size: 0.95rem;
-            margin-top: 6px;
+            margin: 4px 0 0;
             color: #b7b7ff;
+            max-width: 680px;
         }
 
-        .sound-profile-header-right {
+        /* PILLS DE ESTADO (MODO / ACTIVIDAD) */
+        .sound-profile-status-row {
             display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 22px;
         }
 
         .sound-profile-pill {
@@ -111,12 +131,26 @@
             gap: 6px;
             background: linear-gradient(120deg, rgba(147, 51, 234, 0.14), rgba(244, 63, 94, 0.18));
             backdrop-filter: blur(10px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65);
+            max-width: 100%;
         }
 
             .sound-profile-pill span {
                 font-size: 0.9rem;
             }
 
+        @media (max-width: 600px) {
+            .sound-profile-status-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+                .sound-profile-status-row .sound-profile-pill {
+                    justify-content: space-between;
+                }
+        }
+
+        /* GRID PRINCIPAL */
         .sound-profile-main {
             display: grid;
             grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
@@ -127,14 +161,6 @@
         @media (max-width: 900px) {
             .sound-profile-main {
                 grid-template-columns: minmax(0, 1fr);
-            }
-
-            .sound-profile-header {
-                align-items: flex-start;
-            }
-
-            .sound-profile-header-right {
-                align-items: flex-start;
             }
         }
 
@@ -171,7 +197,6 @@
         }
 
         /* DISTRIBUCIÓN DE GÉNEROS */
-
         .genres-list {
             display: flex;
             flex-direction: column;
@@ -204,8 +229,9 @@
             position: relative;
             height: 7px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(15, 23, 42, 0.9);
             overflow: hidden;
+            box-shadow: inset 0 0 6px rgba(15, 23, 42, 0.9);
         }
 
         .genre-bar-fill {
@@ -217,7 +243,6 @@
         }
 
         /* MOOD + TOXICIDAD */
-
         .mood-grid {
             display: grid;
             grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
@@ -277,9 +302,10 @@
             width: 100%;
             height: 8px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(15, 23, 42, 0.9);
             overflow: hidden;
             position: relative;
+            box-shadow: inset 0 0 6px rgba(15, 23, 42, 0.9);
         }
 
         .toxicity-fill {
@@ -297,7 +323,6 @@
         }
 
         /* BADGES */
-
         .badges-list {
             display: flex;
             flex-wrap: wrap;
@@ -335,7 +360,7 @@
         .profile-status {
             font-size: 0.85rem;
             opacity: 0.8;
-            margin-top: 8px;
+            margin-top: 4px;
         }
 
             .profile-status.error {
@@ -362,27 +387,32 @@
             </nav>
         </header>
 
-
+        <!-- HEADER PERFIL SONORO REORDENADO -->
         <header class="sound-profile-header">
-            <div class="sound-profile-header-left">
-                <h1>Perfil sonoro</h1>
-                <div class="sound-profile-username">@usuario</div>
+            <div class="sound-profile-header-main">
+                <div class="sound-profile-title-row">
+                    <h1>Perfil sonoro</h1>
+                    <span class="sound-profile-username">@usuario</span>
+                </div>
+
                 <p class="sound-profile-tagline">
                     Cargando tu perfil sonoro…
                 </p>
                 <div id="profile-status" class="profile-status info"></div>
             </div>
-            <div class="sound-profile-header-right">
-                <div class="sound-profile-pill">
-                    <span>🎧 Modo actual:</span>
-                    <strong id="pill-mode">Analizando tus gustos…</strong>
-                </div>
-                <div class="sound-profile-pill">
-                    <span>⏱ Última actividad:</span>
-                    <strong id="pill-activity">–</strong>
-                </div>
-            </div>
         </header>
+
+        <!-- PILLS DE MODO / ACTIVIDAD -->
+        <section class="sound-profile-status-row">
+            <div class="sound-profile-pill">
+                <span>🎧 Modo actual:</span>
+                <strong id="pill-mode">Analizando tus gustos…</strong>
+            </div>
+            <div class="sound-profile-pill">
+                <span>⏱ Última actividad:</span>
+                <strong id="pill-activity">–</strong>
+            </div>
+        </section>
 
         <section class="sound-profile-main">
             <!-- DISTRIBUCIÓN DE GÉNEROS -->
@@ -444,22 +474,40 @@
     </main>
 
     <script>
-        async function cargarPerfilSonoro() {
+        // Detecta si estás en local o en producción (Render) y ajusta la URL
+        const API_URL =
+            window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+                ? "http://localhost:4000"
+                : "https://beefmusic-backend.onrender.com";
+
+        // Inicializar página: comprobar sesión, poner nombre y cargar perfil
+        (function initPerfilSonoro() {
+            const token = localStorage.getItem("beefmusic_user_token");
+            const storedUserName = localStorage.getItem("beefmusic_user_name");
+            const usernameEl = document.querySelector(".sound-profile-username");
             const statusEl = document.getElementById("profile-status");
 
-            // Ajusta estas claves según cómo guardes el token al hacer login
-            const token =
-                localStorage.getItem("tokenUser") ||
-                localStorage.getItem("token_user") ||
-                localStorage.getItem("token");
+            if (storedUserName && usernameEl) {
+                usernameEl.textContent = "@" + storedUserName;
+            }
 
             if (!token) {
                 if (statusEl) {
                     statusEl.textContent = "Inicia sesión para generar tu perfil sonoro.";
                     statusEl.classList.add("error");
                 }
+                setTimeout(() => {
+                    window.location.href = "user-login.html";
+                }, 1200);
                 return;
             }
+
+            // Si hay token, cargamos el perfil
+            cargarPerfilSonoro(token);
+        })();
+
+        async function cargarPerfilSonoro(token) {
+            const statusEl = document.getElementById("profile-status");
 
             if (statusEl) {
                 statusEl.textContent = "Analizando tu actividad en BeefMusic…";
@@ -468,7 +516,7 @@
             }
 
             try {
-                const res = await fetch("http://localhost:4000/api/sound-profile", {
+                const res = await fetch(API_URL + "/api/sound-profile", {
                     headers: {
                         "Authorization": "Bearer " + token
                     }
@@ -476,8 +524,21 @@
 
                 if (!res.ok) {
                     console.error("Error al obtener perfil sonoro:", res.status);
+
+                    if (res.status === 401) {
+                        if (statusEl) {
+                            statusEl.textContent = "Sesión caducada. Vuelve a iniciar sesión.";
+                            statusEl.classList.remove("info");
+                            statusEl.classList.add("error");
+                        }
+                        setTimeout(() => {
+                            window.location.href = "user-login.html";
+                        }, 1200);
+                        return;
+                    }
+
                     if (statusEl) {
-                        statusEl.textContent = "No se ha podido cargar tu perfil sonoro. Vuelve a iniciar sesión.";
+                        statusEl.textContent = "No se ha podido cargar tu perfil sonoro.";
                         statusEl.classList.remove("info");
                         statusEl.classList.add("error");
                     }
@@ -485,6 +546,7 @@
                 }
 
                 const profile = await res.json();
+                console.log("Perfil sonoro:", profile);
                 pintarPerfilSonoro(profile);
 
                 if (statusEl) {
@@ -507,13 +569,13 @@
         }
 
         function pintarPerfilSonoro(userSoundProfile) {
-            // Username
+            // Username (por si el backend devuelve algo distinto)
             const usernameEl = document.querySelector(".sound-profile-username");
             if (usernameEl && userSoundProfile.username) {
                 usernameEl.textContent = "@" + userSoundProfile.username;
             }
 
-            // Tagline (frase tipo "Eres 70% Trap…")
+            // Tagline
             const taglineEl = document.querySelector(".sound-profile-tagline");
             if (taglineEl) {
                 if (userSoundProfile.genres && userSoundProfile.genres.length > 0) {
@@ -537,11 +599,11 @@
                 }
             }
 
-            // Pill "última actividad" – placeholder
+            // Pill "última actividad"
             const pillActivity = document.getElementById("pill-activity");
             if (pillActivity) {
                 if ((userSoundProfile.totalVotes || 0) > 0) {
-                    pillActivity.textContent = "hace poco (basado en tus últimos votos)";
+                    pillActivity.textContent = "hace poco (basado en tus votos)";
                 } else {
                     pillActivity.textContent = "sin actividad reciente";
                 }
@@ -590,14 +652,14 @@
                     row.className = "genre-row";
 
                     row.innerHTML = `
-                <div class="genre-row-header">
-                  <span class="genre-name">${genre.name}</span>
-                  <span class="genre-percent">${genre.percent}%</span>
-                </div>
-                <div class="genre-bar">
-                  <div class="genre-bar-fill"></div>
-                </div>
-              `;
+                            <div class="genre-row-header">
+                                <span class="genre-name">${genre.name}</span>
+                                <span class="genre-percent">${genre.percent}%</span>
+                            </div>
+                            <div class="genre-bar">
+                                <div class="genre-bar-fill"></div>
+                            </div>
+                        `;
 
                     genresListEl.appendChild(row);
 
@@ -607,6 +669,14 @@
                         fill.style.transform = "scaleX(" + (genre.percent / 100) + ")";
                     });
                 });
+
+                if ((userSoundProfile.genres || []).length === 0) {
+                    const empty = document.createElement("p");
+                    empty.style.fontSize = "0.82rem";
+                    empty.style.opacity = "0.75";
+                    empty.textContent = "Sin votos aún. Cuando empieces a votar canciones, verás aquí qué géneros dominas.";
+                    genresListEl.appendChild(empty);
+                }
             }
 
             // Mood tags
@@ -619,6 +689,13 @@
                     span.textContent = tag;
                     moodTagsEl.appendChild(span);
                 });
+
+                if ((userSoundProfile.moodTags || []).length === 0) {
+                    const span = document.createElement("span");
+                    span.className = "mood-tag";
+                    span.textContent = "Aún sin mood definido";
+                    moodTagsEl.appendChild(span);
+                }
             }
 
             // Badges
@@ -629,26 +706,23 @@
                     const div = document.createElement("div");
                     div.className = "badge";
                     div.innerHTML = `
-                <span class="badge-icon">✨</span>
-                <span>Aún sin logros. Todo por desbloquear.</span>
-              `;
+                            <span class="badge-icon">✨</span>
+                            <span>Aún sin logros. Todo por desbloquear.</span>
+                        `;
                     badgesListEl.appendChild(div);
                 } else {
                     userSoundProfile.badges.forEach(badge => {
                         const div = document.createElement("div");
                         div.className = "badge";
                         div.innerHTML = `
-                  <span class="badge-icon">${badge.icon}</span>
-                  <span>${badge.label}</span>
-                `;
+                                <span class="badge-icon">${badge.icon}</span>
+                                <span>${badge.label}</span>
+                            `;
                         badgesListEl.appendChild(div);
                     });
                 }
             }
         }
-
-        // Lanzar carga al entrar en la página
-        cargarPerfilSonoro();
     </script>
 </body>
 </html>
