@@ -79,17 +79,17 @@
         /* CONTENEDOR HEADER PERFIL (CARD GRANDE) */
         .sound-profile-header-card {
             margin: 24px 0 26px;
-            padding: 16px 24px 18px;
+            padding: 16px 24px 26px; /* más padding abajo para que quepan bien las pills */
             border-radius: 32px;
             border: 1px solid rgba(148, 163, 184, 0.18);
             background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9)), linear-gradient(120deg, rgba(79, 70, 229, 0.2), rgba(236, 72, 153, 0.08));
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
-            overflow: hidden;
+            overflow: visible; /* antes hidden: cortaba la sombra de las pills */
         }
 
         @media (max-width: 640px) {
             .sound-profile-header-card {
-                padding: 14px 16px 16px;
+                padding: 14px 16px 22px; /* también un poco más abajo en móvil */
                 border-radius: 24px;
             }
         }
@@ -151,20 +151,20 @@
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            margin: 10px 0 0;
+            margin: 14px 0 0; /* un pelín más de separación respecto al texto */
         }
 
         .sound-profile-pill {
-            padding: 6px 12px;
+            padding: 7px 14px;
             border-radius: 999px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 0.8rem;
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: linear-gradient(120deg, rgba(147, 51, 234, 0.16), rgba(244, 63, 94, 0.2));
+            background: linear-gradient(120deg, rgba(147, 51, 234, 0.22), rgba(244, 63, 94, 0.26));
             backdrop-filter: blur(10px);
-            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.75); /* sombra visible dentro de la card */
             max-width: 100%;
         }
 
@@ -389,6 +389,7 @@
                 font-weight: 500;
             }
     </style>
+
 </head>
 <body>
     <main class="sound-profile-page">
