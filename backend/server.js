@@ -718,6 +718,33 @@ app.post("/api/canciones", authAdmin, async (req, res) => {
     }
 });
 
+// Normalizar nombres de género (para que "dembow", "Dembow", "DEMBOW" cuenten como uno)
+function normalizarGenero(raw) {
+    if (!raw) {
+        return { key: "desconocido", label: "Desconocido" };
+    }
+
+    // quitar espacios, pasar a minúsculas y quitar acentos
+    let base = raw.trim().toLowerCase();
+    base = base.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // reggaetón -> reggaeton
+
+    // mapa para nombres bonitos
+    const mapa = {
+        dembow: "Dembow",
+        drill: "Drill",
+        trap: "Trap",
+        rap: "Rap",
+        reggaeton: "Reggaetón",
+        pop: "Pop",
+        boom bap: "Boom Bap",
+        reggaeton_dembow: "Reggaetón / Dembow",
+    };
+
+    const label = mapa[base] || (base.charAt(0).toUpperCase() + base.slice(1));
+
+    return { key: base, label };
+}
+
 // === PERFIL SONORO DEL USUARIO (USER) ===
 app.get("/api/sound-profile", authUser, async (req, res) => {
     try {
@@ -776,16 +803,18 @@ app.get("/api/sound-profile", authUser, async (req, res) => {
         let totalDislikes = 0;
 
         for (const v of votos) {
-            const estilo = songMap.get(v.cancion_id) || "Desconocido";
-            if (!statsByGenre[estilo]) {
-                statsByGenre[estilo] = { likes: 0, dislikes: 0 };
+            const estiloOriginal = songMap.get(v.cancion_id) || "Desconocido";
+            const { key, label } = normalizarGenero(estiloOriginal);
+
+            if (!statsByGenre[key]) {
+                statsByGenre[key] = { label, likes: 0, dislikes: 0 };
             }
 
             if (v.tipo === "like") {
-                statsByGenre[estilo].likes++;
+                statsByGenre[key].likes++;
                 totalLikes++;
             } else if (v.tipo === "dislike") {
-                statsByGenre[estilo].dislikes++;
+                statsByGenre[key].dislikes++;
                 totalDislikes++;
             }
 
@@ -793,10 +822,10 @@ app.get("/api/sound-profile", authUser, async (req, res) => {
         }
 
         // 4) Transformar a array y calcular porcentajes
-        let genres = Object.entries(statsByGenre).map(([name, stats]) => ({
-            name,
-            likes: stats.likes,
-            dislikes: stats.dislikes,
+        let genres = Object.values(statsByGenre).map((g) => ({
+            name: g.label,
+            likes: g.likes,
+            dislikes: g.dislikes,
         }));
 
         // Si no hay likes, usamos votos totales para %; si hay likes, solo likes
