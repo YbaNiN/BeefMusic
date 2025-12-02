@@ -98,42 +98,64 @@
 
         /* HEADER PERFIL SONORO (dentro de la card) */
         .sound-profile-header {
-            margin: 0; /* la separación la maneja la card con gap */
+            position: relative;
+            margin: 24px 0 20px; /* separa la card del resto */
+            padding: 18px 24px 20px; /* aire por dentro: arriba, lados y abajo */
+            border-radius: 0; /* CUADRADO */
+            background: rgba(15, 23, 42, 0.96);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
         }
+
+            /* anulamos cualquier pseudo-elemento raro del estilo antiguo */
+            .sound-profile-header::before,
+            .sound-profile-header::after {
+                content: none !important;
+            }
 
         .sound-profile-header-main {
             display: flex;
             flex-direction: column;
-            gap: 10px; /* espacio entre fila de título, tagline y estado */
+            gap: 10px; /* espacio entre título, tagline y estado */
         }
 
         .sound-profile-title-row {
             display: flex;
             flex-wrap: wrap;
-            align-items: baseline;
-            gap: 12px;
-            margin-bottom: 2px;
+            align-items: center;
+            gap: 14px; /* espacio entre "Perfil sonoro" y @usuario */
+            margin-bottom: 4px;
         }
 
         .sound-profile-header-main h1 {
-            font-size: 2rem;
+            font-size: 1.9rem;
             margin: 0;
-            letter-spacing: 0.10em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
         }
 
         .sound-profile-username {
-            font-size: 0.95rem;
+            font-size: 0.98rem;
             opacity: 0.85;
         }
 
         .sound-profile-tagline {
-            font-size: 0.95rem;
+            font-size: 0.93rem;
             margin: 0;
-            margin-top: 4px;
-            line-height: 1.6; /* más respiración */
-            color: #b7b7ff;
-            max-width: 100%;
+            margin-top: 2px;
+            line-height: 1.7; /* líneas más separadas */
+            color: #c7d2fe;
+            max-width: 680px; /* evita líneas muy largas */
+        }
+
+        /* En móvil, el @usuario baja debajo del título para que no se aplaste */
+        @media (max-width: 640px) {
+            .sound-profile-title-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
         }
 
         /* ESTADO (texto pequeño bajo la tagline) */
@@ -412,7 +434,7 @@
             </nav>
         </header>
 
-        <!-- HEADER + STATUS DENTRO DE CARD -->
+        <!-- CARD CUADRADA DEL PERFIL SONORO -->
         <section class="sound-profile-header-card">
             <header class="sound-profile-header">
                 <div class="sound-profile-header-main">
@@ -428,7 +450,6 @@
                 </div>
             </header>
 
-            <!-- PILLS DE MODO / ACTIVIDAD -->
             <div class="sound-profile-status-row">
                 <div class="sound-profile-pill">
                     <span>🎧 Modo actual:</span>
@@ -493,13 +514,7 @@
                 </div>
             </article>
         </section>
-
-        <p class="sound-profile-footer">
-            Este perfil se genera a partir de tus votos, likes y no-likes en las canciones de <strong>BeefMusic</strong>.
-            Más actividad = perfil más preciso.
-        </p>
     </main>
-
     <script>
         // Detecta si estás en local o en producción (Render) y ajusta la URL
         const API_URL =
