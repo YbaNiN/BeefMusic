@@ -718,6 +718,181 @@ app.post("/api/canciones", authAdmin, async (req, res) => {
     }
 });
 
+// === PERFIL SONORO DEL USUARIO (USER) ===
+app.get("/api/sound-profile", authUser, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const username = req.user.username;
+
+        // 1) Votos del usuario
+        const { data: votos, error: errorVotos } = await supabase
+            .from("votos_cancion")
+            .select("tipo, cancion_id")
+            .eq("usuario_id", userId);
+
+        if (errorVotos) {
+            console.error("Supabase error (select votos usuario):", errorVotos);
+            return res.status(500).json({ error: "Error obteniendo votos del usuario" });
+        }
+
+        // Si no ha votado nada, devolvemos un perfil vacío pero válido
+        if (!votos || votos.length === 0) {
+            return res.json({
+                username,
+                toxicity: 0,
+                totalVotes: 0,
+                totalLikes: 0,
+                totalDislikes: 0,
+                genres: [],
+                dominantGenre: null,
+                moodLabel: "Aún sin datos suficientes",
+                moodTags: ["dale like o dislike a alguna canción"],
+                badges: [],
+            });
+        }
+
+        // 2) Sacar los IDs de canciones y traer sus estilos
+        const songIds = [...new Set(votos.map((v) => v.cancion_id))];
+
+        const { data: canciones, error: errorCancionesPerfil } = await supabase
+            .from("canciones")
+            .select("id, estilo")
+            .in("id", songIds);
+
+        if (errorCancionesPerfil) {
+            console.error("Supabase error (select canciones perfil):", errorCancionesPerfil);
+            return res.status(500).json({ error: "Error obteniendo canciones para el perfil" });
+        }
+
+        const songMap = new Map();
+        (canciones || []).forEach((c) => {
+            songMap.set(c.id, c.estilo || "Desconocido");
+        });
+
+        // 3) Calcular stats por género + likes/dislikes totales
+        const statsByGenre = {};
+        let totalVotes = 0;
+        let totalLikes = 0;
+        let totalDislikes = 0;
+
+        for (const v of votos) {
+            const estilo = songMap.get(v.cancion_id) || "Desconocido";
+            if (!statsByGenre[estilo]) {
+                statsByGenre[estilo] = { likes: 0, dislikes: 0 };
+            }
+
+            if (v.tipo === "like") {
+                statsByGenre[estilo].likes++;
+                totalLikes++;
+            } else if (v.tipo === "dislike") {
+                statsByGenre[estilo].dislikes++;
+                totalDislikes++;
+            }
+
+            totalVotes++;
+        }
+
+        // 4) Transformar a array y calcular porcentajes
+        let genres = Object.entries(statsByGenre).map(([name, stats]) => ({
+            name,
+            likes: stats.likes,
+            dislikes: stats.dislikes,
+        }));
+
+        // Si no hay likes, usamos votos totales para %; si hay likes, solo likes
+        const baseForPercent = totalLikes > 0 ? totalLikes : totalVotes;
+
+        genres = genres
+            .map((g) => {
+                const weight = totalLikes > 0 ? g.likes : g.likes + g.dislikes;
+                const percent = baseForPercent > 0
+                    ? Math.round((weight / baseForPercent) * 100)
+                    : 0;
+                return { ...g, percent };
+            })
+            .sort((a, b) => b.percent - a.percent);
+
+        const dominantGenre = genres.length > 0 ? genres[0].name : null;
+
+        // 5) Toxicidad = porcentaje de dislikes sobre votos totales
+        const toxicity =
+            totalVotes > 0 ? Math.round((totalDislikes / totalVotes) * 100) : 0;
+
+        // 6) Mood y tags básicos (lógica simple pero resultona)
+        function getMoodLabel(toxicity, dominantGenre) {
+            if (!dominantGenre) return "Explorando sonidos";
+
+            if (toxicity >= 70) {
+                if (["Trap", "Drill", "Dembow", "Rap"].includes(dominantGenre)) {
+                    return "Modo demonio nocturno";
+                }
+                return "Crítico profesional de Spotify";
+            }
+
+            if (toxicity >= 40) {
+                return `Selectivo con el ${dominantGenre}`;
+            }
+
+            return `Buen rollo con el ${dominantGenre}`;
+        }
+
+        function getMoodTags(toxicity, dominantGenre, totalVotes) {
+            const tags = [];
+
+            if (dominantGenre) tags.push(`fan del ${dominantGenre.toLowerCase()}`);
+
+            if (toxicity >= 70) {
+                tags.push("hater fino", "no compro cualquier tema");
+            } else if (toxicity >= 40) {
+                tags.push("exigente", "o me flipa o nada");
+            } else {
+                tags.push("flow chill", "mente abierta");
+            }
+
+            if (totalVotes >= 50) tags.push("usuario veterano");
+            if (totalVotes < 10) tags.push("recién llegado");
+
+            return tags;
+        }
+
+        const moodLabel = getMoodLabel(toxicity, dominantGenre);
+        const moodTags = getMoodTags(toxicity, dominantGenre, totalVotes);
+
+        // 7) Badges desbloqueados
+        const badges = [];
+
+        if (totalVotes >= 1) {
+            badges.push({ icon: "🔥", label: "Primer beef votado" });
+        }
+        if (totalLikes >= 10) {
+            badges.push({ icon: "🎧", label: "10 canciones que te han volado la cabeza" });
+        }
+        if (totalLikes >= 30 && dominantGenre) {
+            badges.push({ icon: "🖤", label: `Fan oficial del ${dominantGenre}` });
+        }
+        if (totalDislikes >= 10) {
+            badges.push({ icon: "💣", label: "Hater elegante (10 no me gusta)" });
+        }
+
+        // 8) Respuesta final
+        res.json({
+            username,
+            toxicity,
+            totalVotes,
+            totalLikes,
+            totalDislikes,
+            genres,
+            dominantGenre,
+            moodLabel,
+            moodTags,
+            badges,
+        });
+    } catch (err) {
+        console.error("Error en GET /api/sound-profile:", err);
+        res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
     console.log(`BeefMusic API escuchando en http://localhost:${port}`);
