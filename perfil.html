@@ -41,7 +41,7 @@
         }
 
         .site-logo-img {
-            height: 40px; /* un poco más grande para que luzca el gif */
+            height: 40px;
             width: auto;
             display: block;
             border-radius: 10px;
@@ -76,9 +76,27 @@
                     background: radial-gradient(circle at top left, rgba(139, 92, 246, 0.45), rgba(15, 23, 42, 0.9));
                 }
 
-        /* HEADER PERFIL SONORO */
+        /* CONTENEDOR HEADER PERFIL (CARD GRANDE) */
+        .sound-profile-header-card {
+            margin: 24px 0 26px;
+            padding: 16px 24px 18px;
+            border-radius: 32px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.9)), linear-gradient(120deg, rgba(79, 70, 229, 0.2), rgba(236, 72, 153, 0.08));
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+            overflow: hidden;
+        }
+
+        @media (max-width: 640px) {
+            .sound-profile-header-card {
+                padding: 14px 16px 16px;
+                border-radius: 24px;
+            }
+        }
+
+        /* HEADER PERFIL SONORO (dentro de la card) */
         .sound-profile-header {
-            margin: 24px 0 10px;
+            margin: 0 0 10px;
         }
 
         .sound-profile-header-main {
@@ -110,15 +128,30 @@
             font-size: 0.95rem;
             margin: 4px 0 0;
             color: #b7b7ff;
-            max-width: 680px;
+            max-width: 100%;
         }
+
+        /* ESTADO (texto pequeño bajo la tagline) */
+        .profile-status {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+            .profile-status.error {
+                color: #fecaca;
+            }
+
+            .profile-status.info {
+                color: #bfdbfe;
+            }
 
         /* PILLS DE ESTADO (MODO / ACTIVIDAD) */
         .sound-profile-status-row {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 22px;
+            margin: 10px 0 0;
         }
 
         .sound-profile-pill {
@@ -129,7 +162,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: linear-gradient(120deg, rgba(147, 51, 234, 0.14), rgba(244, 63, 94, 0.18));
+            background: linear-gradient(120deg, rgba(147, 51, 234, 0.16), rgba(244, 63, 94, 0.2));
             backdrop-filter: blur(10px);
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65);
             max-width: 100%;
@@ -355,21 +388,6 @@
             .sound-profile-footer strong {
                 font-weight: 500;
             }
-
-        /* ESTADOS */
-        .profile-status {
-            font-size: 0.85rem;
-            opacity: 0.8;
-            margin-top: 4px;
-        }
-
-            .profile-status.error {
-                color: #fecaca;
-            }
-
-            .profile-status.info {
-                color: #bfdbfe;
-            }
     </style>
 </head>
 <body>
@@ -387,30 +405,32 @@
             </nav>
         </header>
 
-        <!-- HEADER PERFIL SONORO REORDENADO -->
-        <header class="sound-profile-header">
-            <div class="sound-profile-header-main">
-                <div class="sound-profile-title-row">
-                    <h1>Perfil sonoro</h1>
-                    <span class="sound-profile-username">@usuario</span>
+        <!-- HEADER + STATUS DENTRO DE CARD -->
+        <section class="sound-profile-header-card">
+            <header class="sound-profile-header">
+                <div class="sound-profile-header-main">
+                    <div class="sound-profile-title-row">
+                        <h1>Perfil sonoro</h1>
+                        <span class="sound-profile-username">@usuario</span>
+                    </div>
+
+                    <p class="sound-profile-tagline">
+                        Cargando tu perfil sonoro…
+                    </p>
+                    <div id="profile-status" class="profile-status info"></div>
                 </div>
+            </header>
 
-                <p class="sound-profile-tagline">
-                    Cargando tu perfil sonoro…
-                </p>
-                <div id="profile-status" class="profile-status info"></div>
-            </div>
-        </header>
-
-        <!-- PILLS DE MODO / ACTIVIDAD -->
-        <section class="sound-profile-status-row">
-            <div class="sound-profile-pill">
-                <span>🎧 Modo actual:</span>
-                <strong id="pill-mode">Analizando tus gustos…</strong>
-            </div>
-            <div class="sound-profile-pill">
-                <span>⏱ Última actividad:</span>
-                <strong id="pill-activity">–</strong>
+            <!-- PILLS DE MODO / ACTIVIDAD -->
+            <div class="sound-profile-status-row">
+                <div class="sound-profile-pill">
+                    <span>🎧 Modo actual:</span>
+                    <strong id="pill-mode">Analizando tus gustos…</strong>
+                </div>
+                <div class="sound-profile-pill">
+                    <span>⏱ Última actividad:</span>
+                    <strong id="pill-activity">–</strong>
+                </div>
             </div>
         </section>
 
@@ -569,7 +589,7 @@
         }
 
         function pintarPerfilSonoro(userSoundProfile) {
-            // Username (por si el backend devuelve algo distinto)
+            // Username
             const usernameEl = document.querySelector(".sound-profile-username");
             if (usernameEl && userSoundProfile.username) {
                 usernameEl.textContent = "@" + userSoundProfile.username;
