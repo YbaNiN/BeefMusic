@@ -1,4 +1,5 @@
 require("dotenv").config();
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const express = require("express");
@@ -392,6 +393,73 @@ app.post("/api/reportes", async (req, res) => {
     } catch (error) {
         console.error("Error en POST /api/reportes:", error);
         res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
+// === ASISTENTE IA BEEFMUSIC (USER) ===
+// Espera body: { prompt: string }
+app.post("/api/assistant", authUser, async (req, res) => {
+    try {
+        if (!OPENAI_API_KEY) {
+            console.error("Falta OPENAI_API_KEY en el .env");
+            return res
+                .status(500)
+                .json({ error: "Configuración de IA no disponible en el servidor" });
+        }
+
+        const { prompt } = req.body;
+
+        if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
+            return res.status(400).json({ error: "Falta el campo 'prompt'" });
+        }
+
+        const username = req.user?.username || "usuario_beefmusic";
+
+        // Llamada al endpoint /v1/responses de OpenAI (API nueva recomendada) :contentReference[oaicite:1]{index=1}
+        const openaiResponse = await axios.post(
+            "https://api.openai.com/v1/responses",
+            {
+                model: "gpt-5", // puedes cambiar a otro modelo compatible si quieres
+                instructions:
+                    "Eres el asistente oficial de BeefMusic. " +
+                    "Respondes SIEMPRE en español y estás especializado en música urbana (reggaetón, dembow, trap, drill, rap). " +
+                    "Ayudas a componer letras, proponer títulos, estructuras de canciones y planes de lanzamiento en redes. " +
+                    "No prometas cosas que el usuario no pueda hacer legalmente (no uses samples con copyright sin permisos, etc.). " +
+                    `El usuario actual se llama @${username}.`,
+                input: prompt,
+                // Opcional: puedes ajustar temperatura, etc.
+                // reasoning: { effort: "low" }, // si usas modelos de razonamiento
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${OPENAI_API_KEY}`,
+                    "Content-Type": "application/json",
+                },
+                timeout: 30000,
+            }
+        );
+
+        // La Responses API expone el texto directamente en output_text cuando el output es texto simple :contentReference[oaicite:2]{index=2}
+        const text =
+            openaiResponse.data?.output_text ||
+            "No he podido generar respuesta en este momento.";
+
+        return res.json({
+            ok: true,
+            text,
+        });
+    } catch (err) {
+        console.error("Error en POST /api/assistant:", err.response?.data || err.message);
+
+        // Si viene error de OpenAI, intento devolver algo entendible
+        if (err.response && err.response.data) {
+            return res.status(500).json({
+                error: "Error llamando a la IA",
+                detail: err.response.data,
+            });
+        }
+
+        res.status(500).json({ error: "Error en el servidor al usar la IA" });
     }
 });
 
