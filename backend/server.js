@@ -419,7 +419,7 @@ app.post("/api/assistant", authUser, async (req, res) => {
         const openaiResponse = await axios.post(
             "https://api.openai.com/v1/chat/completions",
             {
-                model: "gpt-4o-mini", // modelo ligero recomendado y disponible
+                model: "gpt-4o-mini", // modelo real disponible
                 messages: [
                     {
                         role: "system",
