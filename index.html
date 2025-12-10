@@ -1258,7 +1258,7 @@
             });
         }
 
-        // Botón flotante Asistente IA + panel desplegable
+                // Botón flotante Asistente IA + panel desplegable
         const assistantFab = document.getElementById("assistant-fab");
         const assistantFloat = document.getElementById("assistant-float");
         const assistantFloatClose = document.getElementById("assistant-float-close");
@@ -1308,7 +1308,7 @@
             }
         });
 
-        // === Asistente IA: lógica real (chips + llamada al backend) ===
+        // === Asistente IA casera: lógica (chips + llamada al backend) ===
         const assistantFloatPrompt = document.getElementById("assistant-float-prompt");
         const assistantFloatStatus = document.getElementById("assistant-float-status");
         const assistantFloatSend = document.getElementById("assistant-float-send");
@@ -1330,8 +1330,7 @@
                         assistantFloatPrompt.value = prompt;
 
                         assistantFloatStatus.textContent =
-                            "Prompt cargado. Pulsa en Enviar para que la IA lo procese.";
-
+                            "Prompt cargado. Pulsa en Enviar para que se genere la letra.";
                         updateSendButtonState();
                     });
                 });
@@ -1340,7 +1339,7 @@
             // Habilitar el botón cuando el usuario escribe
             assistantFloatPrompt.addEventListener("input", updateSendButtonState);
 
-            // Enviar prompt a la API de IA del backend
+            // Enviar prompt a la API del backend (IA casera)
             assistantFloatSend.addEventListener("click", async () => {
                 const prompt = assistantFloatPrompt.value.trim();
                 if (!prompt) return;
@@ -1354,8 +1353,8 @@
 
                 const originalText = assistantFloatSend.textContent;
                 assistantFloatSend.disabled = true;
-                assistantFloatSend.textContent = "Pensando…";
-                assistantFloatStatus.textContent = "Hablando con la IA de BeefMusic...";
+                assistantFloatSend.textContent = "Generando letra…";
+                assistantFloatStatus.textContent = "Montando tu letra con BeefMusic...";
 
                 try {
                     const res = await fetch(API_URL + "/api/assistant", {
@@ -1368,19 +1367,21 @@
                     });
 
                     const data = await res.json();
+                    console.log("Respuesta /api/assistant:", data);
 
                     if (!res.ok || data.error) {
-                        console.error("Error IA:", data);
+                        const msgBackend = data.error || "Error desconocido en el servidor.";
                         assistantFloatStatus.textContent =
-                            "❌ Error al pedir ayuda a la IA. Inténtalo de nuevo más tarde.";
+                            "❌ Error generando la letra: " + msgBackend;
                     } else {
+                        // Aquí pintamos la letra generada
                         assistantFloatStatus.textContent =
-                            data.text || "La IA no devolvió texto.";
+                            data.text || "No se pudo generar letra.";
                     }
                 } catch (err) {
                     console.error(err);
                     assistantFloatStatus.textContent =
-                        "❌ Error de conexión con el servidor de IA.";
+                        "❌ Error de conexión con el servidor de BeefMusic.";
                 } finally {
                     assistantFloatSend.textContent = originalText;
                     updateSendButtonState();
