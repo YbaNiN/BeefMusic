@@ -818,6 +818,49 @@ function pickRandom(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
 
+// Capitalizar mínimamente una línea
+function capitalizarLinea(str) {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Extraer keywords importantes del prompt (muy sencillo)
+function extraerKeywordsImportantes(prompt) {
+    const texto = prompt
+        .toLowerCase()
+        .replace(/[.,!¡?¿;:()"]/g, " ");
+
+    const stopwords = new Set([
+        "de","la","el","y","que","en","a","un","una","con","por","para","es",
+        "al","del","lo","las","los","se","me","te","mi","tu","su","ya","muy",
+        "más","mas","sin","pero","como","cuando","si","no","sí","o","u",
+        "esto","eso","esa","ese","esta","este","hay","soy","eres","somos",
+        "estoy","está","están","era","fue","fui","voy","vas","van","quiero",
+        "quieres","queremos","donde","dónde","sobre"
+    ]);
+
+    const tokens = texto
+        .split(/\s+/)
+        .filter((w) => w && w.length >= 3 && !stopwords.has(w));
+
+    const unicos = [...new Set(tokens)];
+
+    // Nos quedamos con algunas palabras clave representativas
+    return unicos.slice(0, 8);
+}
+
+// Obtener base de mood (para no repetir switch en todos lados)
+function obtenerBaseMood(mood) {
+    if (mood === "triste") return VOCABULARIO.moodTriste;
+    if (mood === "fiesta") return VOCABULARIO.moodFiesta;
+    if (mood === "beef") return VOCABULARIO.moodBeef;
+    if (mood === "motivacional") return VOCABULARIO.moodMotivacional;
+    if (mood === "romantico") return VOCABULARIO.moodRomantico;
+    if (mood === "nostalgico") return VOCABULARIO.moodNostalgico;
+    if (mood === "oscuro") return VOCABULARIO.moodOscuro;
+    return VOCABULARIO.moodNeutro;
+}
+
 // Construir un estribillo según el mood
 function generarEstribillo(mood, nombres) {
     let base;
@@ -840,8 +883,8 @@ function generarEstribillo(mood, nombres) {
     ];
 }
 
-// Construir versos en función del género + mood
-function generarVerso(genero, mood, topicResumen) {
+// Verso más orgánico: mezcla género + mood + palabras del prompt
+function generarVerso({ genero, mood, topicResumen, keywords, nombres, esVerso2 = false }) {
     let base;
 
     switch (genero) {
@@ -884,23 +927,112 @@ function generarVerso(genero, mood, topicResumen) {
             break;
     }
 
-    let moodBase = VOCABULARIO.moodNeutro;
-    if (mood === "triste") moodBase = VOCABULARIO.moodTriste;
-    else if (mood === "fiesta") moodBase = VOCABULARIO.moodFiesta;
-    else if (mood === "beef") moodBase = VOCABULARIO.moodBeef;
-    else if (mood === "motivacional") moodBase = VOCABULARIO.moodMotivacional;
-    else if (mood === "romantico") moodBase = VOCABULARIO.moodRomantico;
-    else if (mood === "nostalgico") moodBase = VOCABULARIO.moodNostalgico;
-    else if (mood === "oscuro") moodBase = VOCABULARIO.moodOscuro;
+    const moodBase = obtenerBaseMood(mood);
 
     const verso = [];
-    verso.push(topicResumen);
-    verso.push(pickRandom(base));
-    verso.push(pickRandom(moodBase));
-    verso.push(pickRandom(base));
-    verso.push(pickRandom(moodBase));
+    const numLineas = 8 + Math.floor(Math.random() * 3); // 8–10 barras
+
+    // Primera línea: podemos usar el resumen del tema
+    if (topicResumen) verso.push(capitalizarLinea(topicResumen));
+
+    while (verso.length < numLineas) {
+        const r = Math.random();
+
+        // 1) A veces usamos una keyword del prompt directamente
+        if (keywords.length && r < 0.4) {
+            const kw = pickRandom(keywords);
+            const plantilla =
+                Math.random() < 0.5
+                    ? `${pickRandom(base)}, pensando en ${kw}`
+                    : `${pickRandom(moodBase)} por todo lo de ${kw}`;
+            verso.push(capitalizarLinea(plantilla));
+            continue;
+        }
+
+        // 2) A veces mencionamos un nick
+        if (nombres.length && r >= 0.4 && r < 0.6) {
+            const nick = pickRandom(nombres);
+            const lineaNick =
+                Math.random() < 0.5
+                    ? `${pickRandom(moodBase)} por ti, ${nick}`
+                    : `desde aquel día con ${nick} nada fue igual`;
+            verso.push(capitalizarLinea(lineaNick));
+            continue;
+        }
+
+        // 3) Resto: mezclamos línea de género + línea de mood
+        if (r >= 0.6 && r < 0.8) {
+            verso.push(capitalizarLinea(pickRandom(base)));
+        } else {
+            verso.push(capitalizarLinea(pickRandom(moodBase)));
+        }
+    }
+
+    // Pequeño remate diferente en el segundo verso
+    if (esVerso2 && nombres.length) {
+        verso.push(
+            capitalizarLinea(
+                `si este tema suena, ${nombres[0]}, sabes que es por ti`
+            )
+        );
+    }
 
     return verso;
+}
+
+// Pre-coro: transición corta hacia el estribillo
+function generarPreCoro(mood, nombres, keywords) {
+    const moodBase = obtenerBaseMood(mood);
+    const lineas = [];
+    const num = 2 + Math.floor(Math.random() * 2); // 2–3 líneas
+
+    for (let i = 0; i < num; i++) {
+        let linea = pickRandom(moodBase);
+
+        if (keywords.length && Math.random() < 0.5) {
+            const kw = pickRandom(keywords);
+            linea = `${linea}, desde aquello de ${kw}`;
+        }
+
+        if (nombres.length && Math.random() < 0.4) {
+            linea = `${linea}, mírame ahora ${nombres[0]}`;
+        }
+
+        lineas.push(capitalizarLinea(linea));
+    }
+
+    return lineas;
+}
+
+// Puente: parte más emocional antes del último estribillo
+function generarPuente(mood, genero, keywords, nombres) {
+    const moodBase = obtenerBaseMood(mood);
+    const lineas = [];
+    const num = 3 + Math.floor(Math.random() * 2); // 3–4 líneas
+
+    for (let i = 0; i < num; i++) {
+        let base = pickRandom(moodBase);
+
+        if (keywords.length && Math.random() < 0.6) {
+            const kw = pickRandom(keywords);
+            base = `${base}, juramos cambiar desde ${kw}`;
+        }
+
+        if (nombres.length && Math.random() < 0.5) {
+            base = `${base}, lo sabes tú y lo sabe ${nombres[0]}`;
+        }
+
+        lineas.push(capitalizarLinea(base));
+    }
+
+    // Última línea más meta
+    lineas.push(
+        capitalizarLinea(
+            `este ${genero.toLowerCase()} no es ficción, es lo que vivimos`
+        )
+    );
+
+    return lineas;
 }
 
 // “IA” que construye una canción entera
@@ -908,19 +1040,35 @@ function generarLetraCancion({ prompt, username }) {
     const genero = detectarGeneroDesdePrompt(prompt);
     const mood = detectarMoodDesdePrompt(prompt);
     const nombres = extraerNombresDesdePrompt(prompt);
+    const keywords = extraerKeywordsImportantes(prompt);
 
     const topicResumen =
         "Esta historia va de: " +
         prompt.slice(0, 140).replace(/\s+/g, " ") +
         (prompt.length > 140 ? "..." : "");
 
-    const verso1 = generarVerso(genero, mood, topicResumen);
-    const estribillo = generarEstribillo(mood, nombres);
-    const verso2 = generarVerso(
+    const verso1 = generarVerso({
         genero,
         mood,
-        `@${username} metido en esta película sonora.`
-    );
+        topicResumen,
+        keywords,
+        nombres,
+        esVerso2: false,
+    });
+
+    const preCoro = generarPreCoro(mood, nombres, keywords);
+    const estribillo = generarEstribillo(mood, nombres);
+
+    const verso2 = generarVerso({
+        genero,
+        mood,
+        topicResumen: `@${username} metido en esta película sonora.`,
+        keywords,
+        nombres,
+        esVerso2: true,
+    });
+
+    const puente = generarPuente(mood, genero, keywords, nombres);
 
     const adlib1 = pickRandom(VOCABULARIO.adlibs);
     const adlib2 = pickRandom(VOCABULARIO.adlibs);
@@ -956,6 +1104,12 @@ function generarLetraCancion({ prompt, username }) {
     verso1.forEach((l) => partes.push(l));
     partes.push("");
 
+    if (preCoro.length) {
+        partes.push("[Pre-Coro]");
+        preCoro.forEach((l) => partes.push(l));
+        partes.push("");
+    }
+
     partes.push("[Estribillo]");
     estribillo.forEach((l) => partes.push(l));
     partes.push("");
@@ -964,13 +1118,20 @@ function generarLetraCancion({ prompt, username }) {
     verso2.forEach((l) => partes.push(l));
     partes.push("");
 
+    partes.push("[Puente]");
+    puente.forEach((l) => partes.push(l));
+    partes.push("");
+
+    partes.push("[Estribillo final]");
+    estribillo.forEach((l) => partes.push(l));
+    partes.push("");
+
     partes.push("[Outro]");
     partes.push(`${adlib2}`);
     partes.push("BeefMusic, esto no es plantilla, es tu historia en forma de tema.");
 
     return partes.join("\n");
 }
-
 // === ASISTENTE IA BEEFMUSIC (USER) ===
 // Generador propio de letras, sin llamar a OpenAI
 app.post("/api/assistant", authUser, async (req, res) => {
