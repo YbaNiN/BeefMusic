@@ -208,219 +208,223 @@
         }
 
         /* BOTÓN FLOTANTE ASISTENTE IA */
-        .assistant-fab {
-            position: fixed;
-            right: 24px;
-            bottom: 24px;
-            z-index: 60;
-            border-radius: 999px;
-            padding-inline: 18px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
+.assistant-fab {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 60;
+    border-radius: 999px;
+    padding-inline: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
 
-            /* empieza escondido hacia abajo; se muestra con la clase visible */
-            transform: translateY(80px);
-            opacity: 0;
-            pointer-events: none;
-            transition:
-                transform 0.25s ease,
-                opacity 0.25s ease;
-        }
+    /* empieza escondido hacia abajo; se muestra con la clase visible */
+    transform: translateY(80px);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        transform 0.25s ease,
+        opacity 0.25s ease;
+}
 
-        .assistant-fab.assistant-fab-visible {
-            transform: translateY(0);
-            opacity: 1;
-            pointer-events: auto;
-        }
+.assistant-fab.assistant-fab-visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
 
-        /* PANEL FLOTANTE DEL ASISTENTE */
-        .assistant-float {
-            position: fixed;
-            right: 24px;
-            bottom: 24px;
-            z-index: 59;
-            width: min(420px, 100% - 32px);
-            height: 50vh; /* ocupa la mitad de la pantalla */
-            max-height: 400px;
-            transform: translateY(calc(100% + 24px)); /* escondido bajo el borde inferior */
-            opacity: 0;
-            pointer-events: none;
-            transition:
-                transform 0.28s ease-out,
-                opacity 0.22s ease-out;
-        }
+/* PANEL FLOTANTE DEL ASISTENTE */
+.assistant-float {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 59;
+    width: min(420px, 100% - 32px);
+    /* 🔁 que crezca hasta el 70% de alto de pantalla */
+    height: auto;
+    max-height: 70vh;
+    transform: translateY(calc(100% + 24px)); /* escondido bajo el borde inferior */
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        transform 0.28s ease-out,
+        opacity 0.22s ease-out;
+}
 
-        .assistant-float-open {
-            transform: translateY(0);
-            opacity: 1;
-            pointer-events: auto;
-        }
+.assistant-float-open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
 
-        .assistant-float-inner {
-            height: 100%;
-            border-radius: 20px;
-            padding: 14px 14px 12px;
-            background: linear-gradient(
-                135deg,
-                rgba(255, 255, 255, 0.04),
-                rgba(0, 0, 0, 0.75)
-            );
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(18px);
-            display: flex;
-            flex-direction: column;
-        }
+.assistant-float-inner {
+    /* usamos max-height en vez de height fija */
+    max-height: 70vh;
+    border-radius: 20px;
+    padding: 14px 14px 12px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.04),
+        rgba(0, 0, 0, 0.75)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(18px);
+    display: flex;
+    flex-direction: column;
+}
 
-        .assistant-float-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
+.assistant-float-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
 
-        .assistant-float-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-        }
+.assistant-float-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
 
-        .assistant-float-subtitle {
-            font-size: 0.75rem;
-            opacity: 0.75;
-        }
+.assistant-float-subtitle {
+    font-size: 0.75rem;
+    opacity: 0.75;
+}
 
-        .assistant-float-close {
-            border: none;
-            background: transparent;
-            color: inherit;
-            cursor: pointer;
-            font-size: 1rem;
-            padding: 4px;
-            border-radius: 999px;
-        }
+.assistant-float-close {
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+    border-radius: 999px;
+}
 
-        .assistant-float-close:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
+.assistant-float-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
 
-        .assistant-float-body {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            font-size: 0.85rem;
-        }
+.assistant-float-body {
+    flex: 1;
+    min-height: 0;          /* 🔁 necesario para que el scroll funcione bien */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.85rem;
+    overflow-y: auto;       /* 🔁 scroll interno cuando la letra es muy larga */
+    padding-right: 4px;
+}
 
-        .assistant-float-text {
-            margin: 0;
-            opacity: 0.85;
-        }
+.assistant-float-text {
+    margin: 0;
+    opacity: 0.85;
+}
 
-        .assistant-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
+.assistant-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
 
-        .prompt-chip {
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 5px 9px;
-            font-size: 0.75rem;
-            background: rgba(0, 0, 0, 0.35);
-            cursor: pointer;
-            color: #ffffff;
-            transition:
-                transform 0.12s ease,
-                box-shadow 0.12s ease,
-                border-color 0.12s ease;
-        }
+.prompt-chip {
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 5px 9px;
+    font-size: 0.75rem;
+    background: rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    color: #ffffff;
+    transition:
+        transform 0.12s ease,
+        box-shadow 0.12s ease,
+        border-color 0.12s ease;
+}
 
-        .prompt-chip:hover {
-            transform: translateY(-1px);
-            border-color: rgba(255, 255, 255, 0.35);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-        }
+.prompt-chip:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
 
-        .assistant-label {
-            font-size: 0.75rem;
-            opacity: 0.8;
-        }
+.assistant-label {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
 
-        .assistant-textarea {
-            width: 100%;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 8px 9px;
-            background: rgba(0, 0, 0, 0.55);
-            color: inherit;
-            resize: none;
-            min-height: 90px;
-            max-height: 140px;
-            font-family: inherit;
-            font-size: 0.8rem;
-        }
+.assistant-textarea {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 8px 9px;
+    background: rgba(0, 0, 0, 0.55);
+    color: inherit;
+    resize: none;
+    min-height: 90px;
+    max-height: 140px;
+    font-family: inherit;
+    font-size: 0.8rem;
+}
 
-        .assistant-textarea:focus {
-            outline: none;
-            border-color: rgba(245, 239, 239, 0.45);
-            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
-        }
+.assistant-textarea:focus {
+    outline: none;
+    border-color: rgba(245, 239, 239, 0.45);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
 
-        .assistant-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
+.assistant-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
 
-        .assistant-submit[disabled] {
-            opacity: 0.55;
-            cursor: not-allowed;
-        }
+.assistant-submit[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
 
-        .assistant-footer {
-            font-size: 0.75rem;
-            opacity: 0.8;
-        }
+.assistant-footer {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
 
-        .assistant-status {
-            display: block;
-        }
+.assistant-status {
+    display: block;
+}
 
-        /* ⭐ ESTILO PARA LA RESPUESTA DEL ASISTENTE (copiable y con saltos de línea) */
-        #assistant-float-status {
-            white-space: pre-wrap;           /* respeta los saltos de línea \n */
-            word-break: break-word;          /* evita desbordes raros */
-            font-size: 0.8rem;
-            line-height: 1.45;
-            margin-top: 6px;
-            padding: 8px 10px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            background: rgba(0, 0, 0, 0.6);
-            max-height: 260px;               /* scroll cuando la letra es larga */
-            overflow-y: auto;
-        }
+/* ⭐ RESPUESTA DEL ASISTENTE (copiable y con saltos de línea, sin recorte fijo) */
+#assistant-float-status {
+    white-space: pre-wrap;       /* respeta los saltos de línea \n */
+    word-break: break-word;      /* evita desbordes raros */
+    font-size: 0.8rem;
+    line-height: 1.45;
+    margin-top: 6px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(0, 0, 0, 0.6);
+}
 
-        @media (max-width: 480px) {
-            .assistant-fab {
-                right: 12px;
-                bottom: 12px;
-                padding-inline: 14px;
-                font-size: 0.8rem;
-            }
+/* MOBILE */
+@media (max-width: 480px) {
+    .assistant-fab {
+        right: 12px;
+        bottom: 12px;
+        padding-inline: 14px;
+        font-size: 0.8rem;
+    }
 
-            .assistant-float {
-                right: 8px;
-                left: 8px;
-                width: auto;
-                height: 55vh;
-                max-height: none;
-            }
-        }
+    .assistant-float {
+        right: 8px;
+        left: 8px;
+        width: auto;
+        height: auto;
+        max-height: 75vh;   /* un pelín más alto en móvil */
+    }
+}   
         /* BREAKPOINTS */
 
         @media (max-width: 960px) {
