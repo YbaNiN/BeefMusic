@@ -1,5 +1,4 @@
 require("dotenv").config();
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const express = require("express");
@@ -396,17 +395,586 @@ app.post("/api/reportes", async (req, res) => {
     }
 });
 
+// === IA CASERA PARA GENERAR LETRAS (VERSIÓN EXTENDIDA) ===
+
+// Detectar género a partir del prompt
+function detectarGeneroDesdePrompt(prompt) {
+    const texto = prompt.toLowerCase();
+
+    const mapping = [
+        { genero: "Dembow", keywords: ["dembow"] },
+        { genero: "Drill", keywords: ["drill"] },
+        { genero: "Boom Bap", keywords: ["boom bap", "boombap"] },
+        { genero: "Phonk", keywords: ["phonk"] },
+        { genero: "Corridos tumbados", keywords: ["corridos tumbados", "corridos", "tumbados"] },
+        { genero: "Afrobeat", keywords: ["afrobeat", "afrobeats"] },
+        { genero: "Dancehall", keywords: ["dancehall"] },
+        { genero: "R&B", keywords: ["r&b", "rnb", "r and b"] },
+        { genero: "Reggaetón", keywords: ["reggaeton", "reggaetón"] },
+        { genero: "Trap", keywords: ["trap"] },
+        { genero: "Rap", keywords: ["rap", "hip hop", "hip-hop"] },
+        { genero: "Pop urbano", keywords: ["pop urbano", "latin pop", "pop"] },
+        { genero: "Club / EDM", keywords: ["techno", "house", "edm", "club"] },
+    ];
+
+    for (const item of mapping) {
+        if (item.keywords.some((k) => texto.includes(k))) {
+            return item.genero;
+        }
+    }
+
+    // Por defecto, trap que nunca falla
+    return "Trap";
+}
+
+// Detectar mood básico a partir del prompt
+function detectarMoodDesdePrompt(prompt) {
+    const texto = prompt.toLowerCase();
+
+    if (
+        texto.includes("triste") ||
+        texto.includes("ruptura") ||
+        texto.includes("desamor") ||
+        texto.includes("llorar") ||
+        texto.includes("corazón roto")
+    ) {
+        return "triste";
+    }
+
+    if (
+        texto.includes("feliz") ||
+        texto.includes("fiesta") ||
+        texto.includes("perreo") ||
+        texto.includes("discoteca") ||
+        texto.includes("party")
+    ) {
+        return "fiesta";
+    }
+
+    if (
+        texto.includes("beef") ||
+        texto.includes("diss") ||
+        texto.includes("tiradera") ||
+        texto.includes("respuesta") ||
+        texto.includes("enemigo")
+    ) {
+        return "beef";
+    }
+
+    if (
+        texto.includes("motivar") ||
+        texto.includes("superar") ||
+        texto.includes("lograr") ||
+        texto.includes("sueños") ||
+        texto.includes("meta") ||
+        texto.includes("progreso")
+    ) {
+        return "motivacional";
+    }
+
+    if (
+        texto.includes("amor") ||
+        texto.includes("enamora") ||
+        texto.includes("enamorad") ||
+        texto.includes("novia") ||
+        texto.includes("novio") ||
+        texto.includes("crush") ||
+        texto.includes("romántic")
+    ) {
+        return "romantico";
+    }
+
+    if (
+        texto.includes("nostal") ||
+        texto.includes("recuerdo") ||
+        texto.includes("antes") ||
+        texto.includes("infancia") ||
+        texto.includes("viejos tiempos")
+    ) {
+        return "nostalgico";
+    }
+
+    if (
+        texto.includes("oscuro") ||
+        texto.includes("noche") ||
+        texto.includes("demonio") ||
+        texto.includes("diablo") ||
+        texto.includes("smoke") ||
+        texto.includes("sombra")
+    ) {
+        return "oscuro";
+    }
+
+    return "neutro";
+}
+
+// Extraer posibles nombres / nicks del prompt (muy simple)
+function extraerNombresDesdePrompt(prompt) {
+    const posibles = [];
+    const regexArroba = /@\w+/g;
+    const encontrados = prompt.match(regexArroba);
+    if (encontrados) {
+        posibles.push(...encontrados);
+    }
+    return posibles;
+}
+
+// Plantillas de vocabulario por género/mood
+const VOCABULARIO = {
+    // Bases por género
+    baseTrap: [
+        "luces bajas en el bloque",
+        "ruido de motos por la noche",
+        "facturas que no quieren esperar",
+        "miradas que no son de verdad",
+        "humos en la ventana del cuarto",
+        "la sirena suena pero ya ni me levanto",
+        "otra noche corriendo de lo que siento",
+        "en la esquina se negocia tiempo por dinero",
+        "el brillo en la cadena tapa lo que duele",
+        "la vida en modo rápido, nadie aquí se duerme",
+    ],
+    baseDrill: [
+        "pasos firmes por la zona",
+        "la lealtad se firma sin papel",
+        "en mi esquina nadie se esconde",
+        "el silencio vale más que el oro",
+        "caras tapadas, cero gestos de cariño",
+        "quien habló de más ya no pisa este camino",
+        "la mirada fría como el metal que cargan",
+        "en el bloque suena eco de las balas",
+        "lo que tú llamas juego aquí es rutina",
+        "piso fuerte y el suelo se inclina",
+    ],
+    baseDembow: [
+        "la pista encendida hasta tarde",
+        "lo nuestro se rompe en el dancefloor",
+        "bajo las luces todo se olvida",
+        "ese ritmo nos tiene enviciados",
+        "las bocinas reventando el barrio entero",
+        "el bajo rebota como tu cuerpo",
+        "tu pana grabando todo en el cel",
+        "los vecinos ya saben cómo es",
+        "sube el volumen, que tiemble la acera",
+        "esa cintura manda en la noche entera",
+    ],
+    baseReggaeton: [
+        "te pienso cada vez que suena el beat",
+        "tus mensajes que ya no contesté",
+        "lo nuestro se quedó en aquel after",
+        "tus amigas preguntando por qué",
+        "bailábamos pegados, ahora ni me miras",
+        "tus stories se ven pero no me etiquetas",
+        "ese perfume tuyo se quedó en mi hoodie",
+        "las discusiones siempre en medio del party",
+        "te vas con otro pero vuelves pa' escribirme",
+        "dices que me odias y eso es quererse",
+    ],
+    baseRap: [
+        "escribo en la libreta lo que el mundo no escucha",
+        "la verdad en cada barra aunque duela en la nuca",
+        "las calles me criaron, los beats me adoptaron",
+        "el micro es mi arma, mis versos dispararon",
+        "la mente en otra parte mientras el tiempo corre",
+        "lo que no dije en persona, el tema lo recoge",
+        "la base suena cruda como la realidad",
+        "los míos en la grada apoyando de verdad",
+        "no quiero premio, quiero paz mental",
+        "cada línea es terapia musical",
+    ],
+    baseBoomBap: [
+        "zapatillas viejas pero el flow es nuevo",
+        "sample viejito, mensaje moderno",
+        "bombo y caja marcando mi paso",
+        "el humo en el estudio se queda en el vaso",
+        "grafitis en la esquina contando la historia",
+        "cada loop que suena revive memoria",
+        "vinilos girando, aguja en la herida",
+        "boom bap sonando, salvando mi vida",
+        "parques y bancos como escenario",
+        "el underground nunca fue secundario",
+    ],
+    baseAfrobeat: [
+        "el sol cayendo lento sobre la ciudad",
+        "tus caderas hablan con sinceridad",
+        "la vibra es dulce como tu voz",
+        "en cada paso se nos olvida el reloj",
+        "palmas arriba, energía que no se acaba",
+        "el ritmo suave pero el corazón se dispara",
+        "tu sonrisa brilla más que las luces",
+        "nadie en la pista quiere que esto se cruce",
+        "calor en el aire, sudor en la frente",
+        "la música manda sobre toda la gente",
+    ],
+    baseRnb: [
+        "tu voz en mi mente a las tres de la mañana",
+        "las sábanas recuerdan que ya no estás en la cama",
+        "los mensajes a medias que nunca mandé",
+        "las notas de voz que borré por miedo a perder",
+        "tu silueta en la ventana cuando cae la lluvia",
+        "cada melodía me lleva otra vez a tu duda",
+        "las luces tenues hablan más que nosotros",
+        "lo nuestro era fuego, ahora quedan solo escombros",
+        "suspiros mezclados con el delay del reverb",
+        "en cada acorde vuelves aunque no quieras volver",
+    ],
+    basePhonk: [
+        "neones morados reflejados en el vidrio",
+        "el motor ruge como todo lo que me guardo",
+        "la ciudad fantasma, yo corriendo sin frenos",
+        "las sombras se ríen cuando piso el suelo",
+        "filtro en la voz, pero el dolor es real",
+        "los bajos retumban como mi potencial",
+        "gafas oscuras aunque no dé el sol",
+        "en la autopista solo mando yo",
+        "fumo recuerdos que no quiero ver",
+        "en cada giro me pierdo otra vez",
+    ],
+    baseCorridos: [
+        "botas llenas de polvo del camino",
+        "la troca levantada vibra con el destino",
+        "billetes doblados en la bolsa del chaleco",
+        "la banda sonando, celebrando lo que tengo",
+        "de abajo venimos, lo saben los viejos",
+        "el respeto se gana, no se compra con espejos",
+        "botella en la mesa, historias en el aire",
+        "las cicatrices cuentan por quién dispare",
+        "la sierra de fondo, acordeón sonando",
+        "mi nombre en la boca de los que andan criticando",
+    ],
+    baseEdm: [
+        "las luces se cruzan como nuestros caminos",
+        "las manos en alto, olvidando el destino",
+        "el drop se aproxima, el pecho lo siente",
+        "saltamos al tiempo, lo para la gente",
+        "el humo en el aire dibuja tus formas",
+        "cuando baja el bajo, la razón se deforma",
+        "pierdo la noción cuando el kick se repite",
+        "la noche parece un sueño que no se edite",
+        "láseres marcan el ritmo en el suelo",
+        "en cada subida tocamos el cielo",
+    ],
+    basePopUrbano: [
+        "tus dramas convertidos en trending topic",
+        "nuestro amor en IG se volvió caótico",
+        "los planes de futuro se quedaron en typing",
+        "ya no respondes pero sigues stalkeando",
+        "canciones en la radio que llevan tu nombre",
+        "amigos que preguntan qué fue lo que pasa",
+        "selfies sonriendo pero nada encaja",
+        "las noches de risa se fueron sin traza",
+        "filmábamos todo como si fuera eterno",
+        "ahora solo quedan recuerdos en cuaderno",
+    ],
+
+    // Líneas por mood para mezclar en los versos
+    moodTriste: [
+        "y aunque sonrío, por dentro no estoy bien",
+        "cada salida se siente como un ayer",
+        "la almohada sabe lo que tú no ves",
+        "las lágrimas se esconden detrás del stress",
+        "reviso tu chat aunque sé que es perder",
+        "la canción se acaba, pero no tu querer",
+    ],
+    moodFiesta: [
+        "las copas arriba, que nadie se siente",
+        "mañana veremos qué dice la gente",
+        "si suena este tema se cae la discoteca",
+        "la noche está joven, la vibra está fresca",
+        "bailando pegados hasta ver el sol",
+        "los problemas se quedan fuera del control",
+    ],
+    moodBeef: [
+        "no eres mi rival, solo ruido en la red",
+        "tus números inflados no son poder",
+        "hablas de calle y no pisas el andén",
+        "mi pluma dispara, tú apagas el cel",
+        "tu barra más dura es mi calentamiento",
+        "yo no presumo, yo dejo el cemento",
+    ],
+    moodMotivacional: [
+        "caí mil veces pero nunca me rendí",
+        "las cicatrices me trajeron hasta aquí",
+        "nadie apostaba pero yo seguí de pie",
+        "el fracaso fue maestro, no un juez",
+        "los míos en la mente en cada canción",
+        "no vine a jugar, vine por mi bendición",
+    ],
+    moodRomantico: [
+        "tu nombre sonando en cada melodía",
+        "desde que llegaste cambió mi energía",
+        "tu risa es mi hook favorito",
+        "lo nuestro merece más que un mito",
+        "aunque discutan boca y mente",
+        "el corazón siempre te tiene presente",
+    ],
+    moodNostalgico: [
+        "las fotos viejas guardan nuestro secreto",
+        "el tiempo no borra lo que fue correcto",
+        "camino lugares que ya no visitas",
+        "la mente rebobina como una cinta",
+        "mirando al pasado desde otro vagón",
+        "queriendo volver a aquella versión",
+    ],
+    moodOscuro: [
+        "la ciudad dormida y yo sin poder",
+        "las voces internas no paran de arder",
+        "la luna de testigo de lo que no cuento",
+        "cada pensamiento es un tormento",
+        "las sombras conocen mi nombre completo",
+        "el lado oscuro me ofrece su respeto",
+    ],
+    moodNeutro: [
+        "la vida va pasando entre beat y beat",
+        "no todo es drama, a veces es chill",
+        "aprendo del día, descargo en la noche",
+        "la música siempre equilibra el coche",
+    ],
+
+    // Estribillos por mood
+    estribilloTriste: [
+        "y aunque digas que me olvidaste",
+        "yo sé que en secreto todavía me extrañas",
+        "bailas con otro pero no es igual",
+        "porque nadie te canta como yo en el track",
+        "borro tus fotos pero no tu señal",
+        "en cada playlist vuelves a empezar",
+    ],
+    estribilloFiesta: [
+        "sube el dembow que la noche está encendida",
+        "hoy se bebe y nadie aquí se olvida",
+        "si me miras así sabes que es tuyo el VIP",
+        "que suene fuerte pa' que no puedan dormir",
+        "y que se rompa la tarima otra vez",
+        "si este tema suena, tú sabes qué es",
+    ],
+    estribilloBeef: [
+        "tú tiras barras pero no das miedo",
+        "tu movie entera se cae en el suelo",
+        "hablas de calle pero no te creo",
+        "aquí en el barrio respetan lo que veo",
+        "no eres villano, eres extra en la escena",
+        "tu credibilidad se quedó fuera",
+    ],
+    estribilloMotivacional: [
+        "yo vengo de abajo y miro hacia arriba",
+        "cada caída me dejó más vivo",
+        "si se cierra una puerta, rompo la pared",
+        "esta es la prueba de lo que sí se puede hacer",
+        "que suene fuerte en el barrio y la city",
+        "que los de siempre vean que no fue easy",
+    ],
+    estribilloRomantico: [
+        "quédate cerquita aunque el mundo grite",
+        "que lo que tenemos nadie lo repite",
+        "si apagan las luces tú eres mi señal",
+        "con solo mirarte se me olvida el mal",
+        "baila despacito que el tiempo se para",
+        "lo nuestro es canción que nunca se acaba",
+    ],
+    estribilloNostalgico: [
+        "éramos fuego en medio del invierno",
+        "lo que vivimos parecía eterno",
+        "aunque el calendario diga que ya fue",
+        "cada verso vuelve a aquel café",
+        "si cierro los ojos te vuelvo a mirar",
+        "en cada compás te vuelvo a encontrar",
+    ],
+    estribilloOscuro: [
+        "de noche salgo solo con mi sombra",
+        "los miedos se despegan cuando suena la tromba",
+        "el bajo retumba como mi interior",
+        "entre luz y sombra siempre gano yo",
+        "no temo al vacío, ya estuve allí",
+        "de cada caída me traje un beat",
+    ],
+    estribilloNeutro: [
+        "será lo que tenga que ser",
+        "si el beat nos llama, vamos a volver",
+        "entre subidas, bajadas también",
+        "la vida se escribe sobre este papel",
+    ],
+
+    // Adlibs varios
+    adlibs: [
+        "yeah, yeah",
+        "uh, uh",
+        "ey",
+        "woah",
+        "ajá",
+        "yeah, mami",
+        "beefmusic on the track",
+        "ey, ey",
+        "díselo",
+        "prr",
+        "skrrt",
+        "ja",
+        "ok, ok",
+    ],
+};
+
+// Generador de una línea con algo de aleatoriedad
+function pickRandom(array) {
+    return array[Math.floor(Math.random() * array.length)];
+}
+
+// Construir un estribillo según el mood
+function generarEstribillo(mood, nombres) {
+    let base;
+    if (mood === "triste") base = VOCABULARIO.estribilloTriste;
+    else if (mood === "fiesta") base = VOCABULARIO.estribilloFiesta;
+    else if (mood === "beef") base = VOCABULARIO.estribilloBeef;
+    else if (mood === "motivacional") base = VOCABULARIO.estribilloMotivacional;
+    else if (mood === "romantico") base = VOCABULARIO.estribilloRomantico;
+    else if (mood === "nostalgico") base = VOCABULARIO.estribilloNostalgico;
+    else if (mood === "oscuro") base = VOCABULARIO.estribilloOscuro;
+    else base = VOCABULARIO.estribilloNeutro;
+
+    const nombreExtra = nombres.length > 0 ? ` (${nombres[0]})` : "";
+
+    return [
+        pickRandom(base),
+        pickRandom(base),
+        pickRandom(base) + nombreExtra,
+        pickRandom(base),
+    ];
+}
+
+// Construir versos en función del género + mood
+function generarVerso(genero, mood, topicResumen) {
+    let base;
+
+    switch (genero) {
+        case "Drill":
+            base = VOCABULARIO.baseDrill;
+            break;
+        case "Dembow":
+            base = VOCABULARIO.baseDembow;
+            break;
+        case "Reggaetón":
+            base = VOCABULARIO.baseReggaeton;
+            break;
+        case "Rap":
+            base = VOCABULARIO.baseRap;
+            break;
+        case "Boom Bap":
+            base = VOCABULARIO.baseBoomBap;
+            break;
+        case "Afrobeat":
+            base = VOCABULARIO.baseAfrobeat;
+            break;
+        case "R&B":
+            base = VOCABULARIO.baseRnb;
+            break;
+        case "Phonk":
+            base = VOCABULARIO.basePhonk;
+            break;
+        case "Corridos tumbados":
+            base = VOCABULARIO.baseCorridos;
+            break;
+        case "Club / EDM":
+            base = VOCABULARIO.baseEdm;
+            break;
+        case "Pop urbano":
+            base = VOCABULARIO.basePopUrbano;
+            break;
+        case "Trap":
+        default:
+            base = VOCABULARIO.baseTrap;
+            break;
+    }
+
+    let moodBase = VOCABULARIO.moodNeutro;
+    if (mood === "triste") moodBase = VOCABULARIO.moodTriste;
+    else if (mood === "fiesta") moodBase = VOCABULARIO.moodFiesta;
+    else if (mood === "beef") moodBase = VOCABULARIO.moodBeef;
+    else if (mood === "motivacional") moodBase = VOCABULARIO.moodMotivacional;
+    else if (mood === "romantico") moodBase = VOCABULARIO.moodRomantico;
+    else if (mood === "nostalgico") moodBase = VOCABULARIO.moodNostalgico;
+    else if (mood === "oscuro") moodBase = VOCABULARIO.moodOscuro;
+
+    const verso = [];
+    verso.push(topicResumen);
+    verso.push(pickRandom(base));
+    verso.push(pickRandom(moodBase));
+    verso.push(pickRandom(base));
+    verso.push(pickRandom(moodBase));
+
+    return verso;
+}
+
+// “IA” que construye una canción entera
+function generarLetraCancion({ prompt, username }) {
+    const genero = detectarGeneroDesdePrompt(prompt);
+    const mood = detectarMoodDesdePrompt(prompt);
+    const nombres = extraerNombresDesdePrompt(prompt);
+
+    const topicResumen =
+        "Esta historia va de: " +
+        prompt.slice(0, 140).replace(/\s+/g, " ") +
+        (prompt.length > 140 ? "..." : "");
+
+    const verso1 = generarVerso(genero, mood, topicResumen);
+    const estribillo = generarEstribillo(mood, nombres);
+    const verso2 = generarVerso(
+        genero,
+        mood,
+        `@${username} metido en esta película sonora.`
+    );
+
+    const adlib1 = pickRandom(VOCABULARIO.adlibs);
+    const adlib2 = pickRandom(VOCABULARIO.adlibs);
+
+    let titulo;
+    if (mood === "triste") {
+        titulo = `Corazón roto en ${genero}`;
+    } else if (mood === "beef") {
+        titulo = `Beef en ${genero}`;
+    } else if (mood === "fiesta") {
+        titulo = `Noche de ${genero}`;
+    } else if (mood === "motivacional") {
+        titulo = `De cero a todo (${genero})`;
+    } else if (mood === "romantico") {
+        titulo = `Carta en ${genero} para ti`;
+    } else if (mood === "nostalgico") {
+        titulo = `Recuerdos en ${genero}`;
+    } else if (mood === "oscuro") {
+        titulo = `Lado oscuro en ${genero}`;
+    } else {
+        titulo = `Historia en ${genero}`;
+    }
+
+    const partes = [];
+
+    partes.push(`Título sugerido: ${titulo}`);
+    partes.push("");
+    partes.push("[Intro]");
+    partes.push(`${adlib1}`);
+    partes.push("");
+
+    partes.push("[Verso 1]");
+    verso1.forEach((l) => partes.push(l));
+    partes.push("");
+
+    partes.push("[Estribillo]");
+    estribillo.forEach((l) => partes.push(l));
+    partes.push("");
+
+    partes.push("[Verso 2]");
+    verso2.forEach((l) => partes.push(l));
+    partes.push("");
+
+    partes.push("[Outro]");
+    partes.push(`${adlib2}`);
+    partes.push("BeefMusic, esto no es plantilla, es tu historia en forma de tema.");
+
+    return partes.join("\n");
+}
+
 // === ASISTENTE IA BEEFMUSIC (USER) ===
-// Espera body: { prompt: string }
+// Generador propio de letras, sin llamar a OpenAI
 app.post("/api/assistant", authUser, async (req, res) => {
     try {
-        if (!OPENAI_API_KEY) {
-            console.error("Falta OPENAI_API_KEY en el .env");
-            return res
-                .status(500)
-                .json({ error: "La IA no está configurada en el servidor (falta API key)." });
-        }
-
         const { prompt } = req.body;
 
         if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
@@ -415,67 +983,15 @@ app.post("/api/assistant", authUser, async (req, res) => {
 
         const username = req.user?.username || "usuario_beefmusic";
 
-        // Llamada a OpenAI - Chat Completions
-        const openaiResponse = await axios.post(
-            "https://api.openai.com/v1/chat/completions",
-            {
-                model: "gpt-4o-mini", // modelo real disponible
-                messages: [
-                    {
-                        role: "system",
-                        content:
-                            "Eres el asistente oficial de BeefMusic. " +
-                            "Respondes SIEMPRE en español y estás especializado en música urbana " +
-                            "(reggaetón, dembow, trap, drill, rap). " +
-                            "Ayudas a componer letras, proponer títulos, estructuras de canciones " +
-                            "y planes de lanzamiento en redes. " +
-                            "No prometas cosas ilegales (samples con copyright sin permiso, etc.).",
-                    },
-                    {
-                        role: "system",
-                        content: `El usuario actual se llama @${username}.`,
-                    },
-                    {
-                        role: "user",
-                        content: prompt,
-                    },
-                ],
-                temperature: 0.8,
-                max_tokens: 400,
-            },
-            {
-                headers: {
-                    Authorization: `Bearer ${OPENAI_API_KEY}`,
-                    "Content-Type": "application/json",
-                },
-                timeout: 30000,
-            }
-        );
-
-        const text =
-            openaiResponse.data?.choices?.[0]?.message?.content ||
-            "No he podido generar respuesta en este momento.";
+        const letra = generarLetraCancion({ prompt, username });
 
         return res.json({
             ok: true,
-            text,
+            text: letra,
         });
     } catch (err) {
-        console.error("Error en POST /api/assistant:");
-        if (err.response) {
-            console.error("Status:", err.response.status);
-            console.error("Data:", err.response.data);
-
-            return res.status(500).json({
-                error: "Error llamando a la IA",
-                detail: err.response.data,
-            });
-        } else {
-            console.error(err.message);
-            return res.status(500).json({
-                error: "Error en el servidor al usar la IA",
-            });
-        }
+        console.error("Error en POST /api/assistant (IA casera):", err);
+        return res.status(500).json({ error: "Error generando la letra en el servidor" });
     }
 });
 
