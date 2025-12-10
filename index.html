@@ -207,6 +207,206 @@
             opacity: 0.85;
         }
 
+                /* BOTÓN FLOTANTE ASISTENTE IA */
+        .assistant-fab {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 60;
+            border-radius: 999px;
+            padding-inline: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+
+            /* empieza escondido hacia abajo; se muestra con la clase visible */
+            transform: translateY(80px);
+            opacity: 0;
+            pointer-events: none;
+            transition:
+                transform 0.25s ease,
+                opacity 0.25s ease;
+        }
+
+        .assistant-fab.assistant-fab-visible {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* PANEL FLOTANTE DEL ASISTENTE */
+        .assistant-float {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 59;
+            width: min(420px, 100% - 32px);
+            height: 50vh; /* ocupa la mitad de la pantalla */
+            max-height: 400px;
+            transform: translateY(calc(100% + 24px)); /* escondido bajo el borde inferior */
+            opacity: 0;
+            pointer-events: none;
+            transition:
+                transform 0.28s ease-out,
+                opacity 0.22s ease-out;
+        }
+
+        .assistant-float-open {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .assistant-float-inner {
+            height: 100%;
+            border-radius: 20px;
+            padding: 14px 14px 12px;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.04),
+                rgba(0, 0, 0, 0.75)
+            );
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(18px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .assistant-float-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .assistant-float-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .assistant-float-subtitle {
+            font-size: 0.75rem;
+            opacity: 0.75;
+        }
+
+        .assistant-float-close {
+            border: none;
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px;
+            border-radius: 999px;
+        }
+
+        .assistant-float-close:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .assistant-float-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .assistant-float-text {
+            margin: 0;
+            opacity: 0.85;
+        }
+
+        .assistant-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .prompt-chip {
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 5px 9px;
+            font-size: 0.75rem;
+            background: rgba(0, 0, 0, 0.35);
+            cursor: pointer;
+            color: #ffffff;
+            transition:
+                transform 0.12s ease,
+                box-shadow 0.12s ease,
+                border-color 0.12s ease;
+}
+
+
+        .prompt-chip:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .assistant-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .assistant-textarea {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 9px;
+            background: rgba(0, 0, 0, 0.55);
+            color: inherit;
+            resize: none;
+            min-height: 90px;
+            max-height: 140px;
+            font-family: inherit;
+            font-size: 0.8rem;
+        }
+
+        .assistant-textarea:focus {
+            outline: none;
+            border-color: rgba(245, 239, 239, 0.45);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+        }
+
+        .assistant-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .assistant-submit[disabled] {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .assistant-footer {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .assistant-status {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .assistant-fab {
+                right: 12px;
+                bottom: 12px;
+                padding-inline: 14px;
+                font-size: 0.8rem;
+            }
+
+            .assistant-float {
+                right: 8px;
+                left: 8px;
+                width: auto;
+                height: 55vh;
+                max-height: none;
+            }
+        }
         /* BREAKPOINTS */
 
         @media (max-width: 960px) {
@@ -707,7 +907,68 @@
             </form>
         </div>
     </div>
+        <!-- BOTÓN FLOTANTE ASISTENTE -->
+    <button class="btn btn-primary assistant-fab" id="assistant-fab">
+        ✦ Asistente IA
+    </button>
 
+    <!-- PANEL FLOTANTE DEL ASISTENTE -->
+    <div class="assistant-float" id="assistant-float">
+        <div class="assistant-float-inner">
+            <div class="assistant-float-header">
+                <div>
+                    <div class="assistant-float-title">Asistente BeefMusic</div>
+                    <div class="assistant-float-subtitle">
+                        Ideas de letras, títulos y planes de lanzamiento.
+                    </div>
+                </div>
+                <button class="assistant-float-close" id="assistant-float-close">✕</button>
+            </div>
+
+            <div class="assistant-float-body">
+                <p class="assistant-float-text">
+                    Escribe tu petición como si se la mandaras a un ChatGPT especializado en música,
+                    o toca uno de estos ejemplos:
+                </p>
+
+                <div class="assistant-chips">
+                    <button type="button" class="prompt-chip"
+                        data-prompt="Hazme una letra de reggaetón triste sobre una ruptura, en primera persona y con un estribillo muy pegado.">
+                        Letra reggaetón triste
+                    </button>
+                    <button type="button" class="prompt-chip"
+                        data-prompt="Dame 5 ideas de títulos y conceptos para un tema de drill sobre traición en el barrio.">
+                        Títulos + conceptos de drill
+                    </button>
+                    <button type="button" class="prompt-chip"
+                        data-prompt="Hazme un plan de lanzamiento de 7 días para mi nuevo single de dembow, con ideas de posts para TikTok e Instagram.">
+                        Plan de lanzamiento 7 días
+                    </button>
+                </div>
+
+                <label for="assistant-float-prompt" class="assistant-label">
+                    Petición para el asistente BeefMusic
+                </label>
+                <textarea id="assistant-float-prompt" rows="4" class="assistant-textarea"
+                    placeholder="Ejemplo: Quiero un tema de trap oscuro sobre crecer en el barrio, con estribillo agresivo y referencias a videojuegos."></textarea>
+
+                <div class="assistant-actions">
+                    <button type="button" class="btn btn-primary assistant-submit" id="assistant-float-send" disabled>
+                        Enviar (demo)
+                    </button>
+                    <button type="button" class="btn btn-ghost assistant-clear" id="assistant-float-clear">
+                        Limpiar
+                    </button>
+                </div>
+
+                <div class="assistant-footer">
+                    <span class="assistant-status" id="assistant-float-status">
+                        Cuando conectes tu API de IA, aquí aparecerá la respuesta del asistente.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         const API_URL = "https://beefmusic-backend.onrender.com";
 
@@ -995,6 +1256,149 @@
                         }
                     });
             });
+        }
+
+        // Botón flotante Asistente IA + panel desplegable
+        const assistantFab = document.getElementById("assistant-fab");
+        const assistantFloat = document.getElementById("assistant-float");
+        const assistantFloatClose = document.getElementById("assistant-float-close");
+
+        // Mostrar / ocultar el botón según el scroll (se “mueve” con el scroll)
+        if (assistantFab) {
+            const toggleAssistantFab = () => {
+                const scrollY = window.scrollY || document.documentElement.scrollTop;
+                if (scrollY > 200) {
+                    assistantFab.classList.add("assistant-fab-visible");
+                } else {
+                    assistantFab.classList.remove("assistant-fab-visible");
+                    if (assistantFloat) {
+                        assistantFloat.classList.remove("assistant-float-open");
+                    }
+                }
+            };
+
+            toggleAssistantFab();
+            window.addEventListener("scroll", toggleAssistantFab);
+        }
+
+        // Abrir / cerrar panel al clicar el botón
+        if (assistantFab && assistantFloat) {
+            assistantFab.addEventListener("click", () => {
+                assistantFloat.classList.toggle("assistant-float-open");
+            });
+        }
+
+        // Botón de cierre ✕ dentro del panel
+        if (assistantFloatClose && assistantFloat) {
+            assistantFloatClose.addEventListener("click", () => {
+                assistantFloat.classList.remove("assistant-float-open");
+            });
+        }
+
+        // Cerrar panel si clicas fuera (pero no si clicas en el botón)
+        window.addEventListener("click", (e) => {
+            if (!assistantFloat || !assistantFab) return;
+            if (!assistantFloat.classList.contains("assistant-float-open")) return;
+
+            const clickInsidePanel = assistantFloat.contains(e.target);
+            const clickOnFab = assistantFab.contains(e.target);
+
+            if (!clickInsidePanel && !clickOnFab) {
+                assistantFloat.classList.remove("assistant-float-open");
+            }
+        });
+
+        // === Asistente IA: lógica real (chips + llamada al backend) ===
+        const assistantFloatPrompt = document.getElementById("assistant-float-prompt");
+        const assistantFloatStatus = document.getElementById("assistant-float-status");
+        const assistantFloatSend = document.getElementById("assistant-float-send");
+        const assistantFloatClear = document.getElementById("assistant-float-clear");
+        const promptChips = document.querySelectorAll(".prompt-chip");
+
+        if (assistantFloatPrompt && assistantFloatSend && assistantFloatStatus) {
+            // Función para activar/desactivar el botón de enviar
+            const updateSendButtonState = () => {
+                const hasText = assistantFloatPrompt.value.trim().length > 0;
+                assistantFloatSend.disabled = !hasText;
+            };
+
+            // Al pulsar un chip, se carga el texto en el textarea
+            if (promptChips.length) {
+                promptChips.forEach((chip) => {
+                    chip.addEventListener("click", () => {
+                        const prompt = chip.getAttribute("data-prompt") || "";
+                        assistantFloatPrompt.value = prompt;
+
+                        assistantFloatStatus.textContent =
+                            "Prompt cargado. Pulsa en Enviar para que la IA lo procese.";
+
+                        updateSendButtonState();
+                    });
+                });
+            }
+
+            // Habilitar el botón cuando el usuario escribe
+            assistantFloatPrompt.addEventListener("input", updateSendButtonState);
+
+            // Enviar prompt a la API de IA del backend
+            assistantFloatSend.addEventListener("click", async () => {
+                const prompt = assistantFloatPrompt.value.trim();
+                if (!prompt) return;
+
+                const token = localStorage.getItem("beefmusic_user_token");
+                if (!token) {
+                    assistantFloatStatus.textContent =
+                        "❌ No estás logueado. Inicia sesión para usar el asistente.";
+                    return;
+                }
+
+                const originalText = assistantFloatSend.textContent;
+                assistantFloatSend.disabled = true;
+                assistantFloatSend.textContent = "Pensando…";
+                assistantFloatStatus.textContent = "Hablando con la IA de BeefMusic...";
+
+                try {
+                    const res = await fetch(API_URL + "/api/assistant", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({ prompt }),
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok || data.error) {
+                        console.error("Error IA:", data);
+                        assistantFloatStatus.textContent =
+                            "❌ Error al pedir ayuda a la IA. Inténtalo de nuevo más tarde.";
+                    } else {
+                        assistantFloatStatus.textContent =
+                            data.text || "La IA no devolvió texto.";
+                    }
+                } catch (err) {
+                    console.error(err);
+                    assistantFloatStatus.textContent =
+                        "❌ Error de conexión con el servidor de IA.";
+                } finally {
+                    assistantFloatSend.textContent = originalText;
+                    updateSendButtonState();
+                }
+            });
+
+            // Botón de limpiar
+            if (assistantFloatClear) {
+                assistantFloatClear.addEventListener("click", () => {
+                    assistantFloatPrompt.value = "";
+                    assistantFloatStatus.textContent =
+                        "Petición limpia. Escribe algo nuevo o toca uno de los ejemplos.";
+                    updateSendButtonState();
+                });
+            }
+
+            // Estado inicial del botón
+            updateSendButtonState();
         }
 
         // Logout
