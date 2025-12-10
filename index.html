@@ -207,7 +207,7 @@
             opacity: 0.85;
         }
 
-                /* BOTÓN FLOTANTE ASISTENTE IA */
+        /* BOTÓN FLOTANTE ASISTENTE IA */
         .assistant-fab {
             position: fixed;
             right: 24px;
@@ -337,8 +337,7 @@
                 transform 0.12s ease,
                 box-shadow 0.12s ease,
                 border-color 0.12s ease;
-}
-
+        }
 
         .prompt-chip:hover {
             transform: translateY(-1px);
@@ -389,6 +388,21 @@
 
         .assistant-status {
             display: block;
+        }
+
+        /* ⭐ ESTILO PARA LA RESPUESTA DEL ASISTENTE (copiable y con saltos de línea) */
+        #assistant-float-status {
+            white-space: pre-wrap;           /* respeta los saltos de línea \n */
+            word-break: break-word;          /* evita desbordes raros */
+            font-size: 0.8rem;
+            line-height: 1.45;
+            margin-top: 6px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(0, 0, 0, 0.6);
+            max-height: 260px;               /* scroll cuando la letra es larga */
+            overflow-y: auto;
         }
 
         @media (max-width: 480px) {
@@ -907,7 +921,8 @@
             </form>
         </div>
     </div>
-        <!-- BOTÓN FLOTANTE ASISTENTE -->
+
+    <!-- BOTÓN FLOTANTE ASISTENTE -->
     <button class="btn btn-primary assistant-fab" id="assistant-fab">
         ✦ Asistente IA
     </button>
@@ -953,22 +968,28 @@
                     placeholder="Ejemplo: Quiero un tema de trap oscuro sobre crecer en el barrio, con estribillo agresivo y referencias a videojuegos."></textarea>
 
                 <div class="assistant-actions">
+                    <!-- ⭐ Texto actualizado, ya no es demo -->
                     <button type="button" class="btn btn-primary assistant-submit" id="assistant-float-send" disabled>
-                        Enviar (demo)
+                        Enviar
                     </button>
                     <button type="button" class="btn btn-ghost assistant-clear" id="assistant-float-clear">
                         Limpiar
+                    </button>
+                    <!-- ⭐ Nuevo botón copiar letra -->
+                    <button type="button" class="btn btn-ghost assistant-copy" id="assistant-copy-btn">
+                        Copiar letra
                     </button>
                 </div>
 
                 <div class="assistant-footer">
                     <span class="assistant-status" id="assistant-float-status">
-                        Cuando conectes tu API de IA, aquí aparecerá la respuesta del asistente.
+                        Escribe tu idea o usa un ejemplo y aquí aparecerá la letra generada.
                     </span>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
         const API_URL = "https://beefmusic-backend.onrender.com";
 
@@ -1258,7 +1279,7 @@
             });
         }
 
-                // Botón flotante Asistente IA + panel desplegable
+        // Botón flotante Asistente IA + panel desplegable
         const assistantFab = document.getElementById("assistant-fab");
         const assistantFloat = document.getElementById("assistant-float");
         const assistantFloatClose = document.getElementById("assistant-float-close");
@@ -1313,6 +1334,7 @@
         const assistantFloatStatus = document.getElementById("assistant-float-status");
         const assistantFloatSend = document.getElementById("assistant-float-send");
         const assistantFloatClear = document.getElementById("assistant-float-clear");
+        const assistantCopyBtn = document.getElementById("assistant-copy-btn"); // ⭐ nuevo
         const promptChips = document.querySelectorAll(".prompt-chip");
 
         if (assistantFloatPrompt && assistantFloatSend && assistantFloatStatus) {
@@ -1395,6 +1417,25 @@
                     assistantFloatStatus.textContent =
                         "Petición limpia. Escribe algo nuevo o toca uno de los ejemplos.";
                     updateSendButtonState();
+                });
+            }
+
+            // ⭐ Botón de copiar letra
+            if (assistantCopyBtn && assistantFloatStatus) {
+                assistantCopyBtn.addEventListener("click", async () => {
+                    const text = assistantFloatStatus.textContent || "";
+                    if (!text.trim()) return;
+
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        const oldLabel = assistantCopyBtn.textContent;
+                        assistantCopyBtn.textContent = "Copiado ✔";
+                        setTimeout(() => {
+                            assistantCopyBtn.textContent = oldLabel;
+                        }, 1500);
+                    } catch (err) {
+                        console.error("Error copiando la letra:", err);
+                    }
                 });
             }
 
