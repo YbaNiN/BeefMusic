@@ -404,7 +404,7 @@ app.post("/api/assistant", authUser, async (req, res) => {
             console.error("Falta OPENAI_API_KEY en el .env");
             return res
                 .status(500)
-                .json({ error: "Configuración de IA no disponible en el servidor" });
+                .json({ error: "La IA no está configurada en el servidor (falta API key)." });
         }
 
         const { prompt } = req.body;
@@ -415,20 +415,33 @@ app.post("/api/assistant", authUser, async (req, res) => {
 
         const username = req.user?.username || "usuario_beefmusic";
 
-        // Llamada al endpoint /v1/responses de OpenAI (API nueva recomendada) :contentReference[oaicite:1]{index=1}
+        // Llamada a OpenAI - Chat Completions
         const openaiResponse = await axios.post(
-            "https://api.openai.com/v1/responses",
+            "https://api.openai.com/v1/chat/completions",
             {
-                model: "gpt-5", // puedes cambiar a otro modelo compatible si quieres
-                instructions:
-                    "Eres el asistente oficial de BeefMusic. " +
-                    "Respondes SIEMPRE en español y estás especializado en música urbana (reggaetón, dembow, trap, drill, rap). " +
-                    "Ayudas a componer letras, proponer títulos, estructuras de canciones y planes de lanzamiento en redes. " +
-                    "No prometas cosas que el usuario no pueda hacer legalmente (no uses samples con copyright sin permisos, etc.). " +
-                    `El usuario actual se llama @${username}.`,
-                input: prompt,
-                // Opcional: puedes ajustar temperatura, etc.
-                // reasoning: { effort: "low" }, // si usas modelos de razonamiento
+                model: "gpt-4o-mini", // modelo ligero recomendado y disponible
+                messages: [
+                    {
+                        role: "system",
+                        content:
+                            "Eres el asistente oficial de BeefMusic. " +
+                            "Respondes SIEMPRE en español y estás especializado en música urbana " +
+                            "(reggaetón, dembow, trap, drill, rap). " +
+                            "Ayudas a componer letras, proponer títulos, estructuras de canciones " +
+                            "y planes de lanzamiento en redes. " +
+                            "No prometas cosas ilegales (samples con copyright sin permiso, etc.).",
+                    },
+                    {
+                        role: "system",
+                        content: `El usuario actual se llama @${username}.`,
+                    },
+                    {
+                        role: "user",
+                        content: prompt,
+                    },
+                ],
+                temperature: 0.8,
+                max_tokens: 400,
             },
             {
                 headers: {
@@ -439,9 +452,8 @@ app.post("/api/assistant", authUser, async (req, res) => {
             }
         );
 
-        // La Responses API expone el texto directamente en output_text cuando el output es texto simple :contentReference[oaicite:2]{index=2}
         const text =
-            openaiResponse.data?.output_text ||
+            openaiResponse.data?.choices?.[0]?.message?.content ||
             "No he podido generar respuesta en este momento.";
 
         return res.json({
@@ -449,17 +461,21 @@ app.post("/api/assistant", authUser, async (req, res) => {
             text,
         });
     } catch (err) {
-        console.error("Error en POST /api/assistant:", err.response?.data || err.message);
+        console.error("Error en POST /api/assistant:");
+        if (err.response) {
+            console.error("Status:", err.response.status);
+            console.error("Data:", err.response.data);
 
-        // Si viene error de OpenAI, intento devolver algo entendible
-        if (err.response && err.response.data) {
             return res.status(500).json({
                 error: "Error llamando a la IA",
                 detail: err.response.data,
             });
+        } else {
+            console.error(err.message);
+            return res.status(500).json({
+                error: "Error en el servidor al usar la IA",
+            });
         }
-
-        res.status(500).json({ error: "Error en el servidor al usar la IA" });
     }
 });
 
