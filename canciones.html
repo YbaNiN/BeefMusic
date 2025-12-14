@@ -794,7 +794,7 @@ body {
             miniProgressBar.max = duration || 0;
             miniProgressBar.value = audioEl.currentTime || 0;
 
-            miniPlayPauseBtn.textContent = audioEl.paused ? "▶️" : "⏸️";
+            miniPlayPauseBtn.textContent = audioEl.paused ? "▶" : "⏸";
         }
 
         function reproducirPorIndice(index) {
@@ -817,7 +817,7 @@ body {
 
             // 🔥 encendemos el glow del mini player
             miniPlayer.classList.add("is-active");
-            miniPlayPauseBtn.textContent = "⏸️";
+            miniPlayPauseBtn.textContent = "⏸";
 
             activarMiniPlayerDesdePlayer(playerEl, audio);
         }
@@ -833,14 +833,14 @@ body {
 
             if (currentAudio.paused) {
                 currentAudio.play();
-                miniPlayPauseBtn.textContent = "⏸️";
+                miniPlayPauseBtn.textContent = "⏸";
                 miniPlayer.classList.add("is-active"); // 🔥 glow ON
 
                 const currentPlayer = globalPlayers[currentGlobalIndex]?.playerEl;
                 if (currentPlayer) currentPlayer.classList.add("is-playing");
             } else {
                 currentAudio.pause();
-                miniPlayPauseBtn.textContent = "▶️";
+                miniPlayPauseBtn.textContent = "▶";
                 miniPlayer.classList.remove("is-active"); // 💡 glow OFF
 
                 const currentPlayer = globalPlayers[currentGlobalIndex]?.playerEl;
