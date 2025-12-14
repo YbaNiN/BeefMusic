@@ -719,19 +719,20 @@ body {
         </div>
 
         <div class="mini-player-controls">
-    <button id="mini-prev-btn" class="mini-btn mini-btn-skip" aria-label="Anterior">
-        <span class="icon-skip icon-skip-prev" aria-hidden="true"></span>
-    </button>
+            <button id="mini-prev-btn" class="mini-btn mini-btn-skip" aria-label="Anterior">
+                <span class="icon-skip icon-skip-prev" aria-hidden="true"></span>
+            </button>
 
-    <button id="mini-play-pause-btn" class="mini-btn mini-btn-play" aria-label="Reproducir / Pausar">
-        <span class="icon-play" aria-hidden="true"></span>
-        <span class="icon-pause" aria-hidden="true"></span>
-    </button>
+            <button id="mini-play-pause-btn" class="mini-btn mini-btn-play" aria-label="Reproducir / Pausar">
+                <span class="icon-play" aria-hidden="true"></span>
+                <span class="icon-pause" aria-hidden="true"></span>
+            </button>
 
-    <button id="mini-next-btn" class="mini-btn mini-btn-skip" aria-label="Siguiente">
-        <span class="icon-skip icon-skip-next" aria-hidden="true"></span>
-    </button>
-</div>
+            <button id="mini-next-btn" class="mini-btn mini-btn-skip" aria-label="Siguiente">
+                <span class="icon-skip icon-skip-next" aria-hidden="true"></span>
+            </button>
+        </div>
+
         <div class="mini-player-progress">
             <span id="mini-current-time" class="mini-time">0:00</span>
             <input type="range" id="mini-progress-bar" min="0" value="0" step="1">
@@ -770,6 +771,12 @@ body {
         let currentGlobalIndex = -1;
         let currentAudio = null;
 
+        // ✅ FIX: no usar textContent (rompe los spans de iconos)
+        function setMiniPlaying(isPlaying) {
+            miniPlayPauseBtn.classList.toggle("is-playing", isPlaying);
+            miniPlayer.classList.toggle("is-active", isPlaying);
+        }
+
         function formatTimeGlobal(sec) {
             if (!sec || isNaN(sec)) return "0:00";
             const total = Math.floor(sec);
@@ -794,7 +801,8 @@ body {
             miniProgressBar.max = duration || 0;
             miniProgressBar.value = audioEl.currentTime || 0;
 
-            miniPlayPauseBtn.textContent = audioEl.paused ? "▶" : "⏸";
+            // ✅ FIX: estado visual por clase
+            setMiniPlaying(!audioEl.paused);
         }
 
         function reproducirPorIndice(index) {
@@ -815,9 +823,8 @@ body {
             audio.play();
             playerEl.classList.add("is-playing");
 
-            // 🔥 encendemos el glow del mini player
-            miniPlayer.classList.add("is-active");
-            miniPlayPauseBtn.textContent = "⏸";
+            // ✅ FIX: glow + iconos con clase
+            setMiniPlaying(true);
 
             activarMiniPlayerDesdePlayer(playerEl, audio);
         }
@@ -833,15 +840,13 @@ body {
 
             if (currentAudio.paused) {
                 currentAudio.play();
-                miniPlayPauseBtn.textContent = "⏸";
-                miniPlayer.classList.add("is-active"); // 🔥 glow ON
+                setMiniPlaying(true);
 
                 const currentPlayer = globalPlayers[currentGlobalIndex]?.playerEl;
                 if (currentPlayer) currentPlayer.classList.add("is-playing");
             } else {
                 currentAudio.pause();
-                miniPlayPauseBtn.textContent = "▶";
-                miniPlayer.classList.remove("is-active"); // 💡 glow OFF
+                setMiniPlaying(false);
 
                 const currentPlayer = globalPlayers[currentGlobalIndex]?.playerEl;
                 if (currentPlayer) currentPlayer.classList.remove("is-playing");
@@ -982,6 +987,7 @@ body {
             }
             currentAudio = null;
             currentGlobalIndex = -1;
+
             if (miniTitle) {
                 miniTitle.textContent = "Nada reproduciéndose";
                 miniArtist.textContent = "Selecciona una canción";
@@ -989,8 +995,8 @@ body {
                 miniDuration.textContent = "0:00";
                 miniProgressBar.value = 0;
                 miniProgressBar.max = 0;
-                miniPlayPauseBtn.textContent = "▶";
-                miniPlayer.classList.remove("is-active"); // 💡 glow OFF al resetear
+                // ✅ FIX: reset visual sin romper iconos
+                setMiniPlaying(false);
             }
 
             if (!list || list.length === 0) {
@@ -1171,8 +1177,8 @@ body {
                     if (!audio.paused && audio === currentAudio) {
                         audio.pause();
                         player.classList.remove("is-playing");
-                        miniPlayPauseBtn.textContent = "▶️";
-                        miniPlayer.classList.remove("is-active"); // 💡 glow OFF al pausar desde la card
+                        // ✅ FIX: sin textContent
+                        setMiniPlaying(false);
                         return;
                     }
 
@@ -1187,7 +1193,8 @@ body {
 
                     audio.play();
                     player.classList.add("is-playing");
-                    miniPlayer.classList.add("is-active"); // 🔥 glow ON al reproducir desde la card
+                    // ✅ FIX: glow + iconos por clase
+                    setMiniPlaying(true);
                     activarMiniPlayerDesdePlayer(player, audio);
                 });
 
