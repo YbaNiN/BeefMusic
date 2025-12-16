@@ -19,12 +19,20 @@
 
         /* HEADER CON BOTONES AND USER */
         .header-actions {
+            position: sticky;
+            top: 0;
+            z-index: 50;
             display: flex;
             align-items: center;
             justify-content: flex-end;
             gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 24px;
+            padding: 12px 0;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 18px;
         }
 
         .user-profile {
@@ -452,9 +460,21 @@
             }
 
             .header-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 12px 0;
+            background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 18px;
+        }
 
                 .header-actions .btn {
                     width: 100%;
@@ -512,7 +532,22 @@
                 border-radius: 16px;
             }
         }
-    </style>
+    
+        @media (max-width: 700px) {
+            .header-actions {
+                justify-content: space-between;
+                padding: 12px 0;
+            }
+            .header-actions .btn,
+            .header-actions a.btn {
+                width: 100%;
+                justify-content: center;
+            }
+            .user-profile {
+                width: 100%;
+            }
+        }
+</style>
 </head>
 <body>
     <div class="page">
@@ -584,17 +619,7 @@
                     en el <strong>Discord</strong> y desde ahí se trabaja hasta que sale un tema
                     listo para escuchar y compartir desde la web.
                 </p>
-
-                <div class="hero-actions">
-                    <button class="btn btn-primary" id="open-request-2">
-                        <span class="btn-icon">✉</span>
-                        Enviar petición ahora
-                    </button>
-                    <a href="canciones.html" class="btn btn-ghost">
-                        Ver últimas canciones
-                    </a>
-                </div>
-                <div class="hero-meta">
+<div class="hero-meta">
                     <div class="hero-meta-item">
                         <span>Comunidad</span>
                         <div><span class="hero-meta-accent">+200</span> ideas convertidas en letras y beats</div>
@@ -808,16 +833,7 @@
                         donde se revisa y se decide cómo convertirla en tema.
                     </div>
                 </div>
-
-                <div class="hero-actions">
-                    <button class="btn btn-primary" id="open-request-3">
-                        Enviar mi primera petición
-                    </button>
-                    <button class="btn btn-ghost" id="discord-join-btn">
-                        Unirme al servidor de Discord
-                    </button>
-                </div>
-            </div>
+</div>
         </section>
 
         <!-- FOOTER -->
