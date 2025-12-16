@@ -49,6 +49,41 @@
     }
     .comment-replybox{ margin-top:10px; display:none; }
     .comment-replybox.open{ display:block; }
+    /* ===== Comunidad: responsive ===== */
+.grid-2 { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); }
+.card, .item { min-width: 0; } /* evita overflow en grid */
+.input, .textarea, .select { min-width: 0; }
+
+@media (max-width: 980px){
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px){
+  .page-wrap { padding: 18px 12px 44px; }
+  .topbar { flex-wrap: wrap; }
+  .topbar .brand { width: 100%; justify-content: space-between; }
+  .topbar .row { width: 100%; justify-content: space-between; }
+
+  /* filas → columna */
+  .row { align-items: stretch; }
+  .row > .input,
+  .row > .select,
+  .row > .field,
+  .row > button,
+  .row > .btn { width: 100%; }
+
+  /* botones del header */
+  #logout-btn { width: 100%; justify-content: center; }
+
+  /* comentarios: acciones se apilan */
+  .comment-actions { width: 100%; justify-content: flex-start; }
+}
+
+@media (max-width: 480px){
+  .pill { width: 100%; text-align: center; }
+  .card { padding: 14px; }
+}
+
   </style>
 </head>
 
@@ -240,6 +275,25 @@
       try { return new Date(iso).toLocaleString(); } catch { return ""; }
     }
 
+    const PROFILE_PAGE = "comunidad.html"; // mismo archivo
+const SONG_DETAIL_PAGE = "cancion.html"; // <-- cambia si tu detalle se llama distinto (ej: canciones.html)
+
+function profileUrl(username){
+  // En estático lo más fiable es query param:
+  return `${PROFILE_PAGE}?u=${encodeURIComponent(username)}`;
+}
+
+function songUrl(songId){
+  // Si tienes página detalle:
+  return `${SONG_DETAIL_PAGE}?id=${encodeURIComponent(songId)}`;
+  // Si NO tienes detalle, comenta lo de arriba y usa esto:
+  // return `comunidad.html?song=${encodeURIComponent(songId)}#comentarios`;
+}
+
+function scrollToId(id){
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
     // ====== UI: user pill / logout ======
     function refreshAuthUI(){
       const pill = document.getElementById("user-pill");
@@ -288,17 +342,17 @@
       const badges = (sound.badges || []).map(b => `<span class="badge">${escapeHtml(b.icon)} ${escapeHtml(b.label)}</span>`).join(" ");
 
       const topSongs = top.length ? `
-        <div class="divider"></div>
-        <div class="muted" style="margin-bottom:8px;">Top likes recientes</div>
-        <div class="list">
-          ${top.map(song => `
-            <div class="item">
-              <div><strong>${escapeHtml(song.titulo || "Sin título")}</strong></div>
-              <div class="small">${escapeHtml(song.estilo || "—")} · ${escapeHtml(song.autor || "")}</div>
-            </div>
-          `).join("")}
-        </div>
-      ` : "";
+      <div class="divider"></div>
+      <div class="muted" style="margin-bottom:8px;">Top likes recientes</div>
+      <div class="list">
+    ${top.map(song => `
+        <a class="item" href="${songUrl(song.id)}" style="display:block">
+          <div><strong>${escapeHtml(song.titulo || "Sin título")}</strong></div>
+          <div class="small">${escapeHtml(song.estilo || "—")} · ${escapeHtml(song.autor || "")}</div>
+        </a>
+       `).join("")}
+       </div>
+       ` : "";
 
       const followBtn = (typeof s.isFollowing === "boolean" && u?.id) ? `
         <button class="btn ${s.isFollowing ? "btn-ghost" : "btn-primary"}" id="follow-btn" data-user-id="${u.id}" data-following="${s.isFollowing}">
@@ -412,14 +466,22 @@
     let feedOffset = 0;
     let feedDone = false;
 
-    function renderEvent(ev){
-      const u = ev.actor?.username || "alguien";
-      if (ev.verb === "follow") return `${u} siguió a alguien`;
-      if (ev.verb === "like_song") return `${u} dio like a “${ev.metadata?.songTitle || "una canción"}”`;
-      if (ev.verb === "dislike_song") return `${u} dio dislike a “${ev.metadata?.songTitle || "una canción"}”`;
-      if (ev.verb === "comment_song") return `${u} comentó en “${ev.metadata?.songTitle || "una canción"}”`;
-      return `${u} hizo ${ev.verb}`;
-    }
+  function renderEvent(ev){
+  const u = ev.actor?.username || "alguien";
+  const userLink = `<a class="pill" href="${profileUrl(u)}">@${escapeHtml(u)}</a>`;
+
+  const title = ev.metadata?.songTitle || "una canción";
+  const songId = ev.objectId || ev.metadata?.songId || "";
+  const songLink = songId
+    ? `<a class="pill" href="${songUrl(songId)}">${escapeHtml(title)}</a>`
+    : `“${escapeHtml(title)}”`;
+
+  if (ev.verb === "follow") return `${userLink} siguió a alguien`;
+  if (ev.verb === "like_song") return `${userLink} dio like a ${songLink}`;
+  if (ev.verb === "dislike_song") return `${userLink} dio dislike a ${songLink}`;
+  if (ev.verb === "comment_song") return `${userLink} comentó en ${songLink}`;
+  return `${userLink} hizo ${escapeHtml(ev.verb)}`;
+}
 
     async function loadFeedMore(){
       if (!getToken()) return;
@@ -645,6 +707,15 @@
     (async function init(){
       refreshAuthUI();
       await loadSongsForSelect();
+
+      // Auto-abrir perfil vía ?u=
+      const params = new URLSearchParams(location.search);
+      const u = (params.get("u") || "").trim();
+      if (u) {
+        document.getElementById("profile-search").value = u;
+        loadProfileByUsername(u);
+      }
+
 
       // Feed (si hay token)
       if (getToken()){
