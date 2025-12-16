@@ -416,6 +416,205 @@
             .sound-profile-footer strong {
                 font-weight: 500;
             }
+
+        /* ========== LOGROS (COLECCIÓN) ========== */
+        .achievements-wrap {
+            margin-top: 22px;
+        }
+
+        .achievements-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .achievements-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            opacity: 0.7;
+        }
+
+        .achievements-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .achievements-chip {
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(0, 0, 0, 0.28);
+            cursor: pointer;
+            color: inherit;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+            user-select: none;
+        }
+
+        .achievements-chip:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.24);
+            background: rgba(0, 0, 0, 0.38);
+        }
+
+        .achievements-chip.active {
+            border-color: rgba(255, 255, 255, 0.22);
+            background: radial-gradient(circle at top left, rgba(139, 92, 246, 0.35), rgba(15, 23, 42, 0.75));
+        }
+
+        .achievements-search {
+            border-radius: 999px;
+            padding: 7px 12px;
+            font-size: 0.78rem;
+            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(0,0,0,0.45);
+            color: inherit;
+            min-width: 220px;
+        }
+
+        .achievements-search:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.26);
+            box-shadow: 0 0 0 2px rgba(168,85,247,0.12);
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 14px;
+        }
+
+        .achievement-card {
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(10, 10, 18, 0.72);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
+            padding: 14px 14px 14px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .achievement-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 0 0, rgba(168, 85, 247, 0.16), transparent 55%),
+                        radial-gradient(circle at 100% 0, rgba(236, 72, 153, 0.14), transparent 55%);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+        .achievement-top {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .achievement-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            background: rgba(0,0,0,0.45);
+            border: 1px solid rgba(255,255,255,0.14);
+        }
+
+        .achievement-lock {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            display: none;
+        }
+
+        .achievement-name {
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .achievement-desc {
+            position: relative;
+            z-index: 1;
+            font-size: 0.82rem;
+            opacity: 0.78;
+            line-height: 1.35;
+        }
+
+        .achievement-bottom {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .achievement-progress {
+            font-size: 0.78rem;
+            opacity: 0.75;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .achievement-state {
+            padding: 5px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.06);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-size: 0.65rem;
+            white-space: nowrap;
+        }
+
+        .achievement-bar {
+            position: relative;
+            z-index: 1;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.9);
+            overflow: hidden;
+            box-shadow: inset 0 0 6px rgba(15, 23, 42, 0.9);
+        }
+
+        .achievement-bar-fill {
+            position: absolute;
+            inset: 0;
+            transform-origin: left;
+            transform: scaleX(0);
+            background-image: linear-gradient(90deg, #a855f7, #ec4899, #f97316);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.45;
+            filter: grayscale(1);
+        }
+
+        .achievement-card.locked .achievement-lock {
+            display: inline;
+        }
+
+        @media (max-width: 520px) {
+            .achievements-search {
+                min-width: 100%;
+            }
+        }
+
     </style>
 
 </head>
@@ -514,6 +713,38 @@
                 </div>
             </article>
         </section>
+
+
+        <section class="achievements-wrap">
+            <article class="card">
+                <div class="card-inner">
+                    <div class="achievements-header">
+                        <div>
+                            <div class="achievements-title">Colección de logros</div>
+                            <div style="font-size:0.85rem; opacity:0.75; margin-top:6px;">
+                                100 logros para desbloquear. Los bloqueados se ven en gris.
+                            </div>
+                        </div>
+
+                        <div class="achievements-controls">
+                            <button class="achievements-chip active" type="button" data-filter="all">Todos</button>
+                            <button class="achievements-chip" type="button" data-filter="unlocked">Desbloqueados</button>
+                            <button class="achievements-chip" type="button" data-filter="locked">Bloqueados</button>
+                            <input class="achievements-search" id="achievements-search" type="search" placeholder="Buscar logro…" />
+                        </div>
+                    </div>
+
+                    <div class="achievements-grid" id="achievements-grid">
+                        <!-- Logros generados por JS -->
+                    </div>
+
+                    <div style="margin-top:12px; font-size:0.78rem; opacity:0.7;">
+                        Tip: vota en <strong>Canciones</strong> para subir tu progreso.
+                    </div>
+                </div>
+            </article>
+        </section>
+
     </main>
     <script>
         // Detecta si estás en local o en producción (Render) y ajusta la URL
@@ -590,6 +821,7 @@
                 const profile = await res.json();
                 console.log("Perfil sonoro:", profile);
                 pintarPerfilSonoro(profile);
+                renderAchievements(profile);
 
                 if (statusEl) {
                     if ((profile.totalVotes || 0) === 0) {
@@ -765,6 +997,260 @@
                 }
             }
         }
+    
+        // =========================
+        // LOGROS (100) – COLECCIÓN
+        // =========================
+
+        // Estado de filtros/búsqueda
+        let achievementsFilter = "all"; // all | unlocked | locked
+        let achievementsQuery = "";
+
+        function norm(str) {
+            return (str || "").toString().trim().toLowerCase();
+        }
+
+        function getGenreStat(profile, genreName) {
+            const g = (profile.genres || []).find(x => norm(x.name) === norm(genreName));
+            return {
+                likes: g ? (g.likes || 0) : 0,
+                dislikes: g ? (g.dislikes || 0) : 0
+            };
+        }
+
+        function makeMilestones(prefix, icon, titleFn, descFn, currentFn, thresholds) {
+            return thresholds.map((t, idx) => ({
+                id: `${prefix}_${t}_${idx}`,
+                icon,
+                title: titleFn(t),
+                desc: descFn(t),
+                current: currentFn,
+                target: t
+            }));
+        }
+
+        function buildAchievementsCatalog(profile) {
+            // 1) Votos (25)
+            const voteThresholds = [1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,25,30,35,40,50,60];
+            const votes = makeMilestones(
+                "votes",
+                "🗳️",
+                (t) => `Votante ${t}`,
+                (t) => `Acumula ${t} votos en canciones.`,
+                (p) => p.totalVotes || 0,
+                voteThresholds
+            );
+
+            // 2) Likes (25)
+            const likeThresholds = [1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,25,30,35,40,50,60,75,90,100];
+            const likes = makeMilestones(
+                "likes",
+                "👍",
+                (t) => `Buen oído x${t}`,
+                (t) => `Dale ${t} likes en total.`,
+                (p) => p.totalLikes || 0,
+                likeThresholds
+            );
+
+            // 3) Dislikes (15)
+            const dislikeThresholds = [1,2,3,4,5,7,10,12,15,18,20,25,30];
+            const dislikes = makeMilestones(
+                "dislikes",
+                "👎",
+                (t) => `Crítico x${t}`,
+                (t) => `Dale ${t} dislikes en total.`,
+                (p) => p.totalDislikes || 0,
+                dislikeThresholds
+            );
+
+            // 3.5) Cambios de voto / quitar voto (5)
+            // Requiere que el backend envíe voteSwitches y voteRemovals en /api/sound-profile
+            const switchThresholds = [1,2,5];
+            const voteSwitches = makeMilestones(
+                "vote_switches",
+                "🔁",
+                (t) => (t === 1 ? "Cambio de opinión" : `Cambiaste voto x${t}`),
+                (t) => (t === 1 ? "Cambia tu voto por primera vez." : `Cambia tu voto ${t} veces.`),
+                (p) => p.voteSwitches || 0,
+                switchThresholds
+            );
+
+            const removalThresholds = [1,5];
+            const voteRemovals = makeMilestones(
+                "vote_removals",
+                "🧽",
+                (t) => (t === 1 ? "Voto retirado" : `Retiradas x${t}`),
+                (t) => (t === 1 ? "Quita tu voto por primera vez." : `Quita tu voto ${t} veces.`),
+                (p) => p.voteRemovals || 0,
+                removalThresholds
+            );
+
+            // 4) Toxicidad (10)
+            // Aquí el progreso se mide por porcentaje, target = umbral
+            const toxicityThresholds = [5,10,15,20,30,40,50,60,70,80];
+            const toxicity = makeMilestones(
+                "toxicity",
+                "😈",
+                (t) => `Toxicidad ${t}%`,
+                (t) => `Alcanza un ${t}% de toxicidad musical (dislikes/votos).`,
+                (p) => p.toxicity || 0,
+                toxicityThresholds
+            );
+
+            // 5) Likes por género (24) – 12 géneros * (5 y 20 likes)
+            const GENRES = [
+                "Trap",
+                "Drill",
+                "Dembow",
+                "Reggaetón",
+                "Rap",
+                "Boom Bap",
+                "Afrobeat",
+                "R&B",
+                "Phonk",
+                "Corridos tumbados",
+                "Club / EDM",
+                "Pop urbano"
+            ];
+
+            const genre5 = GENRES.map((g) => ({
+                id: "genre5_" + norm(g).replace(/\s+/g, "_"),
+                icon: "🎚️",
+                title: `Fan de ${g}`,
+                desc: `Consigue 5 likes en el estilo ${g}.`,
+                current: (p) => getGenreStat(p, g).likes,
+                target: 5
+            }));
+
+            const genre20 = GENRES.map((g) => ({
+                id: "genre20_" + norm(g).replace(/\s+/g, "_"),
+                icon: "🏆",
+                title: `Leyenda ${g}`,
+                desc: `Consigue 20 likes en el estilo ${g}.`,
+                current: (p) => getGenreStat(p, g).likes,
+                target: 20
+            }));
+
+            // 6) Diversidad (1) – votar en 5 géneros distintos
+            const diversity = [{
+                id: "diversity_5",
+                icon: "🧬",
+                title: "Paladar amplio",
+                desc: "Vota en 5 géneros distintos (cuenta cualquier voto, like o dislike).",
+                current: (p) => (p.genres || []).length,
+                target: 5
+            }];
+
+            // Total: 22 + 25 + 13 + 5 + 10 + 24 + 1 = 100
+            return [
+                ...votes,
+                ...likes,
+                ...dislikes,
+                ...voteSwitches,
+                ...voteRemovals,
+                ...toxicity,
+                ...genre5,
+                ...genre20,
+                ...diversity
+            ];
+        }
+
+        function renderAchievements(profile) {
+            const grid = document.getElementById("achievements-grid");
+            if (!grid) return;
+
+            const chips = Array.from(document.querySelectorAll(".achievements-chip"));
+            const search = document.getElementById("achievements-search");
+
+            // Bind una sola vez
+            if (!renderAchievements._bound) {
+                chips.forEach((c) => {
+                    c.addEventListener("click", () => {
+                        chips.forEach(x => x.classList.remove("active"));
+                        c.classList.add("active");
+                        achievementsFilter = c.getAttribute("data-filter") || "all";
+                        // re-render
+                        renderAchievements(profile);
+                    });
+                });
+
+                if (search) {
+                    search.addEventListener("input", (e) => {
+                        achievementsQuery = (e.target.value || "").trim().toLowerCase();
+                        renderAchievements(profile);
+                    });
+                }
+
+                renderAchievements._bound = true;
+            }
+
+            const catalog = buildAchievementsCatalog(profile);
+
+            // Filtrar
+            let list = catalog.map((a) => {
+                const cur = Math.max(0, Number(a.current(profile) || 0));
+                const tgt = Math.max(1, Number(a.target || 1));
+                const unlocked = cur >= tgt;
+
+                // progreso 0..1
+                const pct = Math.max(0, Math.min(1, cur / tgt));
+
+                return { ...a, cur, tgt, unlocked, pct };
+            });
+
+            if (achievementsFilter === "unlocked") list = list.filter(x => x.unlocked);
+            if (achievementsFilter === "locked") list = list.filter(x => !x.unlocked);
+
+            if (achievementsQuery) {
+                list = list.filter(x =>
+                    x.title.toLowerCase().includes(achievementsQuery) ||
+                    x.desc.toLowerCase().includes(achievementsQuery)
+                );
+            }
+
+            // Orden: primero desbloqueados, luego por progreso descendente, luego por target
+            list.sort((a,b) => {
+                if (a.unlocked !== b.unlocked) return a.unlocked ? -1 : 1;
+                if (b.pct !== a.pct) return b.pct - a.pct;
+                return a.tgt - b.tgt;
+            });
+
+            if (list.length === 0) {
+                grid.innerHTML = `
+                    <div style="opacity:0.75; font-size:0.86rem;">
+                        No hay resultados con ese filtro/búsqueda.
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = list.map((a) => {
+                const state = a.unlocked ? "Desbloqueado" : "Bloqueado";
+                const progressText = `${Math.min(a.cur, a.tgt)}/${a.tgt}`;
+
+                return `
+                    <article class="achievement-card ${a.unlocked ? "" : "locked"}">
+                        <div class="achievement-top">
+                            <div class="achievement-icon">${a.icon}</div>
+                            <div class="achievement-lock">🔒</div>
+                        </div>
+
+                        <div class="achievement-name">${a.title}</div>
+                        <div class="achievement-desc">${a.desc}</div>
+
+                        <div class="achievement-bar" aria-hidden="true">
+                            <div class="achievement-bar-fill" style="transform: scaleX(${a.pct});"></div>
+                        </div>
+
+                        <div class="achievement-bottom">
+                            <div class="achievement-progress">${progressText}</div>
+                            <div class="achievement-state">${state}</div>
+                        </div>
+                    </article>
+                `;
+            }).join("");
+        }
+
     </script>
 </body>
 </html>
