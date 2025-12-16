@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeefMusic – Peticiones</title>
+
+  <!-- Fuente -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Si ya tienes styles.css global, déjalo -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    /* ====== Base (fallback por si styles.css no incluye variables) ====== */
+    :root {
+      --bg-main: #050509;
+      --bg-secondary: #0b0c12;
+      --bg-card: rgba(18, 18, 28, 0.9);
+      --fg-primary: #ffffff;
+      --fg-muted: #a5a6b3;
+      --accent-pink: #ff2757;
+      --accent-purple: #8a4dff;
+      --accent-soft: rgba(255, 255, 255, 0.05);
+      --border-soft: rgba(255, 255, 255, 0.08);
+      --radius-lg: 32px;
+      --radius-md: 20px;
+      --transition-fast: 0.25s ease;
+      --shadow-soft: 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #31112f 0, #050509 45%, #050509 100%);
+      color: var(--fg-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    .page { max-width: 1200px; margin: 0 auto; padding: 24px 20px 80px; }
+
+    /* ====== Header (mismo rollo que tu home) ====== */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
+      background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(5,5,9,0.95));
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-soft);
+      position: sticky;
+      top: 16px;
+      z-index: 20;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      overflow: hidden;
+      background-image: url("img/logo.gif");
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: 0 0 16px rgba(0, 0, 0, 0.6);
+      flex-shrink: 0;
+    }
+    .nav {
+      display: flex;
+      gap: 18px;
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .nav a {
+      position: relative;
+      padding-bottom: 2px;
+    }
+    .nav a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -4px;
+      width: 0;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+      transition: width var(--transition-fast);
+    }
+    .nav a:hover::after { width: 100%; }
+    .nav a.active { color: var(--fg-primary); }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--fg-primary);
+      cursor: pointer;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), border var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .btn-ghost {
+      border-color: var(--border-soft);
+      background: rgba(5,5,9,0.7);
+    }
+    .btn-ghost:hover { transform: translateY(-1px); box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+      box-shadow: 0 10px 32px rgba(255, 39, 87, 0.6);
+    }
+    .btn-primary:hover { transform: translateY(-1px) scale(1.01); box-shadow: 0 16px 40px rgba(255, 39, 87, 0.8); }
+
+    /* ====== Hero pequeño ====== */
+    .hero-mini {
+      margin-top: 22px;
+      padding: 26px 22px;
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(circle at top left, rgba(255,39,87,0.26), transparent 55%),
+        radial-gradient(circle at top right, rgba(138,77,255,0.28), transparent 55%),
+        linear-gradient(145deg, #050509 0, #10101a 40%, #050509 100%);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-mini::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle at 20% 0, rgba(255,255,255,0.10) 0, transparent 52%);
+      opacity: 0.45;
+      pointer-events: none;
+    }
+    .hero-mini-inner { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; }
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      font-size: 0.7rem;
+      color: var(--fg-muted);
+    }
+    .kdot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-pink); }
+    .title {
+      font-size: clamp(1.7rem, 3.6vw, 2.2rem);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.05;
+    }
+    .subtitle {
+      max-width: 740px;
+      color: var(--fg-muted);
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    /* ====== Panel filtros ====== */
+    .filters {
+      margin-top: 18px;
+      border-radius: var(--radius-md);
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      box-shadow: 0 16px 44px rgba(0,0,0,0.55);
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 180px;
+      flex: 1;
+    }
+    .field label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(165,166,179,0.95);
+    }
+    .control {
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.70);
+      color: var(--fg-primary);
+      padding: 10px 10px;
+      font: inherit;
+      outline: none;
+      min-height: 40px;
+    }
+    .control::placeholder { color: rgba(165,166,179,0.6); }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.55);
+      min-height: 40px;
+      white-space: nowrap;
+    }
+    .toggle-row input { transform: translateY(1px); }
+
+    .filters-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    /* ====== Lista / Cards ====== */
+    .section {
+      margin-top: 22px;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .section-head h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .meta-line {
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+    }
+
+    .grid {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .req-card {
+      border-radius: 20px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: var(--shadow-soft);
+      padding: 14px 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 150px;
+      transition: transform var(--transition-fast), border var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .req-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255,255,255,0.22);
+      box-shadow: 0 22px 52px rgba(0,0,0,0.72);
+    }
+
+    .req-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .req-style {
+      font-weight: 600;
+      font-size: 1.02rem;
+      line-height: 1.1;
+    }
+    .req-date {
+      font-size: 0.78rem;
+      color: var(--fg-muted);
+      white-space: nowrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      width: fit-content;
+    }
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.35);
+      box-shadow: 0 0 10px rgba(255,255,255,0.18);
+    }
+    .badge.pendiente { border-color: rgba(255,39,87,0.35); }
+    .badge.pendiente .dot { background: var(--accent-pink); box-shadow: 0 0 12px rgba(255,39,87,0.7); }
+
+    .badge.en_produccion { border-color: rgba(138,77,255,0.35); }
+    .badge.en_produccion .dot { background: var(--accent-purple); box-shadow: 0 0 12px rgba(138,77,255,0.7); }
+
+    .badge.terminada { border-color: rgba(255,255,255,0.22); }
+    .badge.terminada .dot { background: rgba(255,255,255,0.75); box-shadow: 0 0 12px rgba(255,255,255,0.4); }
+
+    .req-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--fg-muted);
+      font-size: 0.85rem;
+    }
+    .req-row strong { color: var(--fg-primary); font-weight: 500; }
+
+    .req-note {
+      font-size: 0.78rem;
+      color: rgba(165,166,179,0.78);
+      line-height: 1.35;
+    }
+
+    /* ====== Estados de UI ====== */
+    .empty, .errorbox {
+      border-radius: 18px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 14px;
+      color: var(--fg-muted);
+    }
+
+    .footer-actions {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+    }
+
+    footer {
+      margin-top: 60px;
+      font-size: 0.78rem;
+      color: var(--fg-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 18px;
+    }
+    .footer-links { display: flex; gap: 14px; flex-wrap: wrap; }
+    .footer-links a { opacity: 0.8; }
+    .footer-links a:hover { opacity: 1; }
+
+    /* ====== Responsive ====== */
+    @media (max-width: 980px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      header { border-radius: 20px; }
+    }
+    @media (max-width: 720px) {
+      .page { padding: 16px 16px 64px; }
+      header { position: static; flex-wrap: wrap; align-items: flex-start; border-radius: 18px; }
+      .nav { display: none; }
+      .grid { grid-template-columns: minmax(0, 1fr); }
+      .filters { padding: 12px; }
+      .filters-actions { width: 100%; justify-content: stretch; }
+      .filters-actions .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <header>
+      <a class="logo" href="index.html" aria-label="BeefMusic Home">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>BeefMusic</span>
+      </a>
+
+      <nav class="nav" aria-label="Navegación">
+        <a href="index.html">Inicio</a>
+        <a href="canciones.html">Canciones</a>
+        <a href="perfil.html">Perfil sonoro</a>
+        <a href="peticiones.html" class="active">Peticiones</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="btn btn-ghost" href="index.html">Volver</a>
+        <a class="btn btn-primary" href="canciones.html">▶ Ver canciones</a>
+      </div>
+    </header>
+
+    <section class="hero-mini">
+      <div class="hero-mini-inner">
+        <div class="kicker">
+          <span class="kdot"></span>
+          <span>Transparencia</span>
+        </div>
+        <h1 class="title">Peticiones en curso</h1>
+        <p class="subtitle">
+          Aquí se ve el estado de las peticiones (sin enseñar el texto completo).
+          A veces el nick sale, <strong>solo si la persona lo acepta</strong>.
+        </p>
+
+        <div class="filters" role="region" aria-label="Filtros de peticiones">
+          <div class="field">
+            <label for="estado">Estado</label>
+            <select id="estado" class="control">
+              <option value="">Todos</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="en_produccion">En producción</option>
+              <option value="terminada">Terminada</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="estilo">Estilo (exacto)</label>
+            <input id="estilo" class="control" type="text" placeholder="Ej: Drill, Trap, Dembow..." />
+          </div>
+
+          <div class="toggle-row" title="Oculta las peticiones anónimas">
+            <input id="soloConNick" type="checkbox" />
+            <label for="soloConNick" style="cursor:pointer; color: var(--fg-muted); font-size:0.85rem;">
+              Solo con nick visible
+            </label>
+          </div>
+
+          <div class="filters-actions">
+            <button id="btn-aplicar" class="btn btn-primary" type="button">Aplicar</button>
+            <button id="btn-limpiar" class="btn btn-ghost" type="button">Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <h2>Listado</h2>
+        <div class="meta-line" id="metaLine">Cargando…</div>
+      </div>
+
+      <div id="errorBox" class="errorbox" style="display:none;"></div>
+      <div id="emptyBox" class="empty" style="display:none;">
+        No hay peticiones con esos filtros (o aún no se han publicado).
+      </div>
+
+      <div id="grid" class="grid" aria-live="polite"></div>
+
+      <div class="footer-actions">
+        <button id="btn-mas" class="btn btn-ghost" type="button" style="display:none;">
+          Cargar más
+        </button>
+      </div>
+    </section>
+
+    <footer>
+      <span>© <span id="year"></span> BeefMusic. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
+        <a href="#">Contacto</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ✅ Backend (Render)
+    const API_URL = "https://beefmusic-backend.onrender.com";
+
+    // UI
+    const estadoEl = document.getElementById("estado");
+    const estiloEl = document.getElementById("estilo");
+    const soloConNickEl = document.getElementById("soloConNick");
+    const btnAplicar = document.getElementById("btn-aplicar");
+    const btnLimpiar = document.getElementById("btn-limpiar");
+    const btnMas = document.getElementById("btn-mas");
+    const grid = document.getElementById("grid");
+    const metaLine = document.getElementById("metaLine");
+    const emptyBox = document.getElementById("emptyBox");
+    const errorBox = document.getElementById("errorBox");
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Paginación
+    const LIMIT = 24;
+    let offset = 0;
+    let lastBatchCount = 0;
+    let totalRendered = 0;
+    let loading = false;
+
+    function formatDate(iso) {
+      try {
+        const d = new Date(iso);
+        return d.toLocaleDateString("es-ES", { year: "numeric", month: "short", day: "2-digit" });
+      } catch {
+        return iso || "";
+      }
+    }
+
+    function estadoLabel(key) {
+      if (key === "pendiente") return "Pendiente";
+      if (key === "en_produccion") return "En producción";
+      if (key === "terminada") return "Terminada";
+      return "Desconocido";
+    }
+
+    function setStatus(text, isError = false) {
+      metaLine.textContent = text;
+      errorBox.style.display = isError ? "block" : "none";
+      if (isError) errorBox.textContent = text;
+    }
+
+    function clearList() {
+      grid.innerHTML = "";
+      emptyBox.style.display = "none";
+      errorBox.style.display = "none";
+      offset = 0;
+      lastBatchCount = 0;
+      totalRendered = 0;
+      btnMas.style.display = "none";
+    }
+
+    function getFilters() {
+      return {
+        estado: (estadoEl.value || "").trim(),
+        estilo: (estiloEl.value || "").trim(),
+        soloConNick: !!soloConNickEl.checked
+      };
+    }
+
+    function syncFiltersToURL() {
+      const f = getFilters();
+      const url = new URL(window.location.href);
+      url.searchParams.set("estado", f.estado);
+      url.searchParams.set("estilo", f.estilo);
+      url.searchParams.set("soloConNick", f.soloConNick ? "1" : "0");
+      // Limpia params vacíos
+      if (!f.estado) url.searchParams.delete("estado");
+      if (!f.estilo) url.searchParams.delete("estilo");
+      if (!f.soloConNick) url.searchParams.delete("soloConNick");
+      history.replaceState(null, "", url.toString());
+    }
+
+    function loadFiltersFromURL() {
+      const url = new URL(window.location.href);
+      const estado = url.searchParams.get("estado") || "";
+      const estilo = url.searchParams.get("estilo") || "";
+      const solo = url.searchParams.get("soloConNick") === "1";
+
+      estadoEl.value = estado;
+      estiloEl.value = estilo;
+      soloConNickEl.checked = solo;
+    }
+
+    function buildEndpointUrl({ estado, estilo, limit, offset }) {
+      const url = new URL(API_URL + "/api/peticiones-publicas");
+      url.searchParams.set("limit", String(limit));
+      url.searchParams.set("offset", String(offset));
+      if (estado) url.searchParams.set("estado", estado);
+      if (estilo) url.searchParams.set("estilo", estilo);
+      return url.toString();
+    }
+
+    function createCard(p) {
+      const estadoKey = p.estado || "desconocido";
+      const style = p.estilo || "Desconocido";
+      const date = formatDate(p.created_at);
+      const nickVisible = (p.nick && String(p.nick).trim().length > 0);
+
+      const card = document.createElement("article");
+      card.className = "req-card";
+
+      card.innerHTML = `
+        <div class="req-top">
+          <div>
+            <div class="req-style">${escapeHtml(style)}</div>
+            <div class="req-note">Petición ${nickVisible ? "con nick visible" : "anónima (nick oculto)"}</div>
+          </div>
+          <div class="req-date">${escapeHtml(date)}</div>
+        </div>
+
+        <div class="badge ${escapeAttr(estadoKey)}">
+          <span class="dot"></span>
+          <span>${escapeHtml(estadoLabel(estadoKey))}</span>
+        </div>
+
+        <div class="req-row">
+          <span>Usuario:</span>
+          <strong>${nickVisible ? escapeHtml(p.nick) : "Anónimo"}</strong>
+        </div>
+
+        <div class="req-row" style="opacity:0.9;">
+          <span>ID:</span>
+          <strong>#${escapeHtml(String(p.id || ""))}</strong>
+        </div>
+      `;
+
+      return card;
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+    function escapeAttr(str) {
+      return String(str ?? "").replaceAll('"', "");
+    }
+
+    async function fetchBatch({ append }) {
+      if (loading) return;
+      loading = true;
+
+      const f = getFilters();
+      syncFiltersToURL();
+
+      if (!append) {
+        clearList();
+        setStatus("Cargando…");
+      } else {
+        setStatus(`Cargando más… (${totalRendered} mostradas)`);
+      }
+
+      try {
+        const endpoint = buildEndpointUrl({
+          estado: f.estado,
+          estilo: f.estilo,
+          limit: LIMIT,
+          offset: offset
+        });
+
+        const res = await fetch(endpoint);
+        const json = await res.json();
+
+        if (!res.ok || json?.error) {
+          const msg = json?.error || "Error obteniendo peticiones públicas.";
+          setStatus("❌ " + msg, true);
+          loading = false;
+          return;
+        }
+
+        let items = Array.isArray(json) ? json : [];
+
+        // Filtro client-side: solo con nick visible
+        if (f.soloConNick) {
+          items = items.filter(p => p.nick && String(p.nick).trim().length > 0);
+        }
+
+        lastBatchCount = items.length;
+
+        if (!items.length && !append) {
+          setStatus("0 resultados");
+          emptyBox.style.display = "block";
+          btnMas.style.display = "none";
+          loading = false;
+          return;
+        }
+
+        emptyBox.style.display = "none";
+
+        // Render
+        const frag = document.createDocumentFragment();
+        items.forEach((p) => frag.appendChild(createCard(p)));
+        grid.appendChild(frag);
+
+        totalRendered += items.length;
+        offset += LIMIT;
+
+        // Botón “más”: si el backend devolvió algo (aunque luego filtremos client-side)
+        // aquí lo hacemos simple: si vino el batch completo, mostramos “más”.
+        // Si quieres perfecto, quita el filtro client-side o añade un parámetro en backend.
+        btnMas.style.display = (items.length >= Math.min(LIMIT, items.length) && items.length > 0) ? "inline-flex" : "none";
+
+        setStatus(`${totalRendered} peticiones mostradas`);
+      } catch (err) {
+        console.error(err);
+        setStatus("❌ Error de conexión con el servidor.", true);
+      } finally {
+        loading = false;
+      }
+    }
+
+    // Eventos
+    btnAplicar.addEventListener("click", () => fetchBatch({ append: false }));
+    btnLimpiar.addEventListener("click", () => {
+      estadoEl.value = "";
+      estiloEl.value = "";
+      soloConNickEl.checked = false;
+      fetchBatch({ append: false });
+    });
+    btnMas.addEventListener("click", () => fetchBatch({ append: true }));
+
+    // Init
+    loadFiltersFromURL();
+    fetchBatch({ append: false });
+  </script>
+</body>
+</html>
