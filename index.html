@@ -1159,9 +1159,13 @@
                     requestStatusEl.textContent = "Enviando petición...";
                 }
 
+                const requestToken = localStorage.getItem("beefmusic_user_token");
+                const requestHeaders = { "Content-Type": "application/json" };
+                if (requestToken) requestHeaders.Authorization = `Bearer ${requestToken}`;
+
                 fetch(API_URL + "/api/peticiones", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: requestHeaders,
                     body: JSON.stringify(data),
                 })
                     .then((res) => res.json())
@@ -1207,9 +1211,13 @@
                     suggestionStatusEl.textContent = "Enviando sugerencia...";
                 }
 
+                const suggestionToken = localStorage.getItem("beefmusic_user_token");
+                const suggestionHeaders = { "Content-Type": "application/json" };
+                if (suggestionToken) suggestionHeaders.Authorization = `Bearer ${suggestionToken}`;
+
                 fetch(API_URL + "/api/sugerencias", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: suggestionHeaders,
                     body: JSON.stringify(data),
                 })
                     .then((res) => res.json())
@@ -1255,9 +1263,13 @@
                     reportStatusEl.textContent = "Enviando reporte...";
                 }
 
+                const reportToken = localStorage.getItem("beefmusic_user_token");
+                const reportHeaders = { "Content-Type": "application/json" };
+                if (reportToken) reportHeaders.Authorization = `Bearer ${reportToken}`;
+
                 fetch(API_URL + "/api/reportes", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: reportHeaders,
                     body: JSON.stringify(data),
                 })
                     .then((res) => res.json())
