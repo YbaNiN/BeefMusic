@@ -1898,6 +1898,1000 @@ app.get("/api/sound-profile", authUser, async (req, res) => {
     }
 });
 
+// === HELPERS SOCIAL ===
+function clampInt(n, min, max, fallback) {
+  const v = Number.parseInt(n, 10);
+  if (Number.isNaN(v)) return fallback;
+  return Math.max(min, Math.min(max, v));
+}
+
+function isHttpUrl(s) {
+  try {
+    const u = new URL(String(s));
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+// === COMMENTS: anti-spam simple (memoria) ===
+const commentRate = new Map(); // userId -> { lastAt, windowStart, count }
+
+function canUserComment(userId) {
+  const now = Date.now();
+  const cooldownMs = 8000;      // 1 comentario cada 8s
+  const windowMs = 60 * 60 * 1000; // 1h
+  const maxPerWindow = 40;      // 40 comentarios/hora
+
+  const row = commentRate.get(String(userId)) || { lastAt: 0, windowStart: now, count: 0 };
+
+  if (now - row.lastAt < cooldownMs) {
+    return { ok: false, reason: "Cooldown: espera unos segundos antes de comentar otra vez." };
+  }
+
+  if (now - row.windowStart > windowMs) {
+    row.windowStart = now;
+    row.count = 0;
+  }
+
+  if (row.count >= maxPerWindow) {
+    return { ok: false, reason: "Límite horario alcanzado. Inténtalo más tarde." };
+  }
+
+  row.lastAt = now;
+  row.count += 1;
+  commentRate.set(String(userId), row);
+
+  return { ok: true };
+}
+
+// === LISTAR COMENTARIOS DE CANCIÓN (PÚBLICO) ===
+app.get("/api/canciones/:id/comments", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const limit = Math.min(parseInt(req.query.limit || "50", 10), 100);
+    const offset = Math.max(parseInt(req.query.offset || "0", 10), 0);
+
+    // (Opcional) comprobar que existe la canción
+    const { data: song, error: errorSong } = await supabase
+      .from("canciones")
+      .select("id")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (errorSong) {
+      console.error("Supabase error (select cancion comments):", errorSong);
+      return res.status(500).json({ error: "Error buscando la canción" });
+    }
+    if (!song) return res.status(404).json({ error: "Canción no encontrada" });
+
+    const { data: comments, error } = await supabase
+      .from("song_comments")
+      .select("id, cancion_id, usuario_id, body, parent_id, status, created_at, updated_at")
+      .eq("cancion_id", id)
+      .eq("status", "visible")
+      .order("created_at", { ascending: true })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error("Supabase error (select song_comments):", error);
+      return res.status(500).json({ error: "Error obteniendo comentarios" });
+    }
+
+    // Traer usernames
+    const userIds = Array.from(new Set((comments || []).map(c => c.usuario_id)));
+    let usersMap = new Map();
+    if (userIds.length) {
+      const { data: users, error: uErr } = await supabase
+        .from("usuarios")
+        .select("id, username")
+        .in("id", userIds);
+
+      if (uErr) console.error("Supabase error (select users comments):", uErr);
+      usersMap = new Map((users || []).map(u => [String(u.id), u.username]));
+    }
+
+    const items = (comments || []).map(c => ({
+      id: c.id,
+      songId: c.cancion_id,
+      user: { id: c.usuario_id, username: usersMap.get(String(c.usuario_id)) || "unknown" },
+      body: c.body,
+      parentId: c.parent_id,
+      createdAt: c.created_at,
+      updatedAt: c.updated_at,
+    }));
+
+    return res.json({
+      items,
+      nextOffset: items.length === limit ? offset + limit : null,
+    });
+  } catch (err) {
+    console.error("Error en GET /api/canciones/:id/comments:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// === CREAR COMENTARIO (USER) ===
+app.post("/api/canciones/:id/comments", authUser, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId; // :contentReference[oaicite:4]{index=4}
+    const { body, parentId } = req.body || {};
+
+    const text = typeof body === "string" ? body.trim() : "";
+    if (!text) return res.status(400).json({ error: "El comentario está vacío" });
+    if (text.length > 800) return res.status(400).json({ error: "Máximo 800 caracteres" });
+
+    const rate = canUserComment(userId);
+    if (!rate.ok) return res.status(429).json({ error: rate.reason });
+
+    // comprobar canción existe
+    const { data: song, error: errorSong } = await supabase
+      .from("canciones")
+      .select("id, titulo, estilo")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (errorSong) {
+      console.error("Supabase error (select cancion create comment):", errorSong);
+      return res.status(500).json({ error: "Error buscando la canción" });
+    }
+    if (!song) return res.status(404).json({ error: "Canción no encontrada" });
+
+    // si es reply, comprobar que el parent existe y es de la misma canción
+    let parent_id = null;
+    if (parentId !== undefined && parentId !== null && String(parentId).trim() !== "") {
+      const { data: parent, error: pErr } = await supabase
+        .from("song_comments")
+        .select("id, cancion_id, status")
+        .eq("id", parentId)
+        .maybeSingle();
+
+      if (pErr) {
+        console.error("Supabase error (select parent comment):", pErr);
+        return res.status(500).json({ error: "Error validando respuesta" });
+      }
+      if (!parent || String(parent.cancion_id) !== String(id) || parent.status !== "visible") {
+        return res.status(400).json({ error: "No puedes responder a ese comentario" });
+      }
+      parent_id = parent.id;
+    }
+
+    const { data: inserted, error } = await supabase
+      .from("song_comments")
+      .insert({
+        cancion_id: id,
+        usuario_id: userId,
+        body: text,
+        parent_id,
+        status: "visible",
+      })
+      .select("id, cancion_id, usuario_id, body, parent_id, status, created_at, updated_at")
+      .single();
+
+    if (error) {
+      console.error("Supabase error (insert song_comments):", error);
+      return res.status(500).json({ error: "Error creando comentario" });
+    }
+
+    // XP (opcional) — solo si añadiste XP.COMMENT :contentReference[oaicite:5]{index=5}
+    if (XP?.COMMENT) await addXp(userId, XP.COMMENT);
+
+    // Evento en feed (si ya metiste logActivityEvent)
+    if (typeof logActivityEvent === "function") {
+      await logActivityEvent({
+        actorId: userId,
+        verb: "comment_song",
+        objectType: "song",
+        objectId: id,
+        metadata: { songTitle: song.titulo || null, estilo: song.estilo || null, commentId: inserted.id },
+        visibility: "public",
+      });
+    }
+
+    return res.status(201).json({
+      message: "Comentario creado",
+      comment: {
+        id: inserted.id,
+        songId: inserted.cancion_id,
+        userId: inserted.usuario_id,
+        body: inserted.body,
+        parentId: inserted.parent_id,
+        createdAt: inserted.created_at,
+        updatedAt: inserted.updated_at,
+      },
+    });
+  } catch (err) {
+    console.error("Error en POST /api/canciones/:id/comments:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// === EDITAR COMENTARIO (USER dueño) ===
+app.patch("/api/comments/:commentId", authUser, async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.userId;
+    const { body } = req.body || {};
+
+    const text = typeof body === "string" ? body.trim() : "";
+    if (!text) return res.status(400).json({ error: "El comentario está vacío" });
+    if (text.length > 800) return res.status(400).json({ error: "Máximo 800 caracteres" });
+
+    const { data: c, error: selErr } = await supabase
+      .from("song_comments")
+      .select("id, usuario_id, status")
+      .eq("id", commentId)
+      .maybeSingle();
+
+    if (selErr) {
+      console.error("Supabase error (select comment for edit):", selErr);
+      return res.status(500).json({ error: "Error buscando comentario" });
+    }
+    if (!c) return res.status(404).json({ error: "Comentario no encontrado" });
+    if (String(c.usuario_id) !== String(userId)) return res.status(403).json({ error: "No es tu comentario" });
+    if (c.status !== "visible") return res.status(400).json({ error: "No puedes editar este comentario" });
+
+    const { data: updated, error: updErr } = await supabase
+      .from("song_comments")
+      .update({ body: text })
+      .eq("id", commentId)
+      .select("id, body, updated_at")
+      .single();
+
+    if (updErr) {
+      console.error("Supabase error (update comment):", updErr);
+      return res.status(500).json({ error: "Error actualizando comentario" });
+    }
+
+    return res.json({
+      message: "Comentario actualizado",
+      comment: { id: updated.id, body: updated.body, updatedAt: updated.updated_at },
+    });
+  } catch (err) {
+    console.error("Error en PATCH /api/comments/:commentId:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// === BORRAR COMENTARIO (USER dueño, soft delete) ===
+app.delete("/api/comments/:commentId", authUser, async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const userId = req.user.userId;
+
+    const { data: c, error: selErr } = await supabase
+      .from("song_comments")
+      .select("id, usuario_id, status")
+      .eq("id", commentId)
+      .maybeSingle();
+
+    if (selErr) {
+      console.error("Supabase error (select comment for delete):", selErr);
+      return res.status(500).json({ error: "Error buscando comentario" });
+    }
+    if (!c) return res.status(404).json({ error: "Comentario no encontrado" });
+    if (String(c.usuario_id) !== String(userId)) return res.status(403).json({ error: "No es tu comentario" });
+
+    const { error: updErr } = await supabase
+      .from("song_comments")
+      .update({ status: "deleted", body: "[deleted]" })
+      .eq("id", commentId);
+
+    if (updErr) {
+      console.error("Supabase error (soft delete comment):", updErr);
+      return res.status(500).json({ error: "Error borrando comentario" });
+    }
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("Error en DELETE /api/comments/:commentId:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// === REPORTAR CONTENIDO (USER) ===
+app.post("/api/report/content", authUser, async (req, res) => {
+  try {
+    const reporterId = req.user.userId;
+    const { targetType, targetId, reason } = req.body || {};
+
+    const t = String(targetType || "").trim();
+    const id = targetId;
+    const r = typeof reason === "string" ? reason.trim() : "";
+
+    if (!["comment", "user", "collab"].includes(t)) {
+      return res.status(400).json({ error: "targetType no válido" });
+    }
+    if (!id) return res.status(400).json({ error: "Falta targetId" });
+    if (!r) return res.status(400).json({ error: "Falta reason" });
+    if (r.length > 500) return res.status(400).json({ error: "reason demasiado largo" });
+
+    // Si reportan comentario, comprobar que existe
+    if (t === "comment") {
+      const { data: c, error: cErr } = await supabase
+        .from("song_comments")
+        .select("id, status")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (cErr) {
+        console.error("Supabase error (select comment report):", cErr);
+        return res.status(500).json({ error: "Error buscando comentario" });
+      }
+      if (!c) return res.status(404).json({ error: "Comentario no encontrado" });
+    }
+
+    const { data: rep, error } = await supabase
+      .from("content_reports")
+      .insert({
+        reporter_id: reporterId,
+        target_type: t,
+        target_id: id,
+        reason: r,
+        status: "open",
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      console.error("Supabase error (insert content_reports):", error);
+      return res.status(500).json({ error: "Error creando reporte" });
+    }
+
+    // Auto-hide si un comentario llega a 3 reportes abiertos
+    if (t === "comment") {
+      const { count, error: cntErr } = await supabase
+        .from("content_reports")
+        .select("*", { count: "exact", head: true })
+        .eq("target_type", "comment")
+        .eq("target_id", id)
+        .eq("status", "open");
+
+      if (cntErr) console.error("Supabase error (count reports):", cntErr);
+
+      if ((count || 0) >= 3) {
+        await supabase.from("song_comments").update({ status: "hidden" }).eq("id", id);
+      }
+    }
+
+    return res.status(201).json({ ok: true, reportId: rep.id });
+  } catch (err) {
+    console.error("Error en POST /api/report/content:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// === ADMIN: OCULTAR/MOSTRAR COMENTARIO ===
+app.patch("/api/admin/comments/:commentId/status", authAdmin, async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    const { status } = req.body || {};
+
+    if (!["visible", "hidden"].includes(status)) {
+      return res.status(400).json({ error: "status debe ser visible o hidden" });
+    }
+
+    const { data, error } = await supabase
+      .from("song_comments")
+      .update({ status })
+      .eq("id", commentId)
+      .select("id, status")
+      .single();
+
+    if (error) {
+      console.error("Supabase error (admin update comment status):", error);
+      return res.status(500).json({ error: "Error actualizando comentario" });
+    }
+
+    return res.json({ ok: true, comment: data });
+  } catch (err) {
+    console.error("Error en PATCH /api/admin/comments/:commentId/status:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// === ADMIN: LISTAR REPORTES DE CONTENIDO ===
+app.get("/api/admin/content-reports", authAdmin, async (req, res) => {
+  try {
+    const status = String(req.query.status || "open").trim();
+    const limit = Math.min(parseInt(req.query.limit || "50", 10), 200);
+    const offset = Math.max(parseInt(req.query.offset || "0", 10), 0);
+
+    const allowed = ["open", "resolved", "dismissed"];
+    const st = allowed.includes(status) ? status : "open";
+
+    const { data: reports, error } = await supabase
+      .from("content_reports")
+      .select("id, reporter_id, target_type, target_id, reason, status, created_at, resolved_at")
+      .eq("status", st)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error("Supabase error (select content_reports admin):", error);
+      return res.status(500).json({ error: "Error obteniendo reportes" });
+    }
+
+    // Mapear reporter username
+    const reporterIds = Array.from(new Set((reports || []).map(r => r.reporter_id).filter(Boolean)));
+    let reporterMap = new Map();
+    if (reporterIds.length) {
+      const { data: users, error: uErr } = await supabase
+        .from("usuarios")
+        .select("id, username")
+        .in("id", reporterIds);
+
+      if (uErr) console.error("Supabase error (select users reports):", uErr);
+      reporterMap = new Map((users || []).map(u => [String(u.id), u.username]));
+    }
+
+    const items = (reports || []).map(r => ({
+      ...r,
+      reporter_username: r.reporter_id ? (reporterMap.get(String(r.reporter_id)) || "unknown") : null,
+    }));
+
+    return res.json({
+      items,
+      nextOffset: items.length === limit ? offset + limit : null,
+    });
+  } catch (err) {
+    console.error("Error en GET /api/admin/content-reports:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// === ADMIN: RESOLVER / DESCARTAR REPORTE ===
+app.patch("/api/admin/content-reports/:reportId", authAdmin, async (req, res) => {
+  try {
+    const { reportId } = req.params;
+    const { status } = req.body || {};
+
+    if (!["resolved", "dismissed"].includes(status)) {
+      return res.status(400).json({ error: "status debe ser resolved o dismissed" });
+    }
+
+    const { data, error } = await supabase
+      .from("content_reports")
+      .update({ status, resolved_at: new Date().toISOString() })
+      .eq("id", reportId)
+      .select("id, status, resolved_at")
+      .single();
+
+    if (error) {
+      console.error("Supabase error (update report status):", error);
+      return res.status(500).json({ error: "Error actualizando reporte" });
+    }
+
+    return res.json({ ok: true, report: data });
+  } catch (err) {
+    console.error("Error en PATCH /api/admin/content-reports/:reportId:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// Inserta un evento en el feed (no debe romper nada si falla)
+async function logActivityEvent({ actorId, verb, objectType, objectId = null, metadata = {}, visibility = "public" }) {
+  try {
+    if (!actorId || !verb || !objectType) return;
+
+    await supabase.from("activity_events").insert({
+      actor_id: actorId,
+      verb,
+      object_type: objectType,
+      object_id: objectId,
+      metadata: metadata || {},
+      visibility,
+    });
+  } catch (e) {
+    console.error("Error logActivityEvent:", e?.message || e);
+  }
+}
+
+// Resumen tipo "sound profile" (para perfil público)
+async function buildPublicSoundSummary(userId) {
+  const { voteSwitches, voteRemovals, xp } = await getUserStats(userId);
+  const levelInfo = getLevelInfo(xp);
+
+  const { data: votos, error: errorVotos } = await supabase
+    .from("votos_cancion")
+    .select("tipo, cancion_id")
+    .eq("usuario_id", userId);
+
+  if (errorVotos) {
+    console.error("Supabase error (select votos usuario resumen):", errorVotos);
+    return {
+      totalVotes: 0,
+      totalLikes: 0,
+      totalDislikes: 0,
+      dominantGenre: null,
+      toxicity: 0,
+      badges: [],
+      levelInfo,
+      voteSwitches,
+      voteRemovals,
+    };
+  }
+
+  if (!votos || votos.length === 0) {
+    return {
+      totalVotes: 0,
+      totalLikes: 0,
+      totalDislikes: 0,
+      dominantGenre: null,
+      toxicity: 0,
+      badges: [],
+      levelInfo,
+      voteSwitches,
+      voteRemovals,
+    };
+  }
+
+  const songIds = Array.from(new Set(votos.map(v => v.cancion_id)));
+  const { data: canciones, error: errorSongs } = await supabase
+    .from("canciones")
+    .select("id, estilo")
+    .in("id", songIds);
+
+  if (errorSongs) {
+    console.error("Supabase error (select canciones resumen):", errorSongs);
+  }
+
+  const songMap = new Map();
+  (canciones || []).forEach(c => songMap.set(c.id, c.estilo || "Desconocido"));
+
+  const statsByGenre = {};
+  let totalVotes = 0, totalLikes = 0, totalDislikes = 0;
+
+  for (const v of votos) {
+    const estiloOriginal = songMap.get(v.cancion_id) || "Desconocido";
+    const { key, label } = normalizarGenero(estiloOriginal);
+
+    if (!statsByGenre[key]) statsByGenre[key] = { label, likes: 0, dislikes: 0 };
+
+    if (v.tipo === "like") { statsByGenre[key].likes++; totalLikes++; }
+    if (v.tipo === "dislike") { statsByGenre[key].dislikes++; totalDislikes++; }
+    totalVotes++;
+  }
+
+  const genres = Object.values(statsByGenre)
+    .map(g => ({ name: g.label, likes: g.likes, dislikes: g.dislikes }))
+    .sort((a, b) => (b.likes + b.dislikes) - (a.likes + a.dislikes));
+
+  const dominantGenre = genres.length ? genres[0].name : null;
+  const toxicity = totalVotes > 0 ? Math.round((totalDislikes / totalVotes) * 100) : 0;
+
+  const badges = [];
+  if (totalVotes >= 1) badges.push({ icon: "🔥", label: "Primer beef votado" });
+  if (totalLikes >= 10) badges.push({ icon: "🎧", label: "10 likes" });
+  if (totalLikes >= 30 && dominantGenre) badges.push({ icon: "🖤", label: `Fan del ${dominantGenre}` });
+  if (totalDislikes >= 10) badges.push({ icon: "💣", label: "Hater elegante (10 dislikes)" });
+
+  return { totalVotes, totalLikes, totalDislikes, dominantGenre, toxicity, badges, levelInfo, voteSwitches, voteRemovals };
+}
+
+// ======================================================
+// PERFILES PÚBLICOS
+// ======================================================
+
+// GET perfil público por username
+app.get("/api/users/:username", async (req, res) => {
+  try {
+    const username = String(req.params.username || "").trim();
+    if (!username) return res.status(400).json({ error: "Username inválido" });
+
+    const viewer = getUserFromToken(req); // opcional :contentReference[oaicite:4]{index=4}
+
+    const { data: user, error: userErr } = await supabase
+      .from("usuarios")
+      .select("id, username")
+      .eq("username", username)
+      .maybeSingle();
+
+    if (userErr && userErr.code !== "PGRST116") {
+      console.error("Supabase error (select user):", userErr);
+      return res.status(500).json({ error: "Error buscando usuario" });
+    }
+    if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+
+    const { data: profile, error: profErr } = await supabase
+      .from("user_profiles")
+      .select("bio, avatar_url, links, gustos, is_public, created_at, updated_at")
+      .eq("usuario_id", user.id)
+      .maybeSingle();
+
+    if (profErr && profErr.code !== "PGRST116") {
+      console.error("Supabase error (select user_profiles):", profErr);
+      return res.status(500).json({ error: "Error obteniendo perfil" });
+    }
+
+    const isPublic = profile?.is_public ?? true;
+    const isOwner = viewer?.userId && String(viewer.userId) === String(user.id);
+
+    if (!isPublic && !isOwner) {
+      return res.status(403).json({ error: "Este perfil es privado" });
+    }
+
+    // counts followers/following
+    const [{ count: followersCount }, { count: followingCount }] = await Promise.all([
+      supabase.from("user_follows").select("*", { count: "exact", head: true }).eq("followee_id", user.id),
+      supabase.from("user_follows").select("*", { count: "exact", head: true }).eq("follower_id", user.id),
+    ]);
+
+    // viewer following?
+    let isFollowing = false;
+    if (viewer?.userId && !isOwner) {
+      const { data: f } = await supabase
+        .from("user_follows")
+        .select("follower_id")
+        .eq("follower_id", viewer.userId)
+        .eq("followee_id", user.id)
+        .maybeSingle();
+      isFollowing = !!f;
+    }
+
+    // resumen + top likes
+    const summary = await buildPublicSoundSummary(user.id);
+
+    const { data: likesRows, error: likesErr } = await supabase
+      .from("votos_cancion")
+      .select("cancion_id, id")
+      .eq("usuario_id", user.id)
+      .eq("tipo", "like")
+      .order("id", { ascending: false })
+      .limit(10);
+
+    if (likesErr) console.error("Supabase error (select likes rows):", likesErr);
+
+    const topSongIds = (likesRows || []).map(r => r.cancion_id);
+    let topSongs = [];
+    if (topSongIds.length) {
+      const { data: songsData, error: songsErr } = await supabase
+        .from("canciones")
+        .select("id, titulo, estilo, autor, url_audio, created_at")
+        .in("id", topSongIds);
+
+      if (songsErr) console.error("Supabase error (select top songs):", songsErr);
+      // mantener el orden del "like" más reciente
+      const map = new Map((songsData || []).map(s => [String(s.id), s]));
+      topSongs = topSongIds.map(id => map.get(String(id))).filter(Boolean);
+    }
+
+    return res.json({
+      user: { id: user.id, username: user.username },
+      profile: {
+        bio: profile?.bio || "",
+        avatarUrl: profile?.avatar_url || null,
+        links: profile?.links || {},
+        gustos: profile?.gustos || {},
+        isPublic,
+        updatedAt: profile?.updated_at || null,
+      },
+      social: {
+        followersCount: followersCount || 0,
+        followingCount: followingCount || 0,
+        isFollowing,
+      },
+      sound: {
+        toxicity: summary.toxicity,
+        totalVotes: summary.totalVotes,
+        totalLikes: summary.totalLikes,
+        totalDislikes: summary.totalDislikes,
+        dominantGenre: summary.dominantGenre,
+        badges: summary.badges,
+      },
+      level: {
+        xp: summary.levelInfo.xp,
+        level: summary.levelInfo.level,
+        title: summary.levelInfo.title,
+        progressPercent: summary.levelInfo.progressPercent,
+        nextLevelAt: summary.levelInfo.nextLevelAt,
+      },
+      topLikedSongs: topSongs,
+    });
+  } catch (err) {
+    console.error("Error en GET /api/users/:username:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// PATCH mi perfil (bio/links/gustos/privacidad)
+app.patch("/api/users/me/profile", authUser, async (req, res) => {
+  try {
+    const userId = req.user.userId; // :contentReference[oaicite:5]{index=5}
+    const { bio, avatarUrl, links, gustos, isPublic } = req.body || {};
+
+    // validación simple
+    const nextBio = typeof bio === "string" ? bio.slice(0, 500) : undefined;
+    const nextAvatar = typeof avatarUrl === "string" && avatarUrl ? avatarUrl.slice(0, 500) : undefined;
+
+    let nextLinks = undefined;
+    if (links !== undefined) {
+      if (typeof links !== "object" || Array.isArray(links) || links === null) {
+        return res.status(400).json({ error: "links debe ser un objeto" });
+      }
+      // filtrar urls
+      const clean = {};
+      for (const [k, v] of Object.entries(links)) {
+        if (typeof k !== "string") continue;
+        if (typeof v !== "string") continue;
+        if (!v.trim()) continue;
+        if (!isHttpUrl(v)) continue;
+        clean[k.slice(0, 30)] = v.slice(0, 300);
+      }
+      nextLinks = clean;
+    }
+
+    let nextGustos = undefined;
+    if (gustos !== undefined) {
+      if (typeof gustos !== "object" || Array.isArray(gustos) || gustos === null) {
+        return res.status(400).json({ error: "gustos debe ser un objeto" });
+      }
+      nextGustos = gustos; // aquí puedes endurecerlo si quieres
+    }
+
+    const payload = { usuario_id: userId };
+    if (nextBio !== undefined) payload.bio = nextBio;
+    if (nextAvatar !== undefined) payload.avatar_url = nextAvatar;
+    if (nextLinks !== undefined) payload.links = nextLinks;
+    if (nextGustos !== undefined) payload.gustos = nextGustos;
+    if (typeof isPublic === "boolean") payload.is_public = isPublic;
+
+    const { data, error } = await supabase
+      .from("user_profiles")
+      .upsert(payload, { onConflict: "usuario_id" })
+      .select("bio, avatar_url, links, gustos, is_public, updated_at")
+      .single();
+
+    if (error) {
+      console.error("Supabase error (upsert user_profiles):", error);
+      return res.status(500).json({ error: "Error guardando perfil" });
+    }
+
+    return res.json({
+      message: "Perfil actualizado",
+      profile: {
+        bio: data.bio || "",
+        avatarUrl: data.avatar_url || null,
+        links: data.links || {},
+        gustos: data.gustos || {},
+        isPublic: data.is_public ?? true,
+        updatedAt: data.updated_at || null,
+      },
+    });
+  } catch (err) {
+    console.error("Error en PATCH /api/users/me/profile:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+
+// ======================================================
+// FOLLOW / UNFOLLOW
+// ======================================================
+
+app.post("/api/users/:id/follow", authUser, async (req, res) => {
+  try {
+    const followerId = req.user.userId; // :contentReference[oaicite:6]{index=6}
+    const followeeId = req.params.id;
+
+    if (String(followerId) === String(followeeId)) {
+      return res.status(400).json({ error: "No puedes seguirte a ti mismo" });
+    }
+
+    // insert (si ya existe, que no pete)
+    const { error } = await supabase
+      .from("user_follows")
+      .insert({ follower_id: followerId, followee_id: followeeId });
+
+    if (error && error.code !== "23505") { // unique violation
+      console.error("Supabase error (insert follow):", error);
+      return res.status(500).json({ error: "Error siguiendo al usuario" });
+    }
+
+    await logActivityEvent({
+      actorId: followerId,
+      verb: "follow",
+      objectType: "user",
+      objectId: followeeId,
+      metadata: {},
+      visibility: "public",
+    });
+
+    return res.json({ ok: true, following: true });
+  } catch (err) {
+    console.error("Error en POST /api/users/:id/follow:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+app.delete("/api/users/:id/follow", authUser, async (req, res) => {
+  try {
+    const followerId = req.user.userId;
+    const followeeId = req.params.id;
+
+    const { error } = await supabase
+      .from("user_follows")
+      .delete()
+      .eq("follower_id", followerId)
+      .eq("followee_id", followeeId);
+
+    if (error) {
+      console.error("Supabase error (delete follow):", error);
+      return res.status(500).json({ error: "Error dejando de seguir" });
+    }
+
+    return res.json({ ok: true, following: false });
+  } catch (err) {
+    console.error("Error en DELETE /api/users/:id/follow:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+
+// ======================================================
+// FEED
+// ======================================================
+
+app.get("/api/feed", authUser, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const limit = clampInt(req.query.limit, 1, 50, 20);
+    const offset = clampInt(req.query.offset, 0, 5000, 0);
+
+    const { data: followees, error: fErr } = await supabase
+      .from("user_follows")
+      .select("followee_id")
+      .eq("follower_id", userId);
+
+    if (fErr) {
+      console.error("Supabase error (select followees):", fErr);
+      return res.status(500).json({ error: "Error obteniendo follows" });
+    }
+
+    const followeeIds = (followees || []).map(r => r.followee_id);
+    if (!followeeIds.length) return res.json({ items: [], nextOffset: null });
+
+    const { data: events, error: eErr } = await supabase
+      .from("activity_events")
+      .select("id, actor_id, verb, object_type, object_id, metadata, visibility, created_at")
+      .in("actor_id", followeeIds)
+      .in("visibility", ["public", "followers"])
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (eErr) {
+      console.error("Supabase error (select activity_events):", eErr);
+      return res.status(500).json({ error: "Error obteniendo feed" });
+    }
+
+    const actorIds = Array.from(new Set((events || []).map(ev => ev.actor_id)));
+    const { data: actors, error: aErr } = await supabase
+      .from("usuarios")
+      .select("id, username")
+      .in("id", actorIds);
+
+    if (aErr) console.error("Supabase error (select actors):", aErr);
+
+    const actorMap = new Map((actors || []).map(a => [String(a.id), a.username]));
+
+    const items = (events || []).map(ev => ({
+      id: ev.id,
+      actor: { id: ev.actor_id, username: actorMap.get(String(ev.actor_id)) || "unknown" },
+      verb: ev.verb,
+      objectType: ev.object_type,
+      objectId: ev.object_id,
+      metadata: ev.metadata || {},
+      createdAt: ev.created_at,
+    }));
+
+    return res.json({
+      items,
+      nextOffset: items.length === limit ? offset + limit : null,
+    });
+  } catch (err) {
+    console.error("Error en GET /api/feed:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
+// === COMENTARIOS EN ÁRBOL (PÚBLICO) ===
+// Devuelve solo status="visible" (para público)
+app.get("/api/canciones/:id/comments-tree", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const limit = Math.min(parseInt(req.query.limit || "30", 10), 100);
+    const offset = Math.max(parseInt(req.query.offset || "0", 10), 0);
+    const maxTotal = Math.min(parseInt(req.query.maxTotal || "1000", 10), 3000);
+
+    // (Opcional) comprobar que existe la canción
+    const { data: song, error: songErr } = await supabase
+      .from("canciones")
+      .select("id")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (songErr) {
+      console.error("Supabase error (select cancion comments-tree):", songErr);
+      return res.status(500).json({ error: "Error buscando la canción" });
+    }
+    if (!song) return res.status(404).json({ error: "Canción no encontrada" });
+
+    // Traer comentarios visibles (limitados por maxTotal)
+    const { data: comments, error } = await supabase
+      .from("song_comments")
+      .select("id, cancion_id, usuario_id, body, parent_id, status, created_at, updated_at")
+      .eq("cancion_id", id)
+      .eq("status", "visible")
+      .order("created_at", { ascending: true })
+      .limit(maxTotal);
+
+    if (error) {
+      console.error("Supabase error (select song_comments tree):", error);
+      return res.status(500).json({ error: "Error obteniendo comentarios" });
+    }
+
+    const rows = comments || [];
+
+    // Mapear usernames
+    const userIds = Array.from(new Set(rows.map(c => c.usuario_id)));
+    let usersMap = new Map();
+    if (userIds.length) {
+      const { data: users, error: uErr } = await supabase
+        .from("usuarios")
+        .select("id, username")
+        .in("id", userIds);
+
+      if (uErr) console.error("Supabase error (select users comments-tree):", uErr);
+      usersMap = new Map((users || []).map(u => [String(u.id), u.username]));
+    }
+
+    // Normalizar nodes
+    const nodes = rows.map(c => ({
+      id: c.id,
+      songId: c.cancion_id,
+      user: { id: c.usuario_id, username: usersMap.get(String(c.usuario_id)) || "unknown" },
+      body: c.body,
+      parentId: c.parent_id,
+      createdAt: c.created_at,
+      updatedAt: c.updated_at,
+      replies: [],
+    }));
+
+    // Índice por id
+    const byId = new Map(nodes.map(n => [String(n.id), n]));
+
+    // Construir árbol
+    const roots = [];
+    for (const n of nodes) {
+      if (n.parentId) {
+        const parent = byId.get(String(n.parentId));
+        if (parent) parent.replies.push(n);
+        else roots.push(n); // fallback si algo raro pasa
+      } else {
+        roots.push(n);
+      }
+    }
+
+    // Paginar SOLO raíces
+    const paginatedRoots = roots.slice(offset, offset + limit);
+
+    return res.json({
+      items: paginatedRoots,
+      meta: {
+        rootsTotal: roots.length,
+        returnedRoots: paginatedRoots.length,
+        maxTotalLoaded: maxTotal,
+      },
+      nextOffset: offset + limit < roots.length ? offset + limit : null,
+    });
+  } catch (err) {
+    console.error("Error en GET /api/canciones/:id/comments-tree:", err);
+    return res.status(500).json({ error: "Error en el servidor" });
+  }
+});
+
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
     console.log(`BeefMusic API escuchando en http://localhost:${port}`);
