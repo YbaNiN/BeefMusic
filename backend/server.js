@@ -16,6 +16,83 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+
+// === USER STATS (para logros) ===
+// Recomendación de tabla en Supabase:
+//   user_stats:
+//     - usuario_id (uuid/int, PK, mismo tipo que usuarios.id)
+//     - vote_switches (int, default 0)
+//     - vote_removals (int, default 0)
+//     - created_at (timestamptz, default now()) [opcional]
+async function bumpUserStat(userId, field, amount = 1) {
+    try {
+        if (!userId) return;
+
+        const allowed = new Set(["vote_switches", "vote_removals"]);
+        if (!allowed.has(field)) return;
+
+        const { data: row, error: selErr } = await supabase
+            .from("user_stats")
+            .select("usuario_id, vote_switches, vote_removals")
+            .eq("usuario_id", userId)
+            .maybeSingle();
+
+        if (selErr && selErr.code !== "PGRST116") {
+            console.error("Supabase error (select user_stats):", selErr);
+            return;
+        }
+
+        if (!row) {
+            const payload = {
+                usuario_id: userId,
+                vote_switches: field === "vote_switches" ? amount : 0,
+                vote_removals: field === "vote_removals" ? amount : 0,
+            };
+
+            const { error: insErr } = await supabase.from("user_stats").insert(payload);
+            if (insErr) console.error("Supabase error (insert user_stats):", insErr);
+            return;
+        }
+
+        const nextVal = (row[field] || 0) + amount;
+
+        const { error: updErr } = await supabase
+            .from("user_stats")
+            .update({ [field]: nextVal })
+            .eq("usuario_id", userId);
+
+        if (updErr) console.error("Supabase error (update user_stats):", updErr);
+    } catch (e) {
+        console.error("Error en bumpUserStat:", e.message);
+    }
+}
+
+async function getUserStats(userId) {
+    try {
+        if (!userId) return { voteSwitches: 0, voteRemovals: 0 };
+
+        const { data, error } = await supabase
+            .from("user_stats")
+            .select("vote_switches, vote_removals")
+            .eq("usuario_id", userId)
+            .maybeSingle();
+
+        if (error && error.code !== "PGRST116") {
+            console.error("Supabase error (get user_stats):", error);
+            return { voteSwitches: 0, voteRemovals: 0 };
+        }
+
+        return {
+            voteSwitches: data?.vote_switches || 0,
+            voteRemovals: data?.vote_removals || 0,
+        };
+    } catch (e) {
+        console.error("Error en getUserStats:", e.message);
+        return { voteSwitches: 0, voteRemovals: 0 };
+    }
+}
+
+
 // === AUTH ADMIN ===
 function crearTokenAdmin() {
     const payload = { role: "admin" };
@@ -1345,6 +1422,9 @@ app.post("/api/canciones/:id/vote", authUser, async (req, res) => {
                     .json({ error: "Error actualizando el voto" });
             }
 
+            // ✅ Logro: primera vez que cambias el voto / contador de cambios
+            await bumpUserStat(userId, "vote_switches", 1);
+
             userVoteResult = tipo;
         } else {
             // Ya había un voto igual -> QUITAR voto (toggle off)
@@ -1359,6 +1439,9 @@ app.post("/api/canciones/:id/vote", authUser, async (req, res) => {
                     .status(500)
                     .json({ error: "Error eliminando el voto" });
             }
+
+            // ✅ Logro: quitaste tu voto / contador de removals
+            await bumpUserStat(userId, "vote_removals", 1);
 
             userVoteResult = null; // sin voto
         }
@@ -1476,6 +1559,9 @@ app.get("/api/sound-profile", authUser, async (req, res) => {
         const userId = req.user.userId;
         const username = req.user.username;
 
+        // Extra: stats para logros (cambios de voto, quitar voto, etc.)
+        const { voteSwitches, voteRemovals } = await getUserStats(userId);
+
         // 1) Votos del usuario
         const { data: votos, error: errorVotos } = await supabase
             .from("votos_cancion")
@@ -1500,6 +1586,8 @@ app.get("/api/sound-profile", authUser, async (req, res) => {
                 moodLabel: "Aún sin datos suficientes",
                 moodTags: ["dale like o dislike a alguna canción"],
                 badges: [],
+                voteSwitches,
+                voteRemovals,
             });
         }
 
@@ -1640,6 +1728,8 @@ app.get("/api/sound-profile", authUser, async (req, res) => {
             moodLabel,
             moodTags,
             badges,
+            voteSwitches,
+            voteRemovals,
         });
     } catch (err) {
         console.error("Error en GET /api/sound-profile:", err);
