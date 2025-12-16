@@ -615,7 +615,79 @@
             }
         }
 
-    </style>
+    
+
+        /* ===== NIVEL / XP ===== */
+        .level-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .level-badge {
+            flex-shrink: 0;
+            border-radius: 14px;
+            padding: 10px 12px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            background: radial-gradient(circle at 30% 20%, var(--accent-pink), var(--accent-purple));
+            color: #050509;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        .level-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .level-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.1;
+        }
+
+        .level-xp {
+            font-size: 0.8rem;
+            color: var(--fg-muted);
+        }
+
+        .xp-bar {
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+            box-shadow: 0 10px 24px rgba(255, 39, 87, 0.35);
+            transition: width 0.35s ease;
+        }
+
+        .xp-meta {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--fg-muted);
+        }
+
+        .xp-hint {
+            margin-top: 8px;
+            font-size: 0.78rem;
+            color: rgba(165, 166, 179, 0.85);
+        }
+
+</style>
 
 </head>
 <body>
@@ -668,6 +740,32 @@
                     <div class="card-title">Distribución de géneros</div>
                     <div class="genres-list" id="genres-list">
                         <!-- Se rellena con JS -->
+                    </div>
+                </div>
+            </article>
+            <!-- NIVEL + XP -->
+            <article class="card">
+                <div class="card-inner">
+                    <div class="card-title">Nivel BeefMusic</div>
+
+                    <div class="level-row">
+                        <div class="level-badge" id="level-badge">LV <span id="level-number">1</span></div>
+                        <div class="level-info">
+                            <div class="level-title" id="level-title">Beef Rookie</div>
+                            <div class="level-xp" id="level-xp-total">0 XP</div>
+                        </div>
+                    </div>
+
+                    <div class="xp-bar" aria-hidden="true">
+                        <div class="xp-fill" id="xp-fill" style="width: 0%"></div>
+                    </div>
+
+                    <div class="xp-meta" id="xp-meta">
+                        0 / 0 XP · siguiente nivel: --
+                    </div>
+
+                    <div class="xp-hint">
+                        XP por acciones: votar +1 · sugerencia +3 · petición +5
                     </div>
                 </div>
             </article>
@@ -849,6 +947,40 @@
                 usernameEl.textContent = "@" + userSoundProfile.username;
             }
 
+
+            // Nivel / XP
+            const levelNumberEl = document.getElementById("level-number");
+            const levelTitleEl = document.getElementById("level-title");
+            const levelXpTotalEl = document.getElementById("level-xp-total");
+            const xpFillEl = document.getElementById("xp-fill");
+            const xpMetaEl = document.getElementById("xp-meta");
+
+            if (typeof userSoundProfile.xp === "number") {
+                if (levelXpTotalEl) levelXpTotalEl.textContent = `${userSoundProfile.xp} XP`;
+            }
+
+            if (typeof userSoundProfile.level === "number") {
+                if (levelNumberEl) levelNumberEl.textContent = String(userSoundProfile.level);
+            }
+
+            if (levelTitleEl && userSoundProfile.title) {
+                levelTitleEl.textContent = userSoundProfile.title;
+            }
+
+            if (xpFillEl && typeof userSoundProfile.levelProgress === "number") {
+                xpFillEl.style.width = `${Math.max(0, Math.min(100, userSoundProfile.levelProgress))}%`;
+            }
+
+            if (xpMetaEl) {
+                if (userSoundProfile.isMaxLevel) {
+                    xpMetaEl.textContent = `MAX LEVEL · ${userSoundProfile.xp} XP`;
+                } else {
+                    const into = userSoundProfile.xpIntoLevel ?? 0;
+                    const next = userSoundProfile.xpForNextLevel ?? 0;
+                    const nextLv = (userSoundProfile.level ?? 1) + 1;
+                    xpMetaEl.textContent = `${into} / ${next} XP · siguiente nivel: LV ${nextLv}`;
+                }
+            }
             // Tagline
             const taglineEl = document.querySelector(".sound-profile-tagline");
             if (taglineEl) {
@@ -1031,7 +1163,7 @@
 
         function buildAchievementsCatalog(profile) {
             // 1) Votos (25)
-            const voteThresholds = [1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,25,30,35,40,50,60];
+            const voteThresholds = [1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,25,30,35,40,50,60,75,90,100];
             const votes = makeMilestones(
                 "votes",
                 "🗳️",
@@ -1053,7 +1185,7 @@
             );
 
             // 3) Dislikes (15)
-            const dislikeThresholds = [1,2,3,4,5,7,10,12,15,18,20,25,30];
+            const dislikeThresholds = [1,2,3,4,5,7,10,12,15,18,20,25,30,40,50];
             const dislikes = makeMilestones(
                 "dislikes",
                 "👎",
@@ -1061,28 +1193,6 @@
                 (t) => `Dale ${t} dislikes en total.`,
                 (p) => p.totalDislikes || 0,
                 dislikeThresholds
-            );
-
-            // 3.5) Cambios de voto / quitar voto (5)
-            // Requiere que el backend envíe voteSwitches y voteRemovals en /api/sound-profile
-            const switchThresholds = [1,2,5];
-            const voteSwitches = makeMilestones(
-                "vote_switches",
-                "🔁",
-                (t) => (t === 1 ? "Cambio de opinión" : `Cambiaste voto x${t}`),
-                (t) => (t === 1 ? "Cambia tu voto por primera vez." : `Cambia tu voto ${t} veces.`),
-                (p) => p.voteSwitches || 0,
-                switchThresholds
-            );
-
-            const removalThresholds = [1,5];
-            const voteRemovals = makeMilestones(
-                "vote_removals",
-                "🧽",
-                (t) => (t === 1 ? "Voto retirado" : `Retiradas x${t}`),
-                (t) => (t === 1 ? "Quita tu voto por primera vez." : `Quita tu voto ${t} veces.`),
-                (p) => p.voteRemovals || 0,
-                removalThresholds
             );
 
             // 4) Toxicidad (10)
@@ -1141,13 +1251,11 @@
                 target: 5
             }];
 
-            // Total: 22 + 25 + 13 + 5 + 10 + 24 + 1 = 100
+            // Total: 25 + 25 + 15 + 10 + 24 + 1 = 100
             return [
                 ...votes,
                 ...likes,
                 ...dislikes,
-                ...voteSwitches,
-                ...voteRemovals,
                 ...toxicity,
                 ...genre5,
                 ...genre20,
