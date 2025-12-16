@@ -33,7 +33,7 @@ async function bumpUserStat(userId, field, amount = 1) {
 
         const { data: row, error: selErr } = await supabase
             .from("user_stats")
-            .select("usuario_id, vote_switches, vote_removals")
+            .select("usuario_id, vote_switches, vote_removals, xp")
             .eq("usuario_id", userId)
             .maybeSingle();
 
@@ -47,6 +47,7 @@ async function bumpUserStat(userId, field, amount = 1) {
                 usuario_id: userId,
                 vote_switches: field === "vote_switches" ? amount : 0,
                 vote_removals: field === "vote_removals" ? amount : 0,
+                xp: 0,
             };
 
             const { error: insErr } = await supabase.from("user_stats").insert(payload);
@@ -69,27 +70,148 @@ async function bumpUserStat(userId, field, amount = 1) {
 
 async function getUserStats(userId) {
     try {
-        if (!userId) return { voteSwitches: 0, voteRemovals: 0 };
+        if (!userId) return { voteSwitches: 0, voteRemovals: 0, xp: 0 };
 
         const { data, error } = await supabase
             .from("user_stats")
-            .select("vote_switches, vote_removals")
+            .select("vote_switches, vote_removals, xp")
             .eq("usuario_id", userId)
             .maybeSingle();
 
         if (error && error.code !== "PGRST116") {
             console.error("Supabase error (get user_stats):", error);
-            return { voteSwitches: 0, voteRemovals: 0 };
+            return { voteSwitches: 0, voteRemovals: 0, xp: 0 };
         }
 
         return {
             voteSwitches: data?.vote_switches || 0,
             voteRemovals: data?.vote_removals || 0,
+            xp: data?.xp || 0,
         };
     } catch (e) {
         console.error("Error en getUserStats:", e.message);
-        return { voteSwitches: 0, voteRemovals: 0 };
+        return { voteSwitches: 0, voteRemovals: 0, xp: 0 };
     }
+}
+
+
+// === XP / NIVEL ===
+// XP por acciones:
+// - votar (cuando creas un voto por primera vez en esa canción): +1
+// - enviar sugerencia: +3
+// - enviar petición: +5
+//
+// Nota anti-farmeo (simple): no damos XP por cambiar/quitar voto; solo por crear un voto nuevo.
+const XP = {
+    VOTE: 1,
+    SUGGESTION: 3,
+    REQUEST: 5,
+};
+
+async function addXp(userId, amount = 1) {
+    try {
+        if (!userId || !amount) return;
+
+        // Si no existe, la creamos. Si existe, sumamos.
+        const { data: row, error: selErr } = await supabase
+            .from("user_stats")
+            .select("usuario_id, xp")
+            .eq("usuario_id", userId)
+            .maybeSingle();
+
+        if (selErr && selErr.code !== "PGRST116") {
+            console.error("Supabase error (select user_stats xp):", selErr);
+            return;
+        }
+
+        if (!row) {
+            const payload = {
+                usuario_id: userId,
+                vote_switches: 0,
+                vote_removals: 0,
+                xp: Math.max(0, amount),
+            };
+
+            const { error: insErr } = await supabase.from("user_stats").insert(payload);
+            if (insErr) console.error("Supabase error (insert user_stats xp):", insErr);
+            return;
+        }
+
+        const nextXp = (row.xp || 0) + amount;
+
+        const { error: updErr } = await supabase
+            .from("user_stats")
+            .update({ xp: nextXp })
+            .eq("usuario_id", userId);
+
+        if (updErr) console.error("Supabase error (update user_stats xp):", updErr);
+    } catch (e) {
+        console.error("Error en addXp:", e.message);
+    }
+}
+
+// Nivel: fórmula progresiva simple (hasta nivel 100)
+function getLevelInfo(xpRaw) {
+    const xp = Math.max(0, Number(xpRaw || 0));
+    const MAX_LEVEL = 100;
+
+    // coste para subir de nivel: 10 + (nivel-1)*5
+    const costForLevelUp = (level) => 10 + (level - 1) * 5;
+
+    let level = 1;
+    let nextLevelAt = costForLevelUp(1); // XP necesaria para pasar a nivel 2
+    let accumulated = 0;
+
+    while (level < MAX_LEVEL) {
+        const cost = costForLevelUp(level);
+        if (xp < accumulated + cost) {
+            nextLevelAt = accumulated + cost;
+            break;
+        }
+        accumulated += cost;
+        level += 1;
+    }
+
+    // Si estás a nivel máximo
+    if (level === MAX_LEVEL) {
+        nextLevelAt = accumulated; // ya no sube
+    }
+
+    const prevLevelAt = accumulated; // XP mínima del nivel actual
+    const xpIntoLevel = xp - prevLevelAt;
+    const xpForNextLevel = level === MAX_LEVEL ? 0 : nextLevelAt - prevLevelAt;
+    const progressPercent = xpForNextLevel > 0 ? Math.min(100, Math.round((xpIntoLevel / xpForNextLevel) * 100)) : 100;
+
+    // Títulos por rangos
+    const titleByLevel = (lvl) => {
+        if (lvl >= 100) return "BeefMusic Godmode";
+        if (lvl >= 90) return "Legend in the Booth";
+        if (lvl >= 80) return "Beef Royalty";
+        if (lvl >= 70) return "Sound Assassin";
+        if (lvl >= 60) return "Chart Wrecker";
+        if (lvl >= 50) return "Hit Maker";
+        if (lvl >= 40) return "Genre Slayer";
+        if (lvl >= 35) return "Bass Commander";
+        if (lvl >= 30) return "Mix Mage";
+        if (lvl >= 25) return "Studio Raider";
+        if (lvl >= 20) return "Neon Soldier";
+        if (lvl >= 15) return "Flow Architect";
+        if (lvl >= 10) return "Hook Apprentice";
+        if (lvl >= 5) return "Beat Hunter";
+        return "Beef Rookie";
+    };
+
+    return {
+        xp,
+        level,
+        title: titleByLevel(level),
+        prevLevelAt,
+        nextLevelAt,
+        xpIntoLevel,
+        xpForNextLevel,
+        progressPercent,
+        isMaxLevel: level === MAX_LEVEL,
+    };
 }
 
 
@@ -376,6 +498,12 @@ app.post("/api/peticiones", async (req, res) => {
 
         const idPeticion = data.id;
 
+        // ⭐ XP (si viene token de usuario)
+        const user = getUserFromToken(req);
+        if (user?.userId) {
+            await addXp(user.userId, XP.REQUEST);
+        }
+
         try {
             await enviarAPeticionDiscord({ nick, style, idea, idPeticion });
         } catch (err) {
@@ -460,6 +588,12 @@ app.post("/api/sugerencias", async (req, res) => {
         }
 
         const idSugerencia = data.id;
+
+        // ⭐ XP (si viene token de usuario)
+        const user = getUserFromToken(req);
+        if (user?.userId) {
+            await addXp(user.userId, XP.SUGGESTION);
+        }
 
         try {
             await enviarASugerenciaDiscord({ nick, mensaje, idSugerencia });
@@ -1408,6 +1542,9 @@ app.post("/api/canciones/:id/vote", authUser, async (req, res) => {
             }
 
             userVoteResult = tipo;
+
+            // ⭐ XP por votar (solo al crear un voto nuevo)
+            await addXp(userId, XP.VOTE);
         } else if (existingVote.tipo !== tipo) {
             // Había voto distinto -> cambiar tipo
             const { error: errorUpdateVote } = await supabase
@@ -1560,7 +1697,9 @@ app.get("/api/sound-profile", authUser, async (req, res) => {
         const username = req.user.username;
 
         // Extra: stats para logros (cambios de voto, quitar voto, etc.)
-        const { voteSwitches, voteRemovals } = await getUserStats(userId);
+        const { voteSwitches, voteRemovals, xp } = await getUserStats(userId);
+
+        const levelInfo = getLevelInfo(xp);
 
         // 1) Votos del usuario
         const { data: votos, error: errorVotos } = await supabase
@@ -1586,6 +1725,17 @@ app.get("/api/sound-profile", authUser, async (req, res) => {
                 moodLabel: "Aún sin datos suficientes",
                 moodTags: ["dale like o dislike a alguna canción"],
                 badges: [],
+
+                // ⭐ Nivel/XP
+                xp: levelInfo.xp,
+                level: levelInfo.level,
+                title: levelInfo.title,
+                levelProgress: levelInfo.progressPercent,
+                nextLevelAt: levelInfo.nextLevelAt,
+                xpIntoLevel: levelInfo.xpIntoLevel,
+                xpForNextLevel: levelInfo.xpForNextLevel,
+                isMaxLevel: levelInfo.isMaxLevel,
+
                 voteSwitches,
                 voteRemovals,
             });
@@ -1728,6 +1878,17 @@ app.get("/api/sound-profile", authUser, async (req, res) => {
             moodLabel,
             moodTags,
             badges,
+
+            // ⭐ Nivel/XP
+            xp: levelInfo.xp,
+            level: levelInfo.level,
+            title: levelInfo.title,
+            levelProgress: levelInfo.progressPercent,
+            nextLevelAt: levelInfo.nextLevelAt,
+            xpIntoLevel: levelInfo.xpIntoLevel,
+            xpForNextLevel: levelInfo.xpForNextLevel,
+            isMaxLevel: levelInfo.isMaxLevel,
+
             voteSwitches,
             voteRemovals,
         });
