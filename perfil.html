@@ -1,1364 +1,957 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BeefMusic – Perfil sonoro</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Tu CSS global -->
-    <link rel="stylesheet" href="styles.css" />
-
-    <style>
-        body {
-            font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-            background: radial-gradient(circle at top, #160b33 0, #050509 45%, #020105 100%);
-            color: #f5f5ff;
-            min-height: 100vh;
-        }
-
-        .sound-profile-page {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px 20px 80px;
-        }
-
-        /* HEADER LOCAL */
-        .site-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-
-        .site-logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .site-logo-img {
-            height: 40px;
-            width: auto;
-            display: block;
-            border-radius: 10px;
-            box-shadow: 0 0 18px rgba(236, 72, 153, 0.4);
-        }
-
-        .site-nav {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            font-size: 0.85rem;
-            opacity: 0.85;
-        }
-
-            .site-nav a {
-                text-decoration: none;
-                color: inherit;
-                padding: 6px 10px;
-                border-radius: 999px;
-                border: 1px solid transparent;
-                transition: background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
-            }
-
-                .site-nav a:hover {
-                    opacity: 1;
-                    border-color: rgba(255, 255, 255, 0.18);
-                    background: rgba(0, 0, 0, 0.35);
-                }
-
-                .site-nav a.active {
-                    border-color: rgba(255, 255, 255, 0.22);
-                    background: radial-gradient(circle at top left, rgba(139, 92, 246, 0.45), rgba(15, 23, 42, 0.9));
-                }
-
-        /* CONTENEDOR HEADER PERFIL (CARD GRANDE, CUADRADA) */
-        .sound-profile-header-card {
-            margin: 24px 0 30px;
-            padding: 24px 28px 22px;
-            border-radius: 0; /* cuadrado total */
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.95)), linear-gradient(120deg, rgba(79, 70, 229, 0.20), rgba(236, 72, 153, 0.10));
-            box-shadow: 0 22px 55px rgba(0, 0, 0, 0.9);
-            display: flex;
-            flex-direction: column;
-            gap: 18px; /* espacio entre título+texto y las pills */
-        }
-
-        @media (max-width: 640px) {
-            .sound-profile-header-card {
-                padding: 20px 18px 18px;
-                margin: 20px 0 24px;
-            }
-        }
-
-        /* HEADER PERFIL SONORO (dentro de la card) */
-        .sound-profile-header {
-            position: relative;
-            margin: 24px 0 20px; /* separa la card del resto */
-            padding: 18px 24px 20px; /* aire por dentro: arriba, lados y abajo */
-            border-radius: 0; /* CUADRADO */
-            background: rgba(15, 23, 42, 0.96);
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-            overflow: hidden;
-        }
-
-            /* anulamos cualquier pseudo-elemento raro del estilo antiguo */
-            .sound-profile-header::before,
-            .sound-profile-header::after {
-                content: none !important;
-            }
-
-        .sound-profile-header-main {
-            display: flex;
-            flex-direction: column;
-            gap: 10px; /* espacio entre título, tagline y estado */
-        }
-
-        .sound-profile-title-row {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 14px; /* espacio entre "Perfil sonoro" y @usuario */
-            margin-bottom: 4px;
-        }
-
-        .sound-profile-header-main h1 {
-            font-size: 1.9rem;
-            margin: 0;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-
-        .sound-profile-username {
-            font-size: 0.98rem;
-            opacity: 0.85;
-        }
-
-        .sound-profile-tagline {
-            font-size: 0.93rem;
-            margin: 0;
-            margin-top: 2px;
-            line-height: 1.7; /* líneas más separadas */
-            color: #c7d2fe;
-            max-width: 680px; /* evita líneas muy largas */
-        }
-
-        /* En móvil, el @usuario baja debajo del título para que no se aplaste */
-        @media (max-width: 640px) {
-            .sound-profile-title-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-            }
-        }
-
-        /* ESTADO (texto pequeño bajo la tagline) */
-        .profile-status {
-            font-size: 0.85rem;
-            opacity: 0.85;
-            margin-top: 6px; /* separación clara con la tagline */
-        }
-
-            .profile-status.error {
-                color: #fecaca;
-            }
-
-            .profile-status.info {
-                color: #bfdbfe;
-            }
-
-        /* PILLS DE ESTADO (MODO / ACTIVIDAD) */
-        .sound-profile-status-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin: 0; /* ya tenemos gap en la card */
-        }
-
-        .sound-profile-pill {
-            padding: 8px 16px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            font-size: 0.8rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(120deg, rgba(147, 51, 234, 0.18), rgba(244, 63, 94, 0.22));
-            backdrop-filter: blur(10px);
-            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.7);
-            max-width: 100%;
-        }
-
-            .sound-profile-pill span {
-                font-size: 0.9rem;
-            }
-
-        @media (max-width: 600px) {
-            .sound-profile-status-row {
-                flex-direction: row;
-                flex-wrap: wrap;
-                align-items: flex-start;
-            }
-
-                .sound-profile-status-row .sound-profile-pill {
-                    justify-content: flex-start;
-                }
-        }
-
-        /* GRID PRINCIPAL */
-        .sound-profile-main {
-            display: grid;
-            grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr);
-            gap: 20px;
-            align-items: flex-start;
-        }
-
-        @media (max-width: 900px) {
-            .sound-profile-main {
-                grid-template-columns: minmax(0, 1fr);
-            }
-        }
-
-        .card {
-            background: radial-gradient(circle at top left, rgba(168, 85, 247, 0.18), transparent 55%);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 18px 18px 16px;
-            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.78);
-            position: relative;
-            overflow: hidden;
-        }
-
-            .card::before {
-                content: "";
-                position: absolute;
-                inset: 0;
-                background: radial-gradient(circle at top right, rgba(244, 63, 94, 0.12), transparent 55%);
-                opacity: 0.9;
-                pointer-events: none;
-            }
-
-        .card-inner {
-            position: relative;
-            z-index: 1;
-        }
-
-        .card-title {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
-            opacity: 0.7;
-            margin-bottom: 12px;
-        }
-
-        /* DISTRIBUCIÓN DE GÉNEROS */
-        .genres-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .genre-row {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .genre-row-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-        }
-
-        .genre-name {
-            opacity: 0.9;
-        }
-
-        .genre-percent {
-            opacity: 0.7;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .genre-bar {
-            position: relative;
-            height: 7px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.9);
-            overflow: hidden;
-            box-shadow: inset 0 0 6px rgba(15, 23, 42, 0.9);
-        }
-
-        .genre-bar-fill {
-            position: absolute;
-            inset: 0;
-            transform-origin: left center;
-            transform: scaleX(0);
-            background-image: linear-gradient(90deg, #a855f7, #ec4899, #f97316);
-        }
-
-        /* MOOD + TOXICIDAD */
-        .mood-grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-            gap: 16px;
-        }
-
-        @media (max-width: 600px) {
-            .mood-grid {
-                grid-template-columns: minmax(0, 1fr);
-            }
-        }
-
-        .mood-main-label {
-            font-size: 1.1rem;
-            margin: 0 0 2px;
-        }
-
-        .mood-sub {
-            font-size: 0.86rem;
-            opacity: 0.75;
-            margin-bottom: 10px;
-        }
-
-        .mood-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 6px;
-        }
-
-        .mood-tag {
-            font-size: 0.75rem;
-            border-radius: 999px;
-            padding: 4px 9px;
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            background: rgba(0, 0, 0, 0.26);
-        }
-
-        .toxicity-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            align-items: flex-start;
-        }
-
-        .toxicity-score {
-            font-size: 1.4rem;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .toxicity-label {
-            font-size: 0.8rem;
-            opacity: 0.75;
-        }
-
-        .toxicity-bar {
-            width: 100%;
-            height: 8px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.9);
-            overflow: hidden;
-            position: relative;
-            box-shadow: inset 0 0 6px rgba(15, 23, 42, 0.9);
-        }
-
-        .toxicity-fill {
-            position: absolute;
-            inset: 0;
-            transform-origin: left;
-            transform: scaleX(0);
-            background-image: linear-gradient(90deg, #22c55e, #eab308, #f97316, #ef4444);
-        }
-
-        .toxicity-note {
-            font-size: 0.78rem;
-            opacity: 0.7;
-            margin-top: 4px;
-        }
-
-        /* BADGES */
-        .badges-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.78rem;
-            padding: 5px 9px;
-            border-radius: 999px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(10, 10, 18, 0.8);
-            backdrop-filter: blur(10px);
-            white-space: nowrap;
-        }
-
-        .badge-icon {
-            font-size: 0.9rem;
-        }
-
-        .sound-profile-footer {
-            margin-top: 20px;
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-
-            .sound-profile-footer strong {
-                font-weight: 500;
-            }
-
-        /* ========== LOGROS (COLECCIÓN) ========== */
-        .achievements-wrap {
-            margin-top: 22px;
-        }
-
-        .achievements-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-
-        .achievements-title {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
-            opacity: 0.7;
-        }
-
-        .achievements-controls {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .achievements-chip {
-            border-radius: 999px;
-            padding: 6px 10px;
-            font-size: 0.75rem;
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            background: rgba(0, 0, 0, 0.28);
-            cursor: pointer;
-            color: inherit;
-            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-            user-select: none;
-        }
-
-        .achievements-chip:hover {
-            transform: translateY(-1px);
-            border-color: rgba(255, 255, 255, 0.24);
-            background: rgba(0, 0, 0, 0.38);
-        }
-
-        .achievements-chip.active {
-            border-color: rgba(255, 255, 255, 0.22);
-            background: radial-gradient(circle at top left, rgba(139, 92, 246, 0.35), rgba(15, 23, 42, 0.75));
-        }
-
-        .achievements-search {
-            border-radius: 999px;
-            padding: 7px 12px;
-            font-size: 0.78rem;
-            border: 1px solid rgba(255,255,255,0.16);
-            background: rgba(0,0,0,0.45);
-            color: inherit;
-            min-width: 220px;
-        }
-
-        .achievements-search:focus {
-            outline: none;
-            border-color: rgba(255,255,255,0.26);
-            box-shadow: 0 0 0 2px rgba(168,85,247,0.12);
-        }
-
-        .achievements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-            gap: 14px;
-        }
-
-        .achievement-card {
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.10);
-            background: rgba(10, 10, 18, 0.72);
-            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
-            padding: 14px 14px 14px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .achievement-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 0 0, rgba(168, 85, 247, 0.16), transparent 55%),
-                        radial-gradient(circle at 100% 0, rgba(236, 72, 153, 0.14), transparent 55%);
-            opacity: 0.9;
-            pointer-events: none;
-        }
-
-        .achievement-top {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .achievement-icon {
-            width: 38px;
-            height: 38px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.15rem;
-            background: rgba(0,0,0,0.45);
-            border: 1px solid rgba(255,255,255,0.14);
-        }
-
-        .achievement-lock {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            display: none;
-        }
-
-        .achievement-name {
-            position: relative;
-            z-index: 1;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .achievement-desc {
-            position: relative;
-            z-index: 1;
-            font-size: 0.82rem;
-            opacity: 0.78;
-            line-height: 1.35;
-        }
-
-        .achievement-bottom {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .achievement-progress {
-            font-size: 0.78rem;
-            opacity: 0.75;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .achievement-state {
-            padding: 5px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(255,255,255,0.14);
-            background: rgba(255,255,255,0.06);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            font-size: 0.65rem;
-            white-space: nowrap;
-        }
-
-        .achievement-bar {
-            position: relative;
-            z-index: 1;
-            height: 8px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.9);
-            overflow: hidden;
-            box-shadow: inset 0 0 6px rgba(15, 23, 42, 0.9);
-        }
-
-        .achievement-bar-fill {
-            position: absolute;
-            inset: 0;
-            transform-origin: left;
-            transform: scaleX(0);
-            background-image: linear-gradient(90deg, #a855f7, #ec4899, #f97316);
-        }
-
-        .achievement-card.locked {
-            opacity: 0.45;
-            filter: grayscale(1);
-        }
-
-        .achievement-card.locked .achievement-lock {
-            display: inline;
-        }
-
-        @media (max-width: 520px) {
-            .achievements-search {
-                min-width: 100%;
-            }
-        }
-
-    
-
-        /* ===== NIVEL / XP ===== */
-        .level-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-
-        .level-badge {
-            flex-shrink: 0;
-            border-radius: 14px;
-            padding: 10px 12px;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            background: radial-gradient(circle at 30% 20%, var(--accent-pink), var(--accent-purple));
-            color: #050509;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-        }
-
-        .level-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-        }
-
-        .level-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            line-height: 1.1;
-        }
-
-        .level-xp {
-            font-size: 0.8rem;
-            color: var(--fg-muted);
-        }
-
-        .xp-bar {
-            width: 100%;
-            height: 10px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            overflow: hidden;
-        }
-
-        .xp-fill {
-            height: 100%;
-            width: 0%;
-            border-radius: 999px;
-            background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
-            box-shadow: 0 10px 24px rgba(255, 39, 87, 0.35);
-            transition: width 0.35s ease;
-        }
-
-        .xp-meta {
-            margin-top: 8px;
-            font-size: 0.8rem;
-            color: var(--fg-muted);
-        }
-
-        .xp-hint {
-            margin-top: 8px;
-            font-size: 0.78rem;
-            color: rgba(165, 166, 179, 0.85);
-        }
-
-</style>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeefMusic – Perfil sonoro</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root{
+      --bg-main:#050509;
+      --bg-secondary:#0b0c12;
+      --bg-card: rgba(18,18,28,.9);
+      --fg-primary:#fff;
+      --fg-muted:#a5a6b3;
+      --accent-pink:#ff2757;
+      --accent-purple:#8a4dff;
+      --border-soft: rgba(255,255,255,.08);
+      --radius-lg: 32px;
+      --radius-md: 20px;
+      --shadow-soft: 0 20px 60px rgba(0,0,0,.6);
+      --transition-fast: .25s ease;
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:"Space Grotesk",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background: radial-gradient(circle at top left,#31112f 0,#050509 45%,#050509 100%);
+      color:var(--fg-primary);
+      min-height:100vh;
+      -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit;text-decoration:none}
+    .page{max-width:1200px;margin:0 auto;padding:30px 24px 96px}
+
+    /* Header */
+    header{
+      display:flex;align-items:center;justify-content:space-between;gap:18px;
+      padding:12px 18px;border-radius:999px;
+      border:1px solid var(--border-soft);
+      background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(5,5,9,0.95));
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-soft);
+      position: sticky; top: 16px; z-index: 20;
+    }
+    .logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.9rem;white-space:nowrap}
+    .logo-mark{
+      width:32px;height:32px;border-radius:10px;overflow:hidden;
+      background-image:url("img/logo.gif");
+      background-size:contain;background-position:center;background-repeat:no-repeat;
+      box-shadow:0 0 16px rgba(0,0,0,.6);flex-shrink:0;
+    }
+    .nav{display:flex;gap:18px;font-size:.85rem;color:var(--fg-muted);flex-wrap:wrap;justify-content:center}
+    .nav a{position:relative;padding-bottom:2px}
+    .nav a::after{
+      content:"";position:absolute;left:0;bottom:-4px;width:0;height:2px;border-radius:999px;
+      background: linear-gradient(90deg,var(--accent-pink),var(--accent-purple));
+      transition: width var(--transition-fast);
+    }
+    .nav a:hover::after{width:100%}
+    .nav a.active{color:var(--fg-primary)}
+    .header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+
+    .btn{
+      border-radius:999px;padding:8px 18px;font-size:.85rem;border:1px solid transparent;
+      background:transparent;color:var(--fg-primary);cursor:pointer;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), border var(--transition-fast);
+      display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+    }
+    .btn-ghost{border-color:var(--border-soft);background:rgba(5,5,9,.7)}
+    .btn-ghost:hover{transform:translateY(-1px);box-shadow:0 10px 25px rgba(0,0,0,.4)}
+    .btn-primary{background:linear-gradient(135deg,var(--accent-pink),var(--accent-purple));box-shadow:0 10px 32px rgba(255,39,87,.6)}
+    .btn-primary:hover{transform:translateY(-1px) scale(1.01);box-shadow:0 16px 40px rgba(255,39,87,.8)}
+
+    /* Hero */
+    .hero{
+      margin-top:22px;
+      padding:36px 30px;
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(circle at top left, rgba(255,39,87,0.26), transparent 55%),
+        radial-gradient(circle at top right, rgba(138,77,255,0.28), transparent 55%),
+        linear-gradient(145deg, #050509 0, #10101a 40%, #050509 100%);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before{
+      content:"";position:absolute;inset:0;
+      background-image: radial-gradient(circle at 20% 0, rgba(255,255,255,0.10) 0, transparent 52%);
+      opacity: .45; pointer-events:none;
+    }
+    .hero-inner{
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      max-width: none;
+      align-items: stretch;
+    }
+    .kicker{display:inline-flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:.25em;font-size:.7rem;color:var(--fg-muted)}
+    .kdot{width:7px;height:7px;border-radius:50%;background:var(--accent-pink)}
+    .hero-title{font-size: clamp(1.7rem, 3.6vw, 2.2rem); letter-spacing:.12em; text-transform:uppercase; line-height:1.05}
+    .hero-sub{max-width:860px;color:var(--fg-muted);font-size:1rem;line-height:1.6}
+
+    .hero-grid{
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      align-items: stretch;
+      width: 100%;
+    }
+
+    /* Cards */
+    .card{
+      border-radius: var(--radius-md);
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 16px 44px rgba(0,0,0,0.55);
+      padding: 18px 18px 20px;
+      position: relative;
+      overflow:hidden;
+    min-width:0;}
+    .card::before{
+      content:"";position:absolute;inset:0;
+      background: radial-gradient(circle at 0 0, rgba(255,39,87,0.14), transparent 55%),
+                  radial-gradient(circle at 100% 0, rgba(138,77,255,0.14), transparent 55%);
+      opacity:.75; pointer-events:none;
+    }
+    .card > *{position:relative;z-index:1}
+    .card-title{
+      font-size:.75rem;text-transform:uppercase;letter-spacing:.18em;color:rgba(165,166,179,.95);
+      margin-bottom: 10px;
+    }
+
+    /* Profile summary */
+    .profile-top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    }
+    .user-chip{
+      display:flex;align-items:center;gap:10px;
+      padding: 8px 10px 8px 8px;
+      border-radius:999px;
+      background: radial-gradient(circle at 0 0, rgba(255,39,87,0.3), transparent 55%), rgba(5,5,12,0.85);
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.55);
+    }
+    .avatar{
+      width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+      font-weight:700;text-transform:uppercase;color:#050509;
+      background: radial-gradient(circle at 30% 20%, var(--accent-pink), var(--accent-purple));
+      border: 1px solid rgba(255,255,255,0.5);
+      flex-shrink:0;
+    }
+    .user-lines{display:flex;flex-direction:column;line-height:1.15}
+    .user-label{font-size:.65rem;letter-spacing:.16em;text-transform:uppercase;color:var(--fg-muted)}
+    .user-name{font-size:.95rem;font-weight:600}
+    .user-title{
+      margin-top:4px;
+      width: fit-content;
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: .7rem;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+
+    .level-block{display:flex;flex-direction:column;gap:8px}
+    .level-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .level-main{font-size:1.1rem;font-weight:700;letter-spacing:.04em}
+    .level-sub{font-size:.85rem;color:var(--fg-muted)}
+    .progress{
+      height:10px;border-radius:999px;background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      overflow:hidden;
+    }
+    .progress > span{
+      display:block;height:100%;width:0%;
+      background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
+      border-radius:999px;
+      transition: width .35s ease;
+    }
+
+    /* Stats grid */
+    .stats-grid{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .stat{
+      padding: 12px 12px 14px;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.58);
+      border: 1px solid rgba(255,255,255,0.12);
+      display:flex;flex-direction:column;gap:6px;
+    }
+    .stat .label{
+      font-size:.65rem;text-transform:uppercase;letter-spacing:.16em;color:var(--fg-muted);
+    }
+    .stat .value{
+      font-size:1.35rem;font-weight:700;
+    }
+    .stat .hint{
+      font-size:.8rem;color:rgba(165,166,179,.92);
+    }
+
+    /* Section */
+    .section{margin-top: 22px;}
+    .section-header{margin-bottom: 12px;}
+    .section-kicker{font-size:.75rem;text-transform:uppercase;letter-spacing:.18em;color:var(--fg-muted);margin-bottom:6px}
+    .section-title{font-size:1.35rem;font-weight:600}
+    .section-subtitle{margin-top:8px;font-size:.92rem;color:var(--fg-muted);max-width: 720px;line-height:1.45}
+
+    /* Genres list */
+    .genres-grid{
+      margin-top: 14px;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .genre{
+      border-radius: 18px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 12px 12px 14px;
+      box-shadow: 0 16px 44px rgba(0,0,0,0.55);
+      display:flex;flex-direction:column;gap:8px;
+    }
+    .genre-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .genre-name{font-weight:700}
+    .genre-percent{font-size:.85rem;color:var(--fg-muted)}
+    .genre-row{display:flex;gap:10px;flex-wrap:wrap;font-size:.85rem;color:var(--fg-muted)}
+    .pill{
+      padding: 6px 10px;border-radius:999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+      width: fit-content;
+    }
+
+    /* Mood tags */
+    .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .tag{
+      padding: 7px 12px;
+      border-radius:999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.92);
+      font-size: .78rem;
+    }
+
+    /* Logros UI */
+    .logros-toolbar{
+      margin-top: 14px;
+      display:flex;gap:12px;flex-wrap:wrap;align-items:center;
+      border-radius: 18px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 14px;
+      box-shadow: 0 16px 44px rgba(0,0,0,0.55);
+    }
+    .control{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.70);
+      color: var(--fg-primary);
+      padding: 11px 12px;
+      font: inherit;
+      outline: none;
+      min-height: 40px;
+    }
+    .control::placeholder{color: rgba(165,166,179,0.6)}
+    .segmented{
+      display:inline-flex;
+      border-radius: 14px;
+      overflow:hidden;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.65);
+    }
+    .segmented button{
+      padding: 10px 12px;
+      font-size: .82rem;
+      border:none;background:transparent;color:var(--fg-muted);
+      cursor:pointer;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    .segmented button.active{
+      color: var(--fg-primary);
+      background: rgba(255,255,255,0.08);
+    }
+
+    .badges-grid{
+      margin-top: 14px;
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .badge-card{
+      border-radius: 20px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 18px 20px;
+      display:flex;flex-direction:column;gap:10px;
+      position:relative;overflow:hidden;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), border var(--transition-fast);
+    }
+    .badge-card:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.22);
+      box-shadow: 0 22px 52px rgba(0,0,0,0.72);
+    }
+    .badge-card::before{
+      content:"";position:absolute;inset:0;
+      background: radial-gradient(circle at 0 0, rgba(255,39,87,0.16), transparent 55%),
+                  radial-gradient(circle at 100% 0, rgba(138,77,255,0.16), transparent 55%);
+      opacity: .7; pointer-events:none;
+    }
+    .badge-card > *{position:relative;z-index:1}
+    .badge-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .badge-icon{
+      width:44px;height:44px;border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.14);
+      font-size:1.1rem;
+    }
+    .badge-lock{font-size:.85rem;opacity:.85;display:none}
+    .badge-title{font-weight:700;font-size:1.02rem;line-height:1.35}
+    .badge-desc{color: var(--fg-muted);font-size:.9rem;line-height:1.55}
+    .badge-progress{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .badge-chip{
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.14);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.65rem;
+      width: fit-content;
+    }
+    .badge-card.locked{
+      opacity: .45;
+      filter: grayscale(1);
+    }
+    .badge-card.locked .badge-lock{display:inline}
+    .badge-small{font-size:.78rem;color: rgba(165,166,179,0.92);}
+
+
+    /* Evitar que textos largos "sobresalgan" */
+    .badge-title,
+    .badge-desc,
+    .genre-name,
+    .hero-sub,
+    .tag,
+    .pill,
+    .user-name {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      hyphens: auto;
+    }
+
+    /* Necesario para que el wrap funcione bien en flex */
+    .user-lines,
+    .badge-card,
+    .genre,
+    .profile-top {
+      min-width: 0;
+    }
+
+
+    /* Defensa extra por si styles.css impone max-width a contenedores del hero */
+    .hero-inner, .hero-grid{
+      max-width: none !important;
+    }
+
+
+    /* 🔧 FIX ANTI-CONFLICTOS: asegura que las cards del hero se estiran (aunque styles.css tenga reglas de .card) */
+    .hero{ display:block !important; }
+    .hero-grid{
+      justify-items: stretch;
+      align-content: start;
+    }
+    .hero-grid > .card{
+      width: 100% !important;
+      max-width: none !important;
+      justify-self: stretch;
+    }
+    .card{
+      width: 100%;
+      max-width: none;
+    }
+
+    /* Footer */
+    footer{
+      margin-top: 60px;
+      font-size: 0.78rem;
+      color: var(--fg-muted);
+      display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 18px;
+    }
+    .footer-links{display:flex;gap:14px;flex-wrap:wrap}
+    .footer-links a{opacity:.8}
+    .footer-links a:hover{opacity:1}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .hero-grid{grid-template-columns: 1fr; }
+      header{border-radius: 20px;}
+      .stats-grid{grid-template-columns: repeat(2, minmax(0,1fr));}
+      .genres-grid{grid-template-columns: repeat(2, minmax(0,1fr));}
+    }
+    @media (max-width: 720px){
+      .page{padding: 18px 16px 72px;}
+      header{position: static; flex-wrap: wrap; align-items: flex-start; border-radius: 18px;}
+      .nav{display:none;}
+      .stats-grid{grid-template-columns: 1fr;}
+      .genres-grid{grid-template-columns: 1fr;}
+      .logros-toolbar{justify-content:stretch;}
+      .logros-toolbar .control{flex:1; min-width: 180px;}
+      .segmented{width:100%;}
+      .segmented button{flex:1;}
+    }
+  </style>
 </head>
+
 <body>
-    <main class="sound-profile-page">
-        <header class="site-header">
-            <!-- LOGO BEEFMUSIC (GIF) -->
-            <a href="index.html" class="site-logo">
-                <img src="img/logo.gif" alt="BeefMusic" class="site-logo-img">
-            </a>
+  <div class="page">
+    <header>
+      <a class="logo" href="index.html" aria-label="BeefMusic Home">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span>BeefMusic</span>
+      </a>
 
-            <nav class="site-nav">
-                <a href="index.html">Inicio</a>
-                <a href="canciones.html">Canciones</a>
-                <a href="perfil.html" class="active">Perfil sonoro</a>
-            </nav>
-        </header>
+      <nav class="nav" aria-label="Navegación">
+        <a href="index.html">Inicio</a>
+        <a href="canciones.html">Canciones</a>
+        <a href="peticiones.html">Peticiones</a>
+        <a href="perfil.html" class="active">Perfil</a>
+      </nav>
 
-        <!-- CARD CUADRADA DEL PERFIL SONORO -->
-        <section class="sound-profile-header-card">
-            <header class="sound-profile-header">
-                <div class="sound-profile-header-main">
-                    <div class="sound-profile-title-row">
-                        <h1>Perfil sonoro</h1>
-                        <span class="sound-profile-username">@usuario</span>
-                    </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" id="logout-btn" type="button">Cerrar sesión</button>
+        <a class="btn btn-primary" href="canciones.html">▶ Ver canciones</a>
+      </div>
+    </header>
 
-                    <p class="sound-profile-tagline">
-                        Cargando tu perfil sonoro…
-                    </p>
-                    <div id="profile-status" class="profile-status info"></div>
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="kicker"><span class="kdot"></span><span>Tu identidad sonora</span></div>
+        <h1 class="hero-title">Perfil sonoro</h1>
+        <p class="hero-sub">
+          Tu perfil se calcula con tus likes y dislikes. Vota canciones para desbloquear logros, subir de nivel y marcar tu estilo.
+        </p>
+
+        <div class="hero-grid">
+          <!-- Resumen usuario + mood -->
+          <div class="card">
+            <div class="profile-top">
+              <div class="user-chip">
+                <div class="avatar" id="avatar">U</div>
+                <div class="user-lines">
+                  <span class="user-label">Conectado</span>
+                  <span class="user-name" id="username">@usuario</span>
+                  <span class="user-title" id="user-title">—</span>
                 </div>
-            </header>
+              </div>
 
-            <div class="sound-profile-status-row">
-                <div class="sound-profile-pill">
-                    <span>🎧 Modo actual:</span>
-                    <strong id="pill-mode">Analizando tus gustos…</strong>
-                </div>
-                <div class="sound-profile-pill">
-                    <span>⏱ Última actividad:</span>
-                    <strong id="pill-activity">–</strong>
-                </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <span class="pill" id="dominant-genre">Dominante: —</span>
+                <span class="pill" id="mood-label">Mood: —</span>
+              </div>
             </div>
-        </section>
 
-        <section class="sound-profile-main">
-            <!-- DISTRIBUCIÓN DE GÉNEROS -->
-            <article class="card">
-                <div class="card-inner">
-                    <div class="card-title">Distribución de géneros</div>
-                    <div class="genres-list" id="genres-list">
-                        <!-- Se rellena con JS -->
-                    </div>
+            <div class="tags" id="mood-tags"></div>
+
+            <div class="stats-grid" style="margin-top:14px">
+              <div class="stat">
+                <div class="label">Votos</div>
+                <div class="value" id="totalVotes">0</div>
+                <div class="hint">Likes + dislikes</div>
+              </div>
+              <div class="stat">
+                <div class="label">Likes</div>
+                <div class="value" id="totalLikes">0</div>
+                <div class="hint">Temas que te flipa</div>
+              </div>
+              <div class="stat">
+                <div class="label">Dislikes</div>
+                <div class="value" id="totalDislikes">0</div>
+                <div class="hint">Ojo fino</div>
+              </div>
+              <div class="stat">
+                <div class="label">Toxicidad</div>
+                <div class="value" id="toxicity">0%</div>
+                <div class="hint">Dislikes/votos</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nivel / XP -->
+          <div class="card">
+            <div class="card-title">Nivel BeefMusic</div>
+            <div class="level-block">
+              <div class="level-row">
+                <div>
+                  <div class="level-main" id="level-line">Nivel —</div>
+                  <div class="level-sub" id="xp-line">XP —</div>
                 </div>
-            </article>
-            <!-- NIVEL + XP -->
-            <article class="card">
-                <div class="card-inner">
-                    <div class="card-title">Nivel BeefMusic</div>
+                <div class="pill" id="rank-pill">—</div>
+              </div>
+              <div class="progress" aria-label="Progreso de nivel">
+                <span id="xp-bar"></span>
+              </div>
+              <div class="level-row" style="margin-top:2px">
+                <div class="level-sub" id="xp-progress">—</div>
+                <div class="level-sub" id="xp-next">—</div>
+              </div>
 
-                    <div class="level-row">
-                        <div class="level-badge" id="level-badge">LV <span id="level-number">1</span></div>
-                        <div class="level-info">
-                            <div class="level-title" id="level-title">Beef Rookie</div>
-                            <div class="level-xp" id="level-xp-total">0 XP</div>
-                        </div>
-                    </div>
+              <div class="card-title" style="margin-top:12px">Badges rápidos</div>
+              <div class="tags" id="quick-badges"></div>
+              <div class="badge-small" style="margin-top:2px; opacity:.9" id="badges-note">
+                (Estos son los badges “resumen”. Abajo tienes la colección de 100 logros.)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-                    <div class="xp-bar" aria-hidden="true">
-                        <div class="xp-fill" id="xp-fill" style="width: 0%"></div>
-                    </div>
+    <!-- Géneros -->
+    <section class="section" id="generos">
+      <div class="section-header">
+        <div class="section-kicker">Taste</div>
+        <h2 class="section-title">Tus géneros</h2>
+        <p class="section-subtitle">
+          Se calcula por tus votos. Si no hay datos suficientes, vota algunas canciones y vuelve.
+        </p>
+      </div>
 
-                    <div class="xp-meta" id="xp-meta">
-                        0 / 0 XP · siguiente nivel: --
-                    </div>
+      <div class="genres-grid" id="genres-grid"></div>
+    </section>
 
-                    <div class="xp-hint">
-                        XP por acciones: votar +1 · sugerencia +3 · petición +5
-                    </div>
-                </div>
-            </article>
+    <!-- Logros -->
+    <section class="section" id="logros">
+      <div class="section-header">
+        <div class="section-kicker">Colección</div>
+        <h2 class="section-title">100 logros</h2>
+        <p class="section-subtitle">
+          Los bloqueados salen en gris. Usa filtros y buscador para encontrarlos rápido.
+        </p>
+      </div>
 
-            <!-- MOOD + TOXICIDAD + BADGES -->
-            <article class="card">
-                <div class="card-inner">
-                    <div class="card-title">Mood & actitud</div>
-                    <div class="mood-grid">
-                        <div>
-                            <p class="mood-main-label">
-                                Mood predominante: <strong id="mood-label">Cargando…</strong>
-                            </p>
-                            <p class="mood-sub" id="mood-sub">
-                                Analizando tus likes y dislikes para adivinar qué clase de ente musical eres.
-                            </p>
+      <div class="logros-toolbar">
+        <input id="search" class="control" type="text" placeholder="Buscar logro… (ej: Drill, votos, likes, toxicidad)" />
+        <div class="segmented" role="tablist" aria-label="Filtro de logros">
+          <button type="button" class="active" data-filter="all">Todos</button>
+          <button type="button" data-filter="unlocked">Desbloqueados</button>
+          <button type="button" data-filter="locked">Bloqueados</button>
+        </div>
+        <select id="sort" class="control" style="min-width:180px">
+          <option value="smart">Orden inteligente</option>
+          <option value="locked-first">Bloqueados primero</option>
+          <option value="unlocked-first">Desbloqueados primero</option>
+          <option value="progress">Más cerca de desbloquear</option>
+          <option value="az">A → Z</option>
+        </select>
+      </div>
 
-                            <div class="mood-tags" id="mood-tags">
-                                <!-- Tags generados por JS -->
-                            </div>
-                        </div>
+      <div class="badges-grid" id="badges-grid"></div>
+    </section>
 
-                        <div class="toxicity-wrapper">
-                            <div>
-                                <div class="toxicity-score" id="toxicity-score">0%</div>
-                                <div class="toxicity-label">Nivel de toxicidad musical</div>
-                            </div>
-                            <div class="toxicity-bar">
-                                <div class="toxicity-fill" id="toxicity-fill"></div>
-                            </div>
-                            <p class="toxicity-note">
-                                Cuanto más alto, más extremos son tus gustos. No es malo… pero cuidado con lo que recomiendas 😈
-                            </p>
-                        </div>
-                    </div>
+    <footer>
+      <span>© <span id="year"></span> BeefMusic. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
+        <a href="#">Contacto</a>
+      </div>
+    </footer>
+  </div>
 
-                    <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 16px 0 14px;">
+  <script>
+    const API_URL = "https://beefmusic-backend.onrender.com";
+    document.getElementById("year").textContent = new Date().getFullYear();
 
-                    <div class="card-title" style="margin-bottom: 8px;">Badges desbloqueados</div>
-                    <div class="badges-list" id="badges-list">
-                        <!-- Badges generados por JS -->
-                    </div>
-                </div>
-            </article>
-        </section>
+    // Auth gate
+    (function () {
+      const userToken = localStorage.getItem("beefmusic_user_token");
+      if (!userToken) window.location.href = "user-login.html";
+    })();
 
+    // Logout
+    const logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        localStorage.removeItem("beefmusic_user_token");
+        localStorage.removeItem("beefmusic_user_name");
+        window.location.href = "user-login.html";
+      });
+    }
 
-        <section class="achievements-wrap">
-            <article class="card">
-                <div class="card-inner">
-                    <div class="achievements-header">
-                        <div>
-                            <div class="achievements-title">Colección de logros</div>
-                            <div style="font-size:0.85rem; opacity:0.75; margin-top:6px;">
-                                100 logros para desbloquear. Los bloqueados se ven en gris.
-                            </div>
-                        </div>
+    // Helpers
+    const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+    const safeNum = (v) => (typeof v === "number" && isFinite(v)) ? v : 0;
 
-                        <div class="achievements-controls">
-                            <button class="achievements-chip active" type="button" data-filter="all">Todos</button>
-                            <button class="achievements-chip" type="button" data-filter="unlocked">Desbloqueados</button>
-                            <button class="achievements-chip" type="button" data-filter="locked">Bloqueados</button>
-                            <input class="achievements-search" id="achievements-search" type="search" placeholder="Buscar logro…" />
-                        </div>
-                    </div>
+    function getGenreVotes(profile, genreName) {
+      const g = (profile.genres || []).find(x => (x.name || "").toLowerCase() === genreName.toLowerCase());
+      return g ? { likes: safeNum(g.likes), dislikes: safeNum(g.dislikes), percent: safeNum(g.percent) } : { likes: 0, dislikes: 0, percent: 0 };
+    }
 
-                    <div class="achievements-grid" id="achievements-grid">
-                        <!-- Logros generados por JS -->
-                    </div>
+    // ---- LEVEL MODEL (frontend fallback) ----
+    function calcLevelFromXp(xp) {
+      let level = 1;
+      let remaining = xp;
+      let cost = 20;
+      while (remaining >= cost && level < 100) {
+        remaining -= cost;
+        level += 1;
+        cost = Math.round(20 + level * 6);
+      }
+      return { level, xpIntoLevel: remaining, xpForNextLevel: cost };
+    }
 
-                    <div style="margin-top:12px; font-size:0.78rem; opacity:0.7;">
-                        Tip: vota en <strong>Canciones</strong> para subir tu progreso.
-                    </div>
-                </div>
-            </article>
-        </section>
+    function titleForLevel(level) {
+      const table = [
+        { min: 1,  title: "Beef Rookie" },
+        { min: 5,  title: "Beat Hunter" },
+        { min: 10, title: "Hook Crafter" },
+        { min: 15, title: "Flow Engineer" },
+        { min: 20, title: "Studio Menace" },
+        { min: 30, title: "Mix & Mayhem" },
+        { min: 40, title: "Neon Producer" },
+        { min: 50, title: "Boss del Bloque" },
+        { min: 65, title: "Leyenda del Server" },
+        { min: 80, title: "Final Boss" },
+        { min: 95, title: "BeefMusic Godmode" },
+      ];
+      let t = table[0].title;
+      for (const row of table) if (level >= row.min) t = row.title;
+      return t;
+    }
 
-    </main>
-    <script>
-        // Detecta si estás en local o en producción (Render) y ajusta la URL
-        const API_URL =
-            window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-                ? "http://localhost:4000"
-                : "https://beefmusic-backend.onrender.com";
+    // ---- 100 LOGROS (catálogo fijo) ----
+    function buildAchievementsCatalog() {
+      const list = [];
+      let id = 1;
+      const push = (obj) => list.push({ ...obj, id: obj.id || ("A" + String(id++).padStart(3, "0")) });
 
-        // Inicializar página: comprobar sesión, poner nombre y cargar perfil
-        (function initPerfilSonoro() {
-            const token = localStorage.getItem("beefmusic_user_token");
-            const storedUserName = localStorage.getItem("beefmusic_user_name");
-            const usernameEl = document.querySelector(".sound-profile-username");
-            const statusEl = document.getElementById("profile-status");
+      [1,2,3,5,8,10,12,15,18,20,25,30,35,40,45,50,60,70,80,90,100,125,150,175,200].forEach((t) => {
+        push({ icon:"🗳️", title:`Votante ${t}+`, desc:`Alcanza ${t} votos totales.`, type:"totalVotes", target:t });
+      });
 
-            if (storedUserName && usernameEl) {
-                usernameEl.textContent = "@" + storedUserName;
-            }
+      [1,2,3,5,8,10,12,15,18,20,25,30,35,40,45,50,60,70,80,90,100,120,140,160,180].forEach((t) => {
+        push({ icon:"🎧", title:`Coleccionista de bangers ${t}+`, desc:`Consigue ${t} likes totales.`, type:"totalLikes", target:t });
+      });
 
-            if (!token) {
-                if (statusEl) {
-                    statusEl.textContent = "Inicia sesión para generar tu perfil sonoro.";
-                    statusEl.classList.add("error");
-                }
-                setTimeout(() => {
-                    window.location.href = "user-login.html";
-                }, 1200);
-                return;
-            }
+      [1,2,3,5,8,10,12,15,18,20,25,30,40,50,75].forEach((t) => {
+        push({ icon:"💣", title:`Hater con criterio ${t}+`, desc:`Da ${t} dislikes totales.`, type:"totalDislikes", target:t });
+      });
 
-            // Si hay token, cargamos el perfil
-            cargarPerfilSonoro(token);
-        })();
+      [5,10,15,20,30,40,50,60,70,80].forEach((t) => {
+        push({ icon:"😈", title:`Toxicidad ${t}%`, desc:`Alcanza ${t}% de toxicidad (dislikes/votos).`, type:"toxicity", target:t });
+      });
 
-        async function cargarPerfilSonoro(token) {
-            const statusEl = document.getElementById("profile-status");
+      const genres = ["Trap","Drill","Dembow","Boom Bap","Phonk","Corridos tumbados","Afrobeat","Dancehall","R&B","Reggaetón","Rap","Pop urbano"];
+      const perTargets = [5, 20];
+      genres.forEach((g) => {
+        perTargets.forEach((t) => {
+          push({ icon:"🎛️", title:`${t} likes en ${g}`, desc:`Consigue ${t} likes en ${g}.`, type:"genreLikes", genre:g, target:t });
+        });
+      });
 
-            if (statusEl) {
-                statusEl.textContent = "Analizando tu actividad en BeefMusic…";
-                statusEl.classList.remove("error");
-                statusEl.classList.add("info");
-            }
+      push({ icon:"🌈", title:"Explorador de estilos", desc:"Vota en 5 géneros distintos.", type:"genreDiversity", target:5 });
 
-            try {
-                const res = await fetch(API_URL + "/api/sound-profile", {
-                    headers: {
-                        "Authorization": "Bearer " + token
-                    }
-                });
+      return list.slice(0, 100);
+    }
 
-                if (!res.ok) {
-                    console.error("Error al obtener perfil sonoro:", res.status);
+    const ACHIEVEMENTS = buildAchievementsCatalog();
 
-                    if (res.status === 401) {
-                        if (statusEl) {
-                            statusEl.textContent = "Sesión caducada. Vuelve a iniciar sesión.";
-                            statusEl.classList.remove("info");
-                            statusEl.classList.add("error");
-                        }
-                        setTimeout(() => {
-                            window.location.href = "user-login.html";
-                        }, 1200);
-                        return;
-                    }
+    function getProgressForAchievement(profile, a) {
+      const totalVotes = safeNum(profile.totalVotes);
+      const totalLikes = safeNum(profile.totalLikes);
+      const totalDislikes = safeNum(profile.totalDislikes);
+      const toxicity = safeNum(profile.toxicity);
 
-                    if (statusEl) {
-                        statusEl.textContent = "No se ha podido cargar tu perfil sonoro.";
-                        statusEl.classList.remove("info");
-                        statusEl.classList.add("error");
-                    }
-                    return;
-                }
+      if (a.type === "totalVotes") return { current: totalVotes, target: a.target };
+      if (a.type === "totalLikes") return { current: totalLikes, target: a.target };
+      if (a.type === "totalDislikes") return { current: totalDislikes, target: a.target };
+      if (a.type === "toxicity") return { current: toxicity, target: a.target };
+      if (a.type === "genreLikes") {
+        const g = getGenreVotes(profile, a.genre);
+        return { current: g.likes, target: a.target };
+      }
+      if (a.type === "genreDiversity") {
+        const distinct = (profile.genres || []).filter(g => (safeNum(g.likes) + safeNum(g.dislikes)) > 0).length;
+        return { current: distinct, target: a.target };
+      }
+      return { current: 0, target: a.target || 1 };
+    }
 
-                const profile = await res.json();
-                console.log("Perfil sonoro:", profile);
-                pintarPerfilSonoro(profile);
-                renderAchievements(profile);
+    function isUnlocked(progress) {
+      return safeNum(progress.current) >= safeNum(progress.target);
+    }
 
-                if (statusEl) {
-                    if ((profile.totalVotes || 0) === 0) {
-                        statusEl.textContent = "Todavía no has votado ninguna canción. Empieza a dar like / no like para ver tu perfil.";
-                    } else {
-                        statusEl.textContent = `Perfil generado a partir de ${profile.totalVotes} votos.`;
-                    }
-                    statusEl.classList.remove("error");
-                    statusEl.classList.add("info");
-                }
-            } catch (err) {
-                console.error("Error de red al obtener perfil sonoro:", err);
-                if (statusEl) {
-                    statusEl.textContent = "Error de conexión al cargar el perfil sonoro.";
-                    statusEl.classList.remove("info");
-                    statusEl.classList.add("error");
-                }
-            }
+    // Render sections
+    function renderProfile(profile) {
+      const stored = localStorage.getItem("beefmusic_user_name");
+      const uname = profile.username || stored || "usuario";
+      document.getElementById("username").textContent = "@" + uname;
+      document.getElementById("avatar").textContent = String(uname).charAt(0).toUpperCase();
+
+      document.getElementById("totalVotes").textContent = safeNum(profile.totalVotes);
+      document.getElementById("totalLikes").textContent = safeNum(profile.totalLikes);
+      document.getElementById("totalDislikes").textContent = safeNum(profile.totalDislikes);
+      document.getElementById("toxicity").textContent = safeNum(profile.toxicity) + "%";
+
+      document.getElementById("dominant-genre").textContent = "Dominante: " + (profile.dominantGenre || "—");
+      document.getElementById("mood-label").textContent = "Mood: " + (profile.moodLabel || "—");
+
+      const tagsEl = document.getElementById("mood-tags");
+      tagsEl.innerHTML = "";
+      (profile.moodTags || []).slice(0, 10).forEach(t => {
+        const s = document.createElement("span");
+        s.className = "tag";
+        s.textContent = t;
+        tagsEl.appendChild(s);
+      });
+
+      const qb = document.getElementById("quick-badges");
+      qb.innerHTML = "";
+      (profile.badges || []).slice(0, 8).forEach(b => {
+        const s = document.createElement("span");
+        s.className = "tag";
+        s.textContent = `${b.icon || "🏷️"} ${b.label || ""}`.trim();
+        qb.appendChild(s);
+      });
+      if (!profile.badges || profile.badges.length === 0) {
+        const s = document.createElement("span");
+        s.className = "tag";
+        s.textContent = "Vota canciones para desbloquear badges";
+        qb.appendChild(s);
+      }
+
+      const xpTotal = safeNum(profile.xp);
+      const backendLevel = safeNum(profile.level);
+      const backendTitle = (profile.title || "").trim();
+
+      let level = backendLevel;
+      let xpIntoLevel = safeNum(profile.xpIntoLevel);
+      let xpForNext = safeNum(profile.xpForNextLevel);
+
+      if (!level) {
+        const calc = calcLevelFromXp(xpTotal);
+        level = calc.level;
+        xpIntoLevel = calc.xpIntoLevel;
+        xpForNext = calc.xpForNextLevel;
+      } else {
+        if (!xpForNext) {
+          const calc = calcLevelFromXp(xpTotal);
+          xpIntoLevel = calc.xpIntoLevel;
+          xpForNext = calc.xpForNextLevel;
         }
+      }
 
-        function pintarPerfilSonoro(userSoundProfile) {
-            // Username
-            const usernameEl = document.querySelector(".sound-profile-username");
-            if (usernameEl && userSoundProfile.username) {
-                usernameEl.textContent = "@" + userSoundProfile.username;
-            }
+      const title = backendTitle || titleForLevel(level);
+      document.getElementById("user-title").textContent = title;
+      document.getElementById("level-line").textContent = `Nivel ${level}`;
+      document.getElementById("xp-line").textContent = `XP total: ${xpTotal}`;
+      document.getElementById("rank-pill").textContent = title;
 
+      const pct = xpForNext > 0 ? clamp(Math.round((xpIntoLevel / xpForNext) * 100), 0, 100) : 0;
+      document.getElementById("xp-bar").style.width = pct + "%";
+      document.getElementById("xp-progress").textContent = `Progreso: ${xpIntoLevel}/${xpForNext} XP`;
+      document.getElementById("xp-next").textContent = `Siguiente nivel: +${Math.max(0, xpForNext - xpIntoLevel)} XP`;
 
-            // Nivel / XP
-            const levelNumberEl = document.getElementById("level-number");
-            const levelTitleEl = document.getElementById("level-title");
-            const levelXpTotalEl = document.getElementById("level-xp-total");
-            const xpFillEl = document.getElementById("xp-fill");
-            const xpMetaEl = document.getElementById("xp-meta");
+      renderGenres(profile);
+      renderAchievements(profile);
+    }
 
-            if (typeof userSoundProfile.xp === "number") {
-                if (levelXpTotalEl) levelXpTotalEl.textContent = `${userSoundProfile.xp} XP`;
-            }
+    function renderGenres(profile) {
+      const grid = document.getElementById("genres-grid");
+      grid.innerHTML = "";
 
-            if (typeof userSoundProfile.level === "number") {
-                if (levelNumberEl) levelNumberEl.textContent = String(userSoundProfile.level);
-            }
+      const genres = Array.isArray(profile.genres) ? profile.genres.slice() : [];
+      if (!genres.length) {
+        const el = document.createElement("div");
+        el.className = "card";
+        el.innerHTML = `<div class="card-title">Sin datos</div><div style="color:var(--fg-muted)">Vota canciones para generar tu perfil.</div>`;
+        grid.appendChild(el);
+        return;
+      }
 
-            if (levelTitleEl && userSoundProfile.title) {
-                levelTitleEl.textContent = userSoundProfile.title;
-            }
+      genres.sort((a,b) => safeNum(b.percent) - safeNum(a.percent));
 
-            if (xpFillEl && typeof userSoundProfile.levelProgress === "number") {
-                xpFillEl.style.width = `${Math.max(0, Math.min(100, userSoundProfile.levelProgress))}%`;
-            }
+      genres.forEach((g) => {
+        const likes = safeNum(g.likes), dislikes = safeNum(g.dislikes), percent = safeNum(g.percent);
+        const card = document.createElement("div");
+        card.className = "genre";
+        card.innerHTML = `
+          <div class="genre-top">
+            <div class="genre-name">${escapeHtml(g.name || "—")}</div>
+            <div class="genre-percent">${percent}%</div>
+          </div>
+          <div class="progress" style="height:9px">
+            <span style="width:${clamp(percent,0,100)}%"></span>
+          </div>
+          <div class="genre-row">
+            <span class="pill">👍 ${likes}</span>
+            <span class="pill">👎 ${dislikes}</span>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
 
-            if (xpMetaEl) {
-                if (userSoundProfile.isMaxLevel) {
-                    xpMetaEl.textContent = `MAX LEVEL · ${userSoundProfile.xp} XP`;
-                } else {
-                    const into = userSoundProfile.xpIntoLevel ?? 0;
-                    const next = userSoundProfile.xpForNextLevel ?? 0;
-                    const nextLv = (userSoundProfile.level ?? 1) + 1;
-                    xpMetaEl.textContent = `${into} / ${next} XP · siguiente nivel: LV ${nextLv}`;
-                }
-            }
-            // Tagline
-            const taglineEl = document.querySelector(".sound-profile-tagline");
-            if (taglineEl) {
-                if (userSoundProfile.genres && userSoundProfile.genres.length > 0) {
-                    const partes = userSoundProfile.genres.map(g => `${g.percent}% ${g.name}`);
-                    taglineEl.innerHTML =
-                        `Eres <strong>${partes.join("</strong>, <strong>")}</strong>. ` +
-                        `Nivel de toxicidad musical: <strong id="toxicity-text">${userSoundProfile.toxicity}%</strong> 🔥`;
-                } else {
-                    taglineEl.textContent =
-                        "Aún no tenemos datos suficientes. Empieza a votar canciones para generar tu perfil sonoro.";
-                }
-            }
+    // ---- Achievements render + filter/sort/search ----
+    const badgesGrid = document.getElementById("badges-grid");
+    const searchEl = document.getElementById("search");
+    const sortEl = document.getElementById("sort");
+    const segmented = document.querySelector(".segmented");
 
-            // Pill "modo actual"
-            const pillMode = document.getElementById("pill-mode");
-            if (pillMode) {
-                if (userSoundProfile.moodLabel && userSoundProfile.moodLabel !== "Aún sin datos suficientes") {
-                    pillMode.textContent = `"${userSoundProfile.moodLabel}"`;
-                } else {
-                    pillMode.textContent = "Esperando tus primeros votos";
-                }
-            }
+    let currentFilter = "all";
+    let currentSearch = "";
+    let currentSort = "smart";
+    let lastProfile = null;
 
-            // Pill "última actividad"
-            const pillActivity = document.getElementById("pill-activity");
-            if (pillActivity) {
-                if ((userSoundProfile.totalVotes || 0) > 0) {
-                    pillActivity.textContent = "hace poco (basado en tus votos)";
-                } else {
-                    pillActivity.textContent = "sin actividad reciente";
-                }
-            }
+    function renderAchievements(profile) {
+      lastProfile = profile;
+      const items = ACHIEVEMENTS.map((a) => {
+        const prog = getProgressForAchievement(profile, a);
+        const unlocked = isUnlocked(prog);
+        const cur = safeNum(prog.current);
+        const tgt = Math.max(1, safeNum(prog.target));
+        const ratio = clamp(cur / tgt, 0, 1);
+        return { a, prog: { cur, tgt, ratio }, unlocked };
+      });
 
-            // Toxicidad
-            const toxicityScoreEl = document.getElementById("toxicity-score");
-            const toxicityFillEl = document.getElementById("toxicity-fill");
-            const toxicityTextInline = document.getElementById("toxicity-text");
+      let filtered = items;
+      if (currentFilter === "unlocked") filtered = filtered.filter(x => x.unlocked);
+      if (currentFilter === "locked") filtered = filtered.filter(x => !x.unlocked);
 
-            if (toxicityScoreEl && toxicityFillEl) {
-                const t = userSoundProfile.toxicity ?? 0;
-                toxicityScoreEl.textContent = t + "%";
-                if (toxicityTextInline) toxicityTextInline.textContent = t + "%";
+      if (currentSearch) {
+        const q = currentSearch.toLowerCase();
+        filtered = filtered.filter(x => {
+          const t = (x.a.title + " " + x.a.desc + " " + (x.a.genre || "")).toLowerCase();
+          return t.includes(q);
+        });
+      }
 
-                requestAnimationFrame(() => {
-                    toxicityFillEl.style.transition = "transform 0.8s ease-out";
-                    toxicityFillEl.style.transform = "scaleX(" + (t / 100) + ")";
-                });
-            }
+      const sorters = {
+        "smart": (x,y) => (x.unlocked === y.unlocked) ? (y.prog.ratio - x.prog.ratio) : (x.unlocked ? 1 : -1),
+        "locked-first": (x,y) => (x.unlocked === y.unlocked) ? 0 : (x.unlocked ? 1 : -1),
+        "unlocked-first": (x,y) => (x.unlocked === y.unlocked) ? 0 : (x.unlocked ? -1 : 1),
+        "progress": (x,y) => (y.prog.ratio - x.prog.ratio),
+        "az": (x,y) => x.a.title.localeCompare(y.a.title, "es", { sensitivity: "base" }),
+      };
+      filtered.sort(sorters[currentSort] || sorters.smart);
 
-            // Mood label
-            const moodLabelEl = document.getElementById("mood-label");
-            if (moodLabelEl && userSoundProfile.moodLabel) {
-                moodLabelEl.textContent = userSoundProfile.moodLabel;
-            }
+      badgesGrid.innerHTML = filtered.map(({ a, prog, unlocked }) => {
+        const pct = Math.round(prog.ratio * 100);
+        const chip = unlocked ? "Desbloqueado" : "Bloqueado";
+        const progressText = `${Math.min(prog.cur, prog.tgt)}/${prog.tgt}`;
+        return `
+          <article class="badge-card ${unlocked ? "" : "locked"}" data-id="${escapeAttr(a.id)}">
+            <div class="badge-top">
+              <div class="badge-icon">${escapeHtml(a.icon || "🏷️")}</div>
+              <div class="badge-lock">🔒</div>
+            </div>
+            <div class="badge-title">${escapeHtml(a.title)}</div>
+            <div class="badge-desc">${escapeHtml(a.desc)}</div>
+            <div class="progress" style="height:9px">
+              <span style="width:${pct}%"></span>
+            </div>
+            <div class="badge-progress">
+              <span class="badge-small">${progressText}</span>
+              <span class="badge-chip">${chip}</span>
+            </div>
+          </article>
+        `;
+      }).join("");
 
-            // Mood subtítulo
-            const moodSubEl = document.getElementById("mood-sub");
-            if (moodSubEl) {
-                if ((userSoundProfile.totalVotes || 0) === 0) {
-                    moodSubEl.textContent =
-                        "Empieza a votar canciones para que podamos descifrar tu personalidad sonora.";
-                } else if (userSoundProfile.dominantGenre) {
-                    moodSubEl.innerHTML =
-                        `Tu actividad reciente nos dice que vives en el terreno del <strong>${userSoundProfile.dominantGenre}</strong>.`;
-                }
-            }
+      if (filtered.length === 0) {
+        badgesGrid.innerHTML = `<div class="card"><div class="card-title">Sin resultados</div><div style="color:var(--fg-muted)">No hay logros que coincidan con tu filtro/búsqueda.</div></div>`;
+      }
+    }
 
-            // Géneros (barras)
-            const genresListEl = document.getElementById("genres-list");
-            if (genresListEl) {
-                genresListEl.innerHTML = "";
-                (userSoundProfile.genres || []).forEach(genre => {
-                    const row = document.createElement("div");
-                    row.className = "genre-row";
+    if (segmented) {
+      segmented.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-filter]");
+        if (!btn) return;
+        currentFilter = btn.getAttribute("data-filter") || "all";
+        segmented.querySelectorAll("button").forEach(b => b.classList.toggle("active", b === btn));
+        if (lastProfile) renderAchievements(lastProfile);
+      });
+    }
 
-                    row.innerHTML = `
-                            <div class="genre-row-header">
-                                <span class="genre-name">${genre.name}</span>
-                                <span class="genre-percent">${genre.percent}%</span>
-                            </div>
-                            <div class="genre-bar">
-                                <div class="genre-bar-fill"></div>
-                            </div>
-                        `;
+    if (searchEl) {
+      let t = null;
+      searchEl.addEventListener("input", () => {
+        currentSearch = searchEl.value.trim();
+        clearTimeout(t);
+        t = setTimeout(() => lastProfile && renderAchievements(lastProfile), 120);
+      });
+    }
+    if (sortEl) {
+      sortEl.addEventListener("change", () => {
+        currentSort = sortEl.value;
+        if (lastProfile) renderAchievements(lastProfile);
+      });
+    }
 
-                    genresListEl.appendChild(row);
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+    function escapeAttr(str) {
+      return String(str ?? "").replaceAll('"', "");
+    }
 
-                    const fill = row.querySelector(".genre-bar-fill");
-                    requestAnimationFrame(() => {
-                        fill.style.transition = "transform 0.8s ease-out";
-                        fill.style.transform = "scaleX(" + (genre.percent / 100) + ")";
-                    });
-                });
-
-                if ((userSoundProfile.genres || []).length === 0) {
-                    const empty = document.createElement("p");
-                    empty.style.fontSize = "0.82rem";
-                    empty.style.opacity = "0.75";
-                    empty.textContent = "Sin votos aún. Cuando empieces a votar canciones, verás aquí qué géneros dominas.";
-                    genresListEl.appendChild(empty);
-                }
-            }
-
-            // Mood tags
-            const moodTagsEl = document.getElementById("mood-tags");
-            if (moodTagsEl) {
-                moodTagsEl.innerHTML = "";
-                (userSoundProfile.moodTags || []).forEach(tag => {
-                    const span = document.createElement("span");
-                    span.className = "mood-tag";
-                    span.textContent = tag;
-                    moodTagsEl.appendChild(span);
-                });
-
-                if ((userSoundProfile.moodTags || []).length === 0) {
-                    const span = document.createElement("span");
-                    span.className = "mood-tag";
-                    span.textContent = "Aún sin mood definido";
-                    moodTagsEl.appendChild(span);
-                }
-            }
-
-            // Badges
-            const badgesListEl = document.getElementById("badges-list");
-            if (badgesListEl) {
-                badgesListEl.innerHTML = "";
-                if (!userSoundProfile.badges || userSoundProfile.badges.length === 0) {
-                    const div = document.createElement("div");
-                    div.className = "badge";
-                    div.innerHTML = `
-                            <span class="badge-icon">✨</span>
-                            <span>Aún sin logros. Todo por desbloquear.</span>
-                        `;
-                    badgesListEl.appendChild(div);
-                } else {
-                    userSoundProfile.badges.forEach(badge => {
-                        const div = document.createElement("div");
-                        div.className = "badge";
-                        div.innerHTML = `
-                                <span class="badge-icon">${badge.icon}</span>
-                                <span>${badge.label}</span>
-                            `;
-                        badgesListEl.appendChild(div);
-                    });
-                }
-            }
+    async function loadProfile() {
+      const token = localStorage.getItem("beefmusic_user_token");
+      try {
+        const res = await fetch(API_URL + "/api/sound-profile", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok || data?.error) throw new Error(data?.error || "Error obteniendo perfil");
+        renderProfile(data);
+      } catch (e) {
+        console.error(e);
+        const grid = document.getElementById("genres-grid");
+        if (grid) {
+          grid.innerHTML = `<div class="card"><div class="card-title">Error</div><div style="color:var(--fg-muted)">No se pudo cargar tu perfil. Vuelve a iniciar sesión o prueba más tarde.</div></div>`;
         }
-    
-        // =========================
-        // LOGROS (100) – COLECCIÓN
-        // =========================
+      }
+    }
 
-        // Estado de filtros/búsqueda
-        let achievementsFilter = "all"; // all | unlocked | locked
-        let achievementsQuery = "";
-
-        function norm(str) {
-            return (str || "").toString().trim().toLowerCase();
-        }
-
-        function getGenreStat(profile, genreName) {
-            const g = (profile.genres || []).find(x => norm(x.name) === norm(genreName));
-            return {
-                likes: g ? (g.likes || 0) : 0,
-                dislikes: g ? (g.dislikes || 0) : 0
-            };
-        }
-
-        function makeMilestones(prefix, icon, titleFn, descFn, currentFn, thresholds) {
-            return thresholds.map((t, idx) => ({
-                id: `${prefix}_${t}_${idx}`,
-                icon,
-                title: titleFn(t),
-                desc: descFn(t),
-                current: currentFn,
-                target: t
-            }));
-        }
-
-        function buildAchievementsCatalog(profile) {
-            // 1) Votos (25)
-            const voteThresholds = [1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,25,30,35,40,50,60,75,90,100];
-            const votes = makeMilestones(
-                "votes",
-                "🗳️",
-                (t) => `Votante ${t}`,
-                (t) => `Acumula ${t} votos en canciones.`,
-                (p) => p.totalVotes || 0,
-                voteThresholds
-            );
-
-            // 2) Likes (25)
-            const likeThresholds = [1,2,3,4,5,6,7,8,9,10,12,14,16,18,20,22,25,30,35,40,50,60,75,90,100];
-            const likes = makeMilestones(
-                "likes",
-                "👍",
-                (t) => `Buen oído x${t}`,
-                (t) => `Dale ${t} likes en total.`,
-                (p) => p.totalLikes || 0,
-                likeThresholds
-            );
-
-            // 3) Dislikes (15)
-            const dislikeThresholds = [1,2,3,4,5,7,10,12,15,18,20,25,30,40,50];
-            const dislikes = makeMilestones(
-                "dislikes",
-                "👎",
-                (t) => `Crítico x${t}`,
-                (t) => `Dale ${t} dislikes en total.`,
-                (p) => p.totalDislikes || 0,
-                dislikeThresholds
-            );
-
-            // 4) Toxicidad (10)
-            // Aquí el progreso se mide por porcentaje, target = umbral
-            const toxicityThresholds = [5,10,15,20,30,40,50,60,70,80];
-            const toxicity = makeMilestones(
-                "toxicity",
-                "😈",
-                (t) => `Toxicidad ${t}%`,
-                (t) => `Alcanza un ${t}% de toxicidad musical (dislikes/votos).`,
-                (p) => p.toxicity || 0,
-                toxicityThresholds
-            );
-
-            // 5) Likes por género (24) – 12 géneros * (5 y 20 likes)
-            const GENRES = [
-                "Trap",
-                "Drill",
-                "Dembow",
-                "Reggaetón",
-                "Rap",
-                "Boom Bap",
-                "Afrobeat",
-                "R&B",
-                "Phonk",
-                "Corridos tumbados",
-                "Club / EDM",
-                "Pop urbano"
-            ];
-
-            const genre5 = GENRES.map((g) => ({
-                id: "genre5_" + norm(g).replace(/\s+/g, "_"),
-                icon: "🎚️",
-                title: `Fan de ${g}`,
-                desc: `Consigue 5 likes en el estilo ${g}.`,
-                current: (p) => getGenreStat(p, g).likes,
-                target: 5
-            }));
-
-            const genre20 = GENRES.map((g) => ({
-                id: "genre20_" + norm(g).replace(/\s+/g, "_"),
-                icon: "🏆",
-                title: `Leyenda ${g}`,
-                desc: `Consigue 20 likes en el estilo ${g}.`,
-                current: (p) => getGenreStat(p, g).likes,
-                target: 20
-            }));
-
-            // 6) Diversidad (1) – votar en 5 géneros distintos
-            const diversity = [{
-                id: "diversity_5",
-                icon: "🧬",
-                title: "Paladar amplio",
-                desc: "Vota en 5 géneros distintos (cuenta cualquier voto, like o dislike).",
-                current: (p) => (p.genres || []).length,
-                target: 5
-            }];
-
-            // Total: 25 + 25 + 15 + 10 + 24 + 1 = 100
-            return [
-                ...votes,
-                ...likes,
-                ...dislikes,
-                ...toxicity,
-                ...genre5,
-                ...genre20,
-                ...diversity
-            ];
-        }
-
-        function renderAchievements(profile) {
-            const grid = document.getElementById("achievements-grid");
-            if (!grid) return;
-
-            const chips = Array.from(document.querySelectorAll(".achievements-chip"));
-            const search = document.getElementById("achievements-search");
-
-            // Bind una sola vez
-            if (!renderAchievements._bound) {
-                chips.forEach((c) => {
-                    c.addEventListener("click", () => {
-                        chips.forEach(x => x.classList.remove("active"));
-                        c.classList.add("active");
-                        achievementsFilter = c.getAttribute("data-filter") || "all";
-                        // re-render
-                        renderAchievements(profile);
-                    });
-                });
-
-                if (search) {
-                    search.addEventListener("input", (e) => {
-                        achievementsQuery = (e.target.value || "").trim().toLowerCase();
-                        renderAchievements(profile);
-                    });
-                }
-
-                renderAchievements._bound = true;
-            }
-
-            const catalog = buildAchievementsCatalog(profile);
-
-            // Filtrar
-            let list = catalog.map((a) => {
-                const cur = Math.max(0, Number(a.current(profile) || 0));
-                const tgt = Math.max(1, Number(a.target || 1));
-                const unlocked = cur >= tgt;
-
-                // progreso 0..1
-                const pct = Math.max(0, Math.min(1, cur / tgt));
-
-                return { ...a, cur, tgt, unlocked, pct };
-            });
-
-            if (achievementsFilter === "unlocked") list = list.filter(x => x.unlocked);
-            if (achievementsFilter === "locked") list = list.filter(x => !x.unlocked);
-
-            if (achievementsQuery) {
-                list = list.filter(x =>
-                    x.title.toLowerCase().includes(achievementsQuery) ||
-                    x.desc.toLowerCase().includes(achievementsQuery)
-                );
-            }
-
-            // Orden: primero desbloqueados, luego por progreso descendente, luego por target
-            list.sort((a,b) => {
-                if (a.unlocked !== b.unlocked) return a.unlocked ? -1 : 1;
-                if (b.pct !== a.pct) return b.pct - a.pct;
-                return a.tgt - b.tgt;
-            });
-
-            if (list.length === 0) {
-                grid.innerHTML = `
-                    <div style="opacity:0.75; font-size:0.86rem;">
-                        No hay resultados con ese filtro/búsqueda.
-                    </div>
-                `;
-                return;
-            }
-
-            grid.innerHTML = list.map((a) => {
-                const state = a.unlocked ? "Desbloqueado" : "Bloqueado";
-                const progressText = `${Math.min(a.cur, a.tgt)}/${a.tgt}`;
-
-                return `
-                    <article class="achievement-card ${a.unlocked ? "" : "locked"}">
-                        <div class="achievement-top">
-                            <div class="achievement-icon">${a.icon}</div>
-                            <div class="achievement-lock">🔒</div>
-                        </div>
-
-                        <div class="achievement-name">${a.title}</div>
-                        <div class="achievement-desc">${a.desc}</div>
-
-                        <div class="achievement-bar" aria-hidden="true">
-                            <div class="achievement-bar-fill" style="transform: scaleX(${a.pct});"></div>
-                        </div>
-
-                        <div class="achievement-bottom">
-                            <div class="achievement-progress">${progressText}</div>
-                            <div class="achievement-state">${state}</div>
-                        </div>
-                    </article>
-                `;
-            }).join("");
-        }
-
-    </script>
+    loadProfile();
+  </script>
 </body>
 </html>
