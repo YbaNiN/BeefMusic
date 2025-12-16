@@ -272,9 +272,10 @@ app.post("/api/login-user", async (req, res) => {
 });
 
 // === CREAR PETICIÓN (PÚBLICO) ===
+// ✅ añadido: mostrarNick -> mostrar_nick
 app.post("/api/peticiones", async (req, res) => {
     try {
-        const { nick, style, idea } = req.body;
+        const { nick, style, idea, mostrarNick } = req.body;
 
         if (!nick || !style || !idea) {
             return res.status(400).json({ error: "Faltan campos obligatorios" });
@@ -286,6 +287,7 @@ app.post("/api/peticiones", async (req, res) => {
                 nick,
                 estilo: style,
                 idea,
+                mostrar_nick: !!mostrarNick, // ✅ nuevo
             })
             .select()
             .single();
@@ -309,6 +311,50 @@ app.post("/api/peticiones", async (req, res) => {
         });
     } catch (error) {
         console.error("Error en POST /api/peticiones:", error);
+        res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
+// === PETICIONES EN CURSO (PÚBLICO LIGHT) ===
+// Devuelve: estado, estilo, fecha, y nick SOLO si mostrar_nick=true
+app.get("/api/peticiones-publicas", async (req, res) => {
+    try {
+        const limit = Math.min(parseInt(req.query.limit || "30", 10), 100);
+        const offset = Math.max(parseInt(req.query.offset || "0", 10), 0);
+
+        // filtros opcionales:
+        // ?estado=pendiente | en_produccion | terminada
+        // ?estilo=Drill  (match exacto)
+        const estado = (req.query.estado || "").trim();
+        const estilo = (req.query.estilo || "").trim();
+
+        let q = supabase
+            .from("peticiones")
+            .select("id, nick, estilo, estado, created_at, mostrar_nick")
+            .order("created_at", { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        if (estado) q = q.eq("estado", estado);
+        if (estilo) q = q.eq("estilo", estilo);
+
+        const { data, error } = await q;
+
+        if (error) {
+            console.error("Supabase error (select peticiones publicas):", error);
+            return res.status(500).json({ error: "Error al obtener peticiones públicas" });
+        }
+
+        const clean = (data || []).map((p) => ({
+            id: p.id,
+            estilo: p.estilo,
+            estado: p.estado,
+            created_at: p.created_at,
+            nick: p.mostrar_nick ? p.nick : null, // ✅ anonimiza si no aceptó
+        }));
+
+        res.json(clean);
+    } catch (err) {
+        console.error("Error en GET /api/peticiones-publicas:", err);
         res.status(500).json({ error: "Error en el servidor" });
     }
 });
@@ -1078,7 +1124,7 @@ app.get("/api/peticiones", authAdmin, async (req, res) => {
     try {
         const { data, error } = await supabase
             .from("peticiones")
-            .select("id, nick, estilo, idea, estado, created_at")
+            .select("id, nick, estilo, idea, estado, created_at, mostrar_nick") // ✅ añadido mostrar_nick
             .order("created_at", { ascending: false });
 
         if (error) {
@@ -1414,7 +1460,7 @@ function normalizarGenero(raw) {
         rap: "Rap",
         reggaeton: "Reggaetón",
         pop: "Pop",
-        "boom bap": "Boom Bap",       
+        "boom bap": "Boom Bap",
         "reggaeton_dembow": "Reggaetón / Dembow",
     };
 
