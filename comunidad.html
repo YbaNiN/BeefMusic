@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BeefMusic — Comunidad</title>
+
+  <!-- Tu CSS global -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Extras mínimos para esta página (sin romper tu estilo) -->
+  <style>
+    .page-wrap { max-width: 1100px; margin: 0 auto; padding: 22px 16px 50px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 18px; }
+    .topbar .brand { display:flex; align-items:center; gap:12px; }
+    .pill { padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.35); color: rgba(255,255,255,.92); font-size:.9rem; }
+    .grid-2 { display:grid; grid-template-columns: 1.15fr .85fr; gap: 14px; }
+    @media (max-width: 900px){ .grid-2{ grid-template-columns: 1fr; } }
+    .card { border-radius: 16px; border: 1px solid rgba(255,255,255,0.10); background: rgba(0,0,0,0.45); box-shadow: 0 18px 60px rgba(0,0,0,.35); padding: 16px; }
+    .card h3{ margin: 0 0 10px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .field { display:flex; flex-direction:column; gap:6px; width:100%; }
+    .input, .textarea, .select {
+      width:100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.75);
+      color: rgba(255,255,255,0.92);
+      padding: 10px 12px;
+      font: inherit;
+    }
+    .textarea { resize: vertical; min-height: 90px; }
+    .muted { color: rgba(255,255,255,.65); font-size: .9rem; }
+    .divider { height:1px; background: rgba(255,255,255,0.08); margin: 14px 0; }
+    .badge { display:inline-flex; gap:8px; align-items:center; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); padding: 6px 10px; border-radius: 999px; font-size: .85rem; }
+    .list { display:flex; flex-direction:column; gap:10px; }
+    .item { border:1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.35); border-radius: 14px; padding: 12px; }
+    .item .small { font-size:.82rem; color: rgba(255,255,255,.65); margin-top:4px; }
+    .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
+
+    /* Comentarios (si ya los pegaste en styles.css, esto no molesta) */
+    .comment-replies{
+      margin-top:10px;
+      padding-left: 14px;
+      border-left: 2px solid rgba(255,255,255,0.08);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .comment-replybox{ margin-top:10px; display:none; }
+    .comment-replybox.open{ display:block; }
+  </style>
+</head>
+
+<body>
+  <div class="page-wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="pill"><strong>BeefMusic</strong> · Comunidad</div>
+        <a class="pill" href="index.html">← Inicio</a>
+      </div>
+
+      <div class="row">
+        <div class="pill" id="user-pill">No logueado</div>
+        <button class="btn btn-ghost" id="logout-btn" style="display:none;">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- ===================== PERFILES ===================== -->
+      <div class="card">
+        <h3>Perfiles</h3>
+        <div class="muted">Busca un usuario por <code>@username</code>, síguelo y mira su perfil público.</div>
+
+        <div class="divider"></div>
+
+        <div class="row">
+          <input class="input" id="profile-search" placeholder="Escribe username (sin @)..." style="flex:1; min-width:220px;" />
+          <button class="btn btn-primary" id="profile-load-btn">Buscar</button>
+        </div>
+
+        <div id="profile-view" style="margin-top:14px;">
+          <div class="muted">Busca un usuario para ver su perfil.</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3>Mi perfil</h3>
+        <div class="muted">Edita tu bio, links y privacidad (requiere login).</div>
+
+        <div style="margin-top:12px;" id="my-profile-locked" class="muted">
+          Inicia sesión para editar tu perfil.
+        </div>
+
+        <div style="margin-top:12px; display:none;" id="my-profile-form">
+          <div class="field">
+            <label>Bio</label>
+            <textarea class="textarea" id="my-bio" maxlength="500" placeholder="Tu bio (máx 500)…"></textarea>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div class="field" style="flex:1; min-width:240px;">
+              <label>Avatar URL (opcional)</label>
+              <input class="input" id="my-avatar" placeholder="https://..." />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div class="field" style="flex:1; min-width:220px;">
+              <label>Instagram</label>
+              <input class="input" id="my-link-ig" placeholder="https://instagram.com/..." />
+            </div>
+            <div class="field" style="flex:1; min-width:220px;">
+              <label>YouTube</label>
+              <input class="input" id="my-link-yt" placeholder="https://youtube.com/..." />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <div class="field" style="flex:1; min-width:220px;">
+              <label>SoundCloud</label>
+              <input class="input" id="my-link-sc" placeholder="https://soundcloud.com/..." />
+            </div>
+            <div class="field" style="flex:1; min-width:220px;">
+              <label>Spotify</label>
+              <input class="input" id="my-link-sp" placeholder="https://open.spotify.com/..." />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px;">
+            <label class="pill" style="display:flex; gap:10px; align-items:center;">
+              <input type="checkbox" id="my-public" />
+              Perfil público
+            </label>
+
+            <button class="btn btn-primary" id="my-profile-save">Guardar</button>
+            <span class="muted" id="my-profile-status">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================== FEED ===================== -->
+      <div class="card">
+        <h3>Feed</h3>
+        <div class="muted">Actividad de la gente que sigues (likes, dislikes, comentarios, follows).</div>
+
+        <div class="divider"></div>
+
+        <div id="feed-locked" class="muted">Inicia sesión para ver tu feed.</div>
+
+        <div id="feed-wrap" style="display:none;">
+          <div class="list" id="feed-list"></div>
+          <div class="row" style="justify-content:flex-end; margin-top:12px;">
+            <button class="btn btn-ghost" id="feed-more-btn">Cargar más</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== COMENTARIOS ===================== -->
+    <div class="card" style="margin-top:14px;">
+      <h3>Comentarios</h3>
+      <div class="muted">Selecciona una canción y mira/crea comentarios en árbol. (Responde y reporta).</div>
+
+      <div class="divider"></div>
+
+      <div class="row">
+        <div class="field" style="flex:1; min-width:240px;">
+          <label>Selecciona canción</label>
+          <select class="select" id="song-select">
+            <option value="">Cargando canciones…</option>
+          </select>
+        </div>
+
+        <div class="field" style="min-width:220px;">
+          <label>o pega ID</label>
+          <input class="input" id="song-id-input" placeholder="id de canción" />
+        </div>
+
+        <div class="field" style="min-width:160px;">
+          <label>&nbsp;</label>
+          <button class="btn btn-primary" id="comments-load-btn">Ver comentarios</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="row" style="align-items:flex-start;">
+        <div style="flex:1;">
+          <textarea class="textarea" id="comment-input" placeholder="Escribe un comentario (máx 800)…" maxlength="800"></textarea>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn btn-primary" id="comment-send-btn">Comentar</button>
+            <button class="btn btn-ghost" id="comments-reload-btn">Recargar</button>
+            <span class="muted" id="comment-status">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="comments-root" class="list">
+        <div class="muted">Selecciona una canción para ver comentarios.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== CONFIG ======
+    const API_URL = "https://beefmusic-backend.onrender.com";
+
+    // Claves que ya usas en tu front
+    const TOKEN_KEY = "beefmusic_user_token";
+    const NAME_KEY  = "beefmusic_user_name";
+
+    function getToken(){ return localStorage.getItem(TOKEN_KEY) || ""; }
+    function getUserName(){ return localStorage.getItem(NAME_KEY) || ""; }
+
+    async function apiFetch(path, { method="GET", body=null, auth=false } = {}) {
+      const headers = { "Content-Type": "application/json" };
+      if (auth) {
+        const t = getToken();
+        if (t) headers.Authorization = `Bearer ${t}`;
+      }
+      const res = await fetch(API_URL + path, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Error de petición");
+      return data;
+    }
+
+    function escapeHtml(s){
+      const div = document.createElement("div");
+      div.textContent = s ?? "";
+      return div.innerHTML;
+    }
+    function formatDate(iso){
+      try { return new Date(iso).toLocaleString(); } catch { return ""; }
+    }
+
+    // ====== UI: user pill / logout ======
+    function refreshAuthUI(){
+      const pill = document.getElementById("user-pill");
+      const logoutBtn = document.getElementById("logout-btn");
+      const username = getUserName();
+      const token = getToken();
+
+      if (token && username){
+        pill.textContent = `Logueado: @${username}`;
+        logoutBtn.style.display = "inline-flex";
+        document.getElementById("my-profile-locked").style.display = "none";
+        document.getElementById("my-profile-form").style.display = "block";
+        document.getElementById("feed-locked").style.display = "none";
+        document.getElementById("feed-wrap").style.display = "block";
+      } else {
+        pill.textContent = "No logueado";
+        logoutBtn.style.display = "none";
+        document.getElementById("my-profile-locked").style.display = "block";
+        document.getElementById("my-profile-form").style.display = "none";
+        document.getElementById("feed-locked").style.display = "block";
+        document.getElementById("feed-wrap").style.display = "none";
+      }
+    }
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(NAME_KEY);
+      refreshAuthUI();
+      alert("Sesión cerrada.");
+    });
+
+    // ====== PERFILES ======
+    function renderProfile(data){
+      const u = data.user;
+      const p = data.profile;
+      const s = data.social;
+      const lvl = data.level;
+      const sound = data.sound;
+      const top = data.topLikedSongs || [];
+
+      const links = p.links || {};
+      const linkItems = Object.entries(links).map(([k,v]) => {
+        return `<a class="pill" href="${escapeHtml(v)}" target="_blank" rel="noopener">${escapeHtml(k)}</a>`;
+      }).join(" ");
+
+      const badges = (sound.badges || []).map(b => `<span class="badge">${escapeHtml(b.icon)} ${escapeHtml(b.label)}</span>`).join(" ");
+
+      const topSongs = top.length ? `
+        <div class="divider"></div>
+        <div class="muted" style="margin-bottom:8px;">Top likes recientes</div>
+        <div class="list">
+          ${top.map(song => `
+            <div class="item">
+              <div><strong>${escapeHtml(song.titulo || "Sin título")}</strong></div>
+              <div class="small">${escapeHtml(song.estilo || "—")} · ${escapeHtml(song.autor || "")}</div>
+            </div>
+          `).join("")}
+        </div>
+      ` : "";
+
+      const followBtn = (typeof s.isFollowing === "boolean" && u?.id) ? `
+        <button class="btn ${s.isFollowing ? "btn-ghost" : "btn-primary"}" id="follow-btn" data-user-id="${u.id}" data-following="${s.isFollowing}">
+          ${s.isFollowing ? "Dejar de seguir" : "Seguir"}
+        </button>
+      ` : "";
+
+      return `
+        <div class="item">
+          <div class="row" style="justify-content:space-between;">
+            <div>
+              <div><strong>@${escapeHtml(u.username)}</strong></div>
+              <div class="small">
+                Nivel ${lvl.level} · ${escapeHtml(lvl.title)} · XP ${lvl.xp}
+              </div>
+              <div class="small">
+                Followers ${s.followersCount} · Siguiendo ${s.followingCount} · Toxicidad ${sound.toxicity}%
+              </div>
+            </div>
+            <div class="row">
+              ${followBtn}
+            </div>
+          </div>
+
+          <div style="margin-top:10px;">${escapeHtml(p.bio || "Sin bio")}</div>
+
+          ${linkItems ? `<div class="row" style="margin-top:10px; flex-wrap:wrap;">${linkItems}</div>` : ""}
+
+          ${badges ? `<div class="row" style="margin-top:10px; flex-wrap:wrap;">${badges}</div>` : ""}
+
+          ${topSongs}
+        </div>
+      `;
+    }
+
+    async function loadProfileByUsername(username){
+      const view = document.getElementById("profile-view");
+      view.innerHTML = `<div class="muted">Cargando perfil…</div>`;
+      try{
+        const data = await apiFetch(`/api/users/${encodeURIComponent(username)}`, { auth: !!getToken() });
+        view.innerHTML = renderProfile(data);
+
+        // Bind follow button
+        const btn = document.getElementById("follow-btn");
+        if (btn){
+          btn.addEventListener("click", async () => {
+            const userId = btn.dataset.userId;
+            const following = btn.dataset.following === "true";
+            if (!getToken()) return alert("Inicia sesión para seguir usuarios.");
+
+            btn.disabled = true;
+            try{
+              if (following) {
+                await apiFetch(`/api/users/${userId}/follow`, { method:"DELETE", auth:true });
+              } else {
+                await apiFetch(`/api/users/${userId}/follow`, { method:"POST", auth:true });
+              }
+              // reload
+              await loadProfileByUsername(username);
+            } catch(e){
+              alert(e.message);
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        }
+      } catch(e){
+        view.innerHTML = `<div class="muted">❌ ${escapeHtml(e.message)}</div>`;
+      }
+    }
+
+    document.getElementById("profile-load-btn").addEventListener("click", () => {
+      const u = (document.getElementById("profile-search").value || "").trim().replace(/^@/,"");
+      if (!u) return;
+      loadProfileByUsername(u);
+    });
+
+    // ====== MI PERFIL (PATCH) ======
+    async function saveMyProfile(){
+      const status = document.getElementById("my-profile-status");
+      status.textContent = "Guardando…";
+
+      const payload = {
+        bio: document.getElementById("my-bio").value || "",
+        avatarUrl: (document.getElementById("my-avatar").value || "").trim() || null,
+        links: {
+          instagram: (document.getElementById("my-link-ig").value || "").trim(),
+          youtube: (document.getElementById("my-link-yt").value || "").trim(),
+          soundcloud: (document.getElementById("my-link-sc").value || "").trim(),
+          spotify: (document.getElementById("my-link-sp").value || "").trim(),
+        },
+        isPublic: document.getElementById("my-public").checked
+      };
+
+      try{
+        const data = await apiFetch(`/api/users/me/profile`, { method:"PATCH", body: payload, auth:true });
+        status.textContent = "✅ Guardado";
+        setTimeout(() => status.textContent = "—", 1200);
+        return data;
+      } catch(e){
+        status.textContent = `❌ ${e.message}`;
+      }
+    }
+
+    document.getElementById("my-profile-save").addEventListener("click", () => {
+      if (!getToken()) return alert("Inicia sesión para guardar tu perfil.");
+      saveMyProfile();
+    });
+
+    // ====== FEED ======
+    let feedOffset = 0;
+    let feedDone = false;
+
+    function renderEvent(ev){
+      const u = ev.actor?.username || "alguien";
+      if (ev.verb === "follow") return `${u} siguió a alguien`;
+      if (ev.verb === "like_song") return `${u} dio like a “${ev.metadata?.songTitle || "una canción"}”`;
+      if (ev.verb === "dislike_song") return `${u} dio dislike a “${ev.metadata?.songTitle || "una canción"}”`;
+      if (ev.verb === "comment_song") return `${u} comentó en “${ev.metadata?.songTitle || "una canción"}”`;
+      return `${u} hizo ${ev.verb}`;
+    }
+
+    async function loadFeedMore(){
+      if (!getToken()) return;
+      if (feedDone) return;
+
+      const list = document.getElementById("feed-list");
+      const btn = document.getElementById("feed-more-btn");
+      btn.disabled = true; btn.textContent = "Cargando…";
+
+      try{
+        const data = await apiFetch(`/api/feed?limit=20&offset=${feedOffset}`, { auth:true });
+        const items = data.items || [];
+        if (!items.length && feedOffset === 0){
+          list.innerHTML = `<div class="muted">Aún no sigues a nadie o no hay actividad.</div>`;
+          feedDone = true;
+        } else {
+          list.insertAdjacentHTML("beforeend", items.map(ev => `
+            <div class="item">
+              <div>${escapeHtml(renderEvent(ev))}</div>
+              <div class="small">${formatDate(ev.createdAt)}</div>
+            </div>
+          `).join(""));
+        }
+        if (data.nextOffset === null){
+          feedDone = true;
+          btn.style.display = "none";
+        } else {
+          feedOffset = data.nextOffset;
+          btn.style.display = "inline-flex";
+          btn.textContent = "Cargar más";
+        }
+      } catch(e){
+        alert(e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById("feed-more-btn").addEventListener("click", loadFeedMore);
+
+    // ====== COMENTARIOS ======
+    function setCommentStatus(msg){
+      document.getElementById("comment-status").textContent = msg;
+    }
+
+    function renderCommentNode(node){
+      const username = node.user?.username || "unknown";
+      const replies = (node.replies || []).map(r => renderCommentNode(r)).join("");
+
+      return `
+        <div class="item comment-item" data-comment-id="${node.id}">
+          <div class="row" style="justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div><strong>@${escapeHtml(username)}</strong></div>
+              <div class="small">${formatDate(node.createdAt)}</div>
+            </div>
+            <div class="row">
+              <button class="btn btn-ghost btn-sm" data-action="reply">Responder</button>
+              <button class="btn btn-ghost btn-sm" data-action="report">Reportar</button>
+            </div>
+          </div>
+
+          <div style="margin-top:8px; white-space:pre-wrap; word-break:break-word;">${escapeHtml(node.body)}</div>
+
+          <div class="comment-replybox" data-replybox>
+            <textarea class="textarea" rows="2" maxlength="800" placeholder="Responder (máx 800)…"></textarea>
+            <div class="row" style="margin-top:8px;">
+              <button class="btn btn-primary btn-sm" data-action="send-reply">Enviar</button>
+              <button class="btn btn-ghost btn-sm" data-action="cancel-reply">Cancelar</button>
+            </div>
+          </div>
+
+          ${replies ? `<div class="comment-replies">${replies}</div>` : ""}
+        </div>
+      `;
+    }
+
+    function getSelectedSongId(){
+      const byInput = (document.getElementById("song-id-input").value || "").trim();
+      if (byInput) return byInput;
+      const sel = document.getElementById("song-select").value;
+      return sel || "";
+    }
+
+    async function loadCommentsTree(){
+      const songId = getSelectedSongId();
+      if (!songId) return alert("Selecciona una canción o pega un ID.");
+
+      setCommentStatus("Cargando comentarios…");
+      const root = document.getElementById("comments-root");
+      root.innerHTML = `<div class="muted">Cargando…</div>`;
+
+      try{
+        const data = await apiFetch(`/api/canciones/${songId}/comments-tree?limit=50&offset=0&maxTotal=1200`);
+        const items = data.items || [];
+        root.innerHTML = items.length
+          ? items.map(n => renderCommentNode(n)).join("")
+          : `<div class="muted">Aún no hay comentarios.</div>`;
+        setCommentStatus("Listo.");
+      } catch(e){
+        root.innerHTML = `<div class="muted">❌ ${escapeHtml(e.message)}</div>`;
+        setCommentStatus("Error.");
+      }
+    }
+
+    async function sendRootComment(){
+      const songId = getSelectedSongId();
+      if (!songId) return alert("Selecciona una canción o pega un ID.");
+
+      if (!getToken()) return alert("Inicia sesión para comentar.");
+
+      const text = (document.getElementById("comment-input").value || "").trim();
+      if (!text) return;
+
+      setCommentStatus("Enviando comentario…");
+      try{
+        await apiFetch(`/api/canciones/${songId}/comments`, {
+          method:"POST",
+          body:{ body: text, parentId: null },
+          auth:true
+        });
+        document.getElementById("comment-input").value = "";
+        await loadCommentsTree();
+      } catch(e){
+        setCommentStatus("❌ " + e.message);
+      }
+    }
+
+    async function sendReply(commentId, textarea){
+      const songId = getSelectedSongId();
+      if (!songId) return;
+
+      if (!getToken()) return alert("Inicia sesión para responder.");
+
+      const text = (textarea.value || "").trim();
+      if (!text) return;
+
+      setCommentStatus("Enviando respuesta…");
+      await apiFetch(`/api/canciones/${songId}/comments`, {
+        method:"POST",
+        body:{ body: text, parentId: commentId },
+        auth:true
+      });
+      await loadCommentsTree();
+    }
+
+    async function reportComment(commentId){
+      if (!getToken()) return alert("Inicia sesión para reportar.");
+
+      const reason = prompt("Motivo del reporte (máx 500):");
+      if (!reason) return;
+
+      setCommentStatus("Enviando reporte…");
+      await apiFetch(`/api/report/content`, {
+        method:"POST",
+        body:{ targetType:"comment", targetId: commentId, reason: reason.slice(0,500) },
+        auth:true
+      });
+      setCommentStatus("Reporte enviado ✅");
+      setTimeout(() => setCommentStatus("Listo."), 1200);
+    }
+
+    document.getElementById("comments-load-btn").addEventListener("click", loadCommentsTree);
+    document.getElementById("comments-reload-btn").addEventListener("click", loadCommentsTree);
+    document.getElementById("comment-send-btn").addEventListener("click", sendRootComment);
+
+    document.getElementById("comments-root").addEventListener("click", async (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+
+      const item = btn.closest(".comment-item");
+      const commentId = item?.dataset?.commentId;
+      if (!commentId) return;
+
+      const action = btn.dataset.action;
+
+      if (action === "reply"){
+        const box = item.querySelector("[data-replybox]");
+        if (box) box.classList.toggle("open");
+        return;
+      }
+      if (action === "cancel-reply"){
+        const box = item.querySelector("[data-replybox]");
+        if (box) box.classList.remove("open");
+        return;
+      }
+      if (action === "send-reply"){
+        const textarea = item.querySelector("[data-replybox] textarea");
+        await sendReply(commentId, textarea);
+        return;
+      }
+      if (action === "report"){
+        await reportComment(commentId);
+        return;
+      }
+    });
+
+    // ====== Cargar canciones para selector ======
+    async function loadSongsForSelect(){
+      const sel = document.getElementById("song-select");
+      try{
+        const data = await apiFetch(`/api/canciones`, { auth: false });
+        const songs = data || [];
+        if (!Array.isArray(songs) || !songs.length){
+          sel.innerHTML = `<option value="">No hay canciones</option>`;
+          return;
+        }
+        sel.innerHTML = `<option value="">— Selecciona una canción —</option>` + songs.map(s => {
+          const label = `${s.titulo || "Sin título"} · ${s.estilo || "—"} · ${s.autor || ""}`.trim();
+          return `<option value="${escapeHtml(String(s.id))}">${escapeHtml(label)}</option>`;
+        }).join("");
+
+        sel.addEventListener("change", () => {
+          const v = sel.value || "";
+          document.getElementById("song-id-input").value = v;
+        });
+      } catch(e){
+        sel.innerHTML = `<option value="">Error cargando canciones</option>`;
+      }
+    }
+
+    // ====== INIT ======
+    (async function init(){
+      refreshAuthUI();
+      await loadSongsForSelect();
+
+      // Feed (si hay token)
+      if (getToken()){
+        loadFeedMore();
+      }
+    })();
+  </script>
+</body>
+</html>
