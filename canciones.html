@@ -1,1349 +1,1338 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BeefMusic – Canciones de la colección</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css" />
-    
-    <style>
-   .songs-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 24px 20px 80px;
-}
-
-/* HEADER */
-.site-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.header-actions {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.songs-header-main {
-    margin: 32px 0 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 16px;
-    flex-wrap: wrap;
-}
-
-.songs-header-main h1 {
-    font-size: 1.8rem;
-    margin-bottom: 4px;
-}
-
-.songs-header-main p {
-    font-size: 0.95rem;
-    color: var(--fg-muted);
-    max-width: 520px;
-}
-
-.songs-tools {
-    margin-bottom: 22px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 16px;
-    align-items: flex-end;
-}
-
-.songs-tools .field {
-    margin-bottom: 0;
-    flex: 1;
-    min-width: 230px;
-    max-width: 320px;
-}
-
-.songs-tools input {
-    min-height: 38px;
-    font-size: 0.85rem;
-}
-
-.songs-count {
-    font-size: 0.85rem;
-    color: var(--fg-muted);
-}
-
-/* Píldoras de filtro */
-.songs-filter-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.songs-filter-btn {
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.03);
-    padding: 6px 12px;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--fg-muted);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border 0.2s ease, color 0.2s ease;
-    white-space: nowrap;
-}
-
-.songs-filter-btn::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.35);
-}
-
-.songs-filter-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.6);
-    border-color: rgba(255,255,255,0.24);
-}
-
-.songs-filter-btn.active {
-    background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
-    color: #ffffff;
-    box-shadow: 0 12px 32px rgba(255,39,87,0.7);
-    border-color: transparent;
-}
-
-.songs-filter-btn.active::before {
-    background: #ffffff;
-}
-
-/* GRID RESPONSIVE DE CANCIONES */
-.songs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 18px;
-}
-
-/* Ajustes cards: título + género + usuario + player + votos */
-.song-card {
-    min-height: 210px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-}
-
-.song-card .song-title {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 4px;
-}
-
-.song-card .song-meta {
-    font-size: 0.8rem;
-}
-
-.song-card .song-meta span {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.song-card .song-req-author {
-    font-weight: 500;
-    color: var(--fg-primary);
-}
-
-.song-card .song-req {
-    margin-top: 6px;
-    font-size: 0.8rem;
-    color: var(--fg-muted);
-}
-
-/* Player de audio – estilo BeefMusic */
-.song-player {
-    margin-top: 12px;
-}
-
-.bm-player {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border-radius: 18px;
-    background:
-        radial-gradient(circle at top left, rgba(255, 39, 87, 0.28), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(160, 54, 255, 0.28), transparent 55%),
-        rgba(5, 5, 12, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.9);
-}
-
-.bm-audio {
-    display: none;
-}
-
-.bm-play-btn {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 999px;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
-    box-shadow: 0 0 18px rgba(255, 39, 87, 0.85);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-}
-
-.bm-play-btn:hover {
-    transform: translateY(-1px) scale(1.03);
-    filter: brightness(1.1);
-}
-
-.bm-play-btn:active {
-    transform: translateY(0) scale(0.97);
-    box-shadow: 0 0 10px rgba(255, 39, 87, 0.5);
-}
-
-/* Iconos play/pause en el player de cada canción */
-.bm-play-icon,
-.bm-pause-icon {
-    display: inline-block;
-}
-
-/* Triángulo de play */
-.bm-play-icon {
-    width: 0;
-    height: 0;
-    border-top: 7px solid transparent;
-    border-bottom: 7px solid transparent;
-    border-left: 12px solid #ffffff;
-}
-
-/* Dos barras de pausa */
-.bm-pause-icon {
-    position: relative;
-    width: 12px;
-    height: 12px;
-}
-
-.bm-pause-icon::before,
-.bm-pause-icon::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    border-radius: 999px;
-    background: #ffffff;
-}
-
-.bm-pause-icon::before {
-    left: 0;
-}
-
-.bm-pause-icon::after {
-    right: 0;
-}
-
-/* Estado visual de play/pause en el player */
-.bm-player.is-playing .bm-play-icon {
-    display: none;
-}
-
-.bm-player.is-playing .bm-pause-icon {
-    display: inline-block;
-}
-
-.bm-player-main {
-    flex: 1;
-    min-width: 0;
-}
-
-.bm-time-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
-    font-size: 0.75rem;
-    color: var(--fg-muted);
-}
-
-.bm-time {
-    font-variant-numeric: tabular-nums;
-}
-
-.bm-timeline {
-    position: relative;
-    height: 6px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    overflow: hidden;
-    cursor: pointer;
-}
-
-.bm-timeline-progress {
-    position: absolute;
-    inset: 0;
-    width: 0%;
-    background: linear-gradient(90deg, var(--accent-pink), var(--accent-purple));
-    box-shadow: 0 0 12px rgba(255, 39, 87, 0.7);
-    transition: width 0.08s linear;
-}
-
-/* Votos (Me gusta / No me gusta) */
-.song-votes {
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
-    flex-wrap: wrap;
-}
-
-.vote-btn {
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(5,5,12,0.85);
-    padding: 4px 10px;
-    font-size: 0.8rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    color: var(--fg-muted);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border 0.2s ease, color 0.2s ease;
-}
-
-.vote-btn span.vote-count {
-    font-weight: 600;
-    color: #fff;
-}
-
-.vote-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.7);
-    border-color: rgba(255,255,255,0.3);
-}
-
-.vote-btn.like {
-    border-color: rgba(61, 214, 140, 0.5);
-}
-
-.vote-btn.dislike {
-    border-color: rgba(255, 99, 132, 0.5);
-}
-
-.vote-btn.voted {
-    background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
-    color: #fff;
-    box-shadow: 0 10px 26px rgba(255,39,87,0.8);
-    border-color: transparent;
-}
-
-.vote-btn.voted span.vote-count {
-    color: #fff;
-}
-
-.songs-vote-hint {
-    font-size: 0.78rem;
-    color: var(--fg-muted);
-    margin-top: 4px;
-}
-
-/* === MINI PLAYER FIJO ABAJO === */
-body {
-    margin-bottom: 100px; /* espacio para el reproductor */
-}
-
-.mini-player {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 8px 16px 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
-    background: rgba(5, 5, 12, 0.96);
-    backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    color: #fff;
-    font-family: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    z-index: 999;
-    box-shadow: 0 0 0 rgba(255, 39, 87, 0);
-    transition: box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
-}
-
-/* Glow cuando hay música sonando */
-.mini-player.is-active {
-    border-top-color: rgba(255, 39, 87, 0.85);
-    box-shadow: 0 0 26px rgba(255, 39, 87, 0.75);
-    background:
-        radial-gradient(circle at top left, rgba(255, 39, 87, 0.25), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(160, 54, 255, 0.25), transparent 55%),
-        rgba(5, 5, 12, 0.96);
-}
-
-/* TOP: portada + título + artista */
-.mini-player-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    width: 100%;
-    order: 1;
-}
-
-.mini-player-cover {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    background:
-        radial-gradient(circle at top left, rgba(255, 39, 87, 0.4), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(160, 54, 255, 0.4), transparent 55%),
-        #0b0b16;
-    box-shadow: 0 0 18px rgba(255, 39, 87, 0.65);
-    flex-shrink: 0;
-}
-
-.mini-player-text {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-.mini-player-title {
-    font-size: 0.9rem;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.mini-player-artist {
-    font-size: 0.75rem;
-    opacity: 0.75;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* CENTRO: línea de reproducción */
-.mini-player-progress {
-    order: 2;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-}
-
-#mini-progress-bar {
-    flex: 1;
-    appearance: none;
-    height: 4px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.18);
-    cursor: pointer;
-}
-
-#mini-progress-bar::-webkit-slider-thumb {
-    appearance: none;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #ffffff;
-    margin-top: -3px;
-}
-
-#mini-progress-bar::-moz-range-thumb {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #ffffff;
-}
-
-.mini-time {
-    font-size: 0.7rem;
-    opacity: 0.7;
-    font-variant-numeric: tabular-nums;
-}
-
-/* ABAJO: botones centrados */
-.mini-player-controls {
-    order: 3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-}
-
-/* Botones mini player (base) */
-.mini-btn {
-    border: none;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 999px;
-    padding: 6px 12px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 36px;
-    min-height: 36px;
-}
-
-.mini-btn:hover {
-    background: rgba(255, 255, 255, 0.16);
-}
-
-/* Iconos play/pause en mini player */
-.icon-play,
-.icon-pause {
-    display: inline-block;
-}
-
-/* Triángulo de play en mini player */
-.icon-play {
-    width: 0;
-    height: 0;
-    border-top: 7px solid transparent;
-    border-bottom: 7px solid transparent;
-    border-left: 12px solid #ffffff;
-}
-
-/* Dos barras de pausa en mini player */
-.icon-pause {
-    position: relative;
-    width: 12px;
-    height: 12px;
-}
-
-.icon-pause::before,
-.icon-pause::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    border-radius: 999px;
-    background: #ffffff;
-}
-
-.icon-pause::before {
-    left: 0;
-}
-
-.icon-pause::after {
-    right: 0;
-}
-
-/* Estado visual del botón de play/pause en mini player */
-.mini-btn-play .icon-pause {
-    display: none;
-}
-
-.mini-btn-play.is-playing .icon-play {
-    display: none;
-}
-
-.mini-btn-play.is-playing .icon-pause {
-    display: inline-block;
-}
-
-/* Iconos de siguiente / anterior (skip) */
-.icon-skip {
-    position: relative;
-    width: 14px;
-    height: 14px;
-    display: inline-block;
-}
-
-/* Botón siguiente (triángulo + barra) */
-.icon-skip-next::before,
-.icon-skip-next::after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    bottom: 2px;
-    border-radius: 999px;
-}
-
-.icon-skip-next::before {
-    top: 50%;
-    left: 0;
-    transform: translateY(-50%);
-    border-top: 6px solid transparent;
-    border-bottom: 6px solid transparent;
-    border-left: 9px solid #ffffff;
-}
-
-.icon-skip-next::after {
-    right: 0;
-    width: 2px;
-    background: #ffffff;
-}
-
-/* Botón anterior (espejo del siguiente) */
-.icon-skip-prev::before,
-.icon-skip-prev::after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    bottom: 2px;
-    border-radius: 999px;
-}
-
-.icon-skip-prev::before {
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%);
-    border-top: 6px solid transparent;
-    border-bottom: 6px solid transparent;
-    border-right: 9px solid #ffffff;
-}
-
-.icon-skip-prev::after {
-    left: 0;
-    width: 2px;
-    background: #ffffff;
-}
-
-@media (max-width: 480px) {
-    .mini-player {
-        padding: 8px 10px 10px;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BeefMusic — Canciones</title>
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    /* ===== Estética base (manteniendo tu look) ===== */
+    :root{
+      --accent-pink: #ff2aa6;
+      --accent-purple:#7a2cff;
+      --glass: rgba(0,0,0,0.42);
+      --glass-border: rgba(255,255,255,0.12);
+      --muted: rgba(255,255,255,0.65);
     }
-}
+    body{
+      margin:0;
+      color: rgba(255,255,255,0.92);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, rgba(122,44,255,0.25), transparent 60%),
+        radial-gradient(900px 500px at 90% 10%, rgba(255,42,166,0.18), transparent 55%),
+        radial-gradient(900px 500px at 60% 110%, rgba(0,240,255,0.10), transparent 60%),
+        #060608;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
 
-/* ✅ Iconos del mini-reproductor en BLANCO */
-.mini-player .icon-play{
-  border-left-color: #ffffff;
-}
+    .songs-page{ max-width: 1120px; margin:0 auto; padding: 22px 18px 120px; }
+    .site-header{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding: 12px 0 18px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.35);
+      padding: 8px 12px;
+      border-radius: 999px;
+      text-decoration:none;
+      color: inherit;
+      font-size: .92rem;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .songs-hero{
+      border: 1px solid var(--glass-border);
+      background: var(--glass);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.35);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .songs-hero-top{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
+      flex-wrap: wrap;
+    }
+    .section-kicker{ font-size:.85rem; color: var(--muted); letter-spacing:.12em; text-transform: uppercase; }
+    .section-title{ margin: 6px 0 0; font-size: 1.55rem; }
+    .songs-sub{ margin-top:8px; color: var(--muted); }
 
-.mini-player .icon-pause::before,
-.mini-player .icon-pause::after{
-  background: #ffffff;
-}
+    .songs-tools{
+      margin-top: 12px;
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      flex-wrap: wrap;
+    }
+    .songs-search{
+      flex:1;
+      min-width: 260px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.75);
+      color: rgba(255,255,255,0.92);
+      padding: 10px 12px;
+      font: inherit;
+    }
+    .songs-count{ color: var(--muted); font-size:.9rem; }
 
-.mini-player .icon-skip-next::before{
-  border-left-color: #ffffff;
-}
-.mini-player .icon-skip-next::after{
-  background: #ffffff;
-}
+    .songs-pills{ display:flex; gap:8px; flex-wrap: wrap; align-items:center; }
+    .songs-filter-btn{
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.9);
+      padding: 8px 10px;
+      border-radius: 999px;
+      cursor:pointer;
+      font: inherit;
+      font-size: .86rem;
+    }
+    .songs-filter-btn.active{
+      border-color: rgba(255,42,166,0.45);
+      box-shadow: 0 0 0 1px rgba(122,44,255,0.25) inset;
+    }
 
-.mini-player .icon-skip-prev::before{
-  border-right-color: #ffffff;
-}
-.mini-player .icon-skip-prev::after{
-  background: #ffffff;
-}
-</style>
+    /* ===== Grid + Tarjetas (tu estética) ===== */
+    .songs-grid{
+      margin-top: 14px;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 980px){ .songs-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 640px){ .songs-grid{ grid-template-columns: 1fr; } }
+
+    .song-card{
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.42);
+      border-radius: 18px;
+      overflow:hidden;
+      min-width:0;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.35);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .song-thumb{
+      height: 90px;
+      position: relative;
+      background: radial-gradient(600px 140px at 20% 0%, rgba(122,44,255,0.55), transparent 60%),
+                  radial-gradient(600px 140px at 80% 0%, rgba(255,42,166,0.45), transparent 60%),
+                  rgba(0,0,0,0.25);
+    }
+    .song-wave{
+      position:absolute; inset:auto -20% 0 -20%;
+      height: 36px;
+      background:
+        radial-gradient(18px 10px at 10% 50%, rgba(255,255,255,0.12), transparent 60%),
+        radial-gradient(18px 10px at 30% 50%, rgba(255,255,255,0.10), transparent 60%),
+        radial-gradient(18px 10px at 50% 50%, rgba(255,255,255,0.12), transparent 60%),
+        radial-gradient(18px 10px at 70% 50%, rgba(255,255,255,0.10), transparent 60%),
+        radial-gradient(18px 10px at 90% 50%, rgba(255,255,255,0.12), transparent 60%);
+      filter: blur(0.2px);
+      animation: waveMove 5s linear infinite;
+      opacity: .9;
+    }
+    @keyframes waveMove{
+      from{ transform: translateX(0); }
+      to{ transform: translateX(-10%); }
+    }
+
+    .song-body{ padding: 14px; display:flex; flex-direction:column; gap: 8px; }
+    .song-title{ font-weight: 800; font-size: 1.06rem; letter-spacing: .2px; }
+    .song-meta{ display:flex; gap:10px; align-items:center; flex-wrap: wrap; color: var(--muted); font-size: .86rem; }
+    .song-badge{
+      display:inline-flex; align-items:center; gap:6px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: .82rem;
+      color: rgba(255,255,255,0.88);
+    }
+    .song-req-author{ opacity:.9; }
+    .song-req{
+      color: rgba(255,255,255,0.78);
+      font-size: .9rem;
+      line-height: 1.35;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* ===== Player (tu custom) ===== */
+    .song-player{ margin-top: 8px; }
+    .song-player--noaudio{
+      margin-top: 8px;
+      padding: 10px 12px;
+      border: 1px dashed rgba(255,255,255,0.18);
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: .9rem;
+      background: rgba(0,0,0,0.35);
+    }
+    .bm-player{
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.35);
+      border-radius: 14px;
+      padding: 10px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .bm-play-btn{
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      position: relative;
+    }
+    .bm-play-icon{
+      width: 0; height: 0;
+      border-top: 8px solid transparent;
+      border-bottom: 8px solid transparent;
+      border-left: 12px solid rgba(255,255,255,0.9);
+      position:absolute;
+    }
+    .bm-pause-icon{
+      width: 12px; height: 16px;
+      position:absolute;
+      display:none;
+    }
+    .bm-pause-icon::before,
+    .bm-pause-icon::after{
+      content:"";
+      position:absolute;
+      top:0; width:4px; height:16px;
+      background: rgba(255,255,255,0.9);
+      border-radius:2px;
+    }
+    .bm-pause-icon::before{ left:0; }
+    .bm-pause-icon::after{ right:0; }
+
+    .bm-player.is-playing .bm-play-icon{ display:none; }
+    .bm-player.is-playing .bm-pause-icon{ display:block; }
+
+    .bm-player-main{ flex:1; min-width: 0; }
+    .bm-time-row{
+      display:flex; justify-content:space-between; align-items:center;
+      font-size: .82rem; color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .bm-timeline{
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow:hidden;
+      cursor:pointer;
+      position: relative;
+    }
+    .bm-timeline-progress{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(255,42,166,0.9), rgba(122,44,255,0.9));
+    }
+
+    /* ===== Votos + Ver más ===== */
+    .song-votes{
+      display:flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+    .vote-btn{
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.9);
+      border-radius: 999px;
+      padding: 8px 10px;
+      cursor:pointer;
+      font: inherit;
+      font-size: .9rem;
+      display:inline-flex;
+      gap: 8px;
+      align-items:center;
+    }
+    .vote-btn.voted{
+      border-color: rgba(255,42,166,0.45);
+      box-shadow: 0 0 0 1px rgba(122,44,255,0.25) inset;
+    }
+    .songs-vote-hint{
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    .song-actions{
+      display:flex;
+      justify-content:flex-end;
+      margin-top: 8px;
+    }
+    .song-more-btn{
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.9);
+      border-radius: 999px;
+      padding: 8px 12px;
+      cursor:pointer;
+      font: inherit;
+      font-size: .86rem;
+    }
+
+    /* ===== Mini player global (tu icon system) ===== */
+    .mini-player{
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.58);
+      border-radius: 18px;
+      padding: 10px 12px;
+      box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      z-index: 60;
+    }
+    .mini-player-main{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      min-width:0;
+    }
+    .mini-player-left{
+      display:flex; gap:10px; align-items:center; min-width:0;
+    }
+    .mini-player-cover{
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background:
+        radial-gradient(26px 26px at 30% 30%, rgba(122,44,255,0.75), transparent 60%),
+        radial-gradient(28px 28px at 70% 30%, rgba(255,42,166,0.55), transparent 60%),
+        rgba(255,255,255,0.05);
+      flex: 0 0 auto;
+    }
+    .mini-player-text{ min-width:0; }
+    .mini-player-title{
+      font-weight: 800;
+      font-size: .95rem;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 52vw;
+    }
+    .mini-player-artist{
+      color: rgba(255,255,255,0.65);
+      font-size: .84rem;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      max-width: 52vw;
+    }
+    .mini-player-controls{
+      display:flex; gap:8px; align-items:center;
+    }
+    .mini-btn{
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.04);
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position: relative;
+    }
+    .icon-play, .icon-pause, .icon-skip{
+      position:absolute;
+      display:inline-block;
+    }
+    .icon-play{
+      width:0; height:0;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+      border-left: 11px solid rgba(255,255,255,0.9);
+    }
+    .icon-pause{
+      width: 12px; height: 16px;
+      display:none;
+    }
+    .icon-pause::before,
+    .icon-pause::after{
+      content:"";
+      position:absolute;
+      top:0;
+      width:4px;
+      height:16px;
+      background: rgba(255,255,255,0.9);
+      border-radius:2px;
+    }
+    .icon-pause::before{ left:0; }
+    .icon-pause::after{ right:0; }
+
+    .mini-btn-play.is-playing .icon-play{ display:none; }
+    .mini-btn-play.is-playing .icon-pause{ display:inline-block; }
+
+    .icon-skip{
+      width: 0; height: 0;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+      border-left: 10px solid rgba(255,255,255,0.9);
+      transform: translateX(0);
+    }
+    .icon-skip-next::after{
+      content:"";
+      position:absolute;
+      right:-6px;
+      top:-7px;
+      width:2px; height:14px;
+      background: rgba(255,255,255,0.9);
+      border-radius:2px;
+    }
+    .icon-skip-prev{
+      transform: rotate(180deg);
+    }
+    .icon-skip-prev::after{
+      content:"";
+      position:absolute;
+      right:-6px;
+      top:-7px;
+      width:2px; height:14px;
+      background: rgba(255,255,255,0.9);
+      border-radius:2px;
+    }
+
+    .mini-player-progress{
+      display:flex; align-items:center; gap:10px;
+    }
+    .mini-time{ color: rgba(255,255,255,0.65); font-size:.82rem; width: 44px; text-align:center; }
+    #mini-progress-bar{ width:100%; }
+
+    /* ====== ✅ Modal de comentarios (nuevo) ====== */
+    .song-comments-backdrop{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 80;
+    }
+    .song-comments-backdrop.open{ display:flex; }
+
+    .song-comments-modal{
+      width: min(920px, 100%);
+      max-height: min(82vh, 760px);
+      overflow:auto;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.60);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 18px 70px rgba(0,0,0,0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .song-comments-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .song-comments-kicker{ font-size:.85rem; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: .12em; }
+    .song-comments-title{ font-size: 1.2rem; font-weight: 900; margin-top: 6px; }
+    .song-comments-sub{ color: rgba(255,255,255,0.65); font-size: .9rem; margin-top: 6px; }
+
+    .divider{ height:1px; background: rgba(255,255,255,0.08); margin: 14px 0; }
+    .list{ display:flex; flex-direction:column; gap:10px; }
+    .item{
+      border:1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.35);
+      border-radius: 14px;
+      padding: 12px;
+      min-width: 0;
+    }
+    .small{ font-size:.82rem; color: rgba(255,255,255,0.65); margin-top:4px; }
+    .textarea{
+      width:100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(0,0,0,0.75);
+      color: rgba(255,255,255,0.92);
+      padding: 10px 12px;
+      font: inherit;
+      resize: vertical;
+      min-height: 90px;
+    }
+    .btn-sm{ padding: 6px 12px; font-size: 0.78rem; }
+
+    .comment-replies{
+      margin-top:10px;
+      padding-left: 14px;
+      border-left: 2px solid rgba(255,255,255,0.08);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .comment-replybox{ margin-top:10px; display:none; }
+    .comment-replybox.open{ display:block; }
+
+    /* ✅ Fix visual (ya lo tenías): iconos del mini player blancos */
+    .mini-btn .icon-play,
+    .mini-btn .icon-pause::before,
+    .mini-btn .icon-pause::after,
+    .mini-btn .icon-skip {
+      border-left-color: rgba(255,255,255,0.9) !important;
+      background: rgba(255,255,255,0.9) !important;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="songs-page">
-        <!-- HEADER SIMPLE -->
-        <header class="site-header">
-            <div class="logo">
-                <div class="logo-mark"></div>
-                <span>BeefMusic</span>
-            </div>
-            <div class="header-actions">
-                <a href="index.html" class="btn btn-ghost">← Volver al inicio</a>
-            </div>
-        </header>
+  <div class="songs-page">
+    <header class="site-header">
+      <div class="pill"><strong>BeefMusic</strong> · Canciones</div>
+      <a class="pill" href="index.html">← Inicio</a>
+    </header>
 
-        <!-- TITULAR -->
-        <section class="songs-header-main">
+    <section class="songs-hero">
+      <div class="songs-hero-top">
+        <div>
+          <div class="section-kicker">Colección BeefMusic</div>
+          <h1 class="section-title">Canciones publicadas</h1>
+          <div class="songs-sub">Busca, filtra y vota. Usa <strong>Ver más</strong> para abrir comentarios del tema.</div>
+        </div>
+        <div class="songs-count" id="songs-count"></div>
+      </div>
+
+      <div class="songs-tools">
+        <input id="songs-search" class="songs-search" placeholder="Busca título, autor, estilo o descripción..." />
+
+        <div class="songs-pills" id="songs-filter-pills">
+          <button class="songs-filter-btn active" data-style="">Todos</button>
+          <button class="songs-filter-btn" data-style="trap">Trap</button>
+          <button class="songs-filter-btn" data-style="reggaeton">Reggaetón</button>
+          <button class="songs-filter-btn" data-style="dembow">Dembow</button>
+        </div>
+
+        <div class="songs-pills" id="songs-sort-pills">
+          <button class="songs-filter-btn active" data-sort="recientes">Recientes</button>
+          <button class="songs-filter-btn" data-sort="top">Top</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="songs-grid" id="songs-grid"></section>
+  </div>
+
+  <!-- ✅ MODAL COMENTARIOS -->
+  <div class="song-comments-backdrop" id="song-comments-backdrop" aria-hidden="true">
+    <div class="song-comments-modal" role="dialog" aria-modal="true" aria-labelledby="song-comments-title">
+      <div class="song-comments-head">
+        <div>
+          <div class="song-comments-kicker">Comentarios</div>
+          <div class="song-comments-title" id="song-comments-title">—</div>
+          <div class="song-comments-sub" id="song-comments-sub">—</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="song-comments-close">Cerrar</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <textarea class="textarea" id="song-comment-input" placeholder="Escribe un comentario (máx 800)…" maxlength="800"></textarea>
+      <div class="songs-tools" style="margin-top:10px;">
+        <div class="songs-pills" style="gap:10px;">
+          <button class="btn btn-primary btn-sm" id="song-comment-send">Comentar</button>
+          <button class="btn btn-ghost btn-sm" id="song-comments-reload">Recargar</button>
+          <span style="color:rgba(255,255,255,0.65); font-size:.9rem;" id="song-comment-status">—</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="song-comments-root" class="list">
+        <div style="color:rgba(255,255,255,0.65);">Selecciona una canción para ver comentarios.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINI PLAYER -->
+  <div id="mini-player" class="mini-player">
+    <div class="mini-player-main">
+      <div class="mini-player-left">
+        <div id="mini-player-cover" class="mini-player-cover"></div>
+        <div class="mini-player-text">
+          <div id="mini-player-title" class="mini-player-title">Nada reproduciéndose</div>
+          <div id="mini-player-artist" class="mini-player-artist">Selecciona una canción</div>
+        </div>
+      </div>
+
+      <div class="mini-player-controls">
+        <button id="mini-prev-btn" class="mini-btn mini-btn-skip" aria-label="Anterior">
+          <span class="icon-skip icon-skip-prev" aria-hidden="true"></span>
+        </button>
+
+        <button id="mini-play-pause-btn" class="mini-btn mini-btn-play" aria-label="Reproducir / Pausar">
+          <span class="icon-play" aria-hidden="true"></span>
+          <span class="icon-pause" aria-hidden="true"></span>
+        </button>
+
+        <button id="mini-next-btn" class="mini-btn mini-btn-skip" aria-label="Siguiente">
+          <span class="icon-skip icon-skip-next" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="mini-player-progress">
+      <span id="mini-current-time" class="mini-time">0:00</span>
+      <input type="range" id="mini-progress-bar" min="0" value="0" step="1" />
+      <span id="mini-duration" class="mini-time">0:00</span>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://beefmusic-backend.onrender.com";
+
+    const grid = document.getElementById("songs-grid");
+    const countEl = document.getElementById("songs-count");
+    const searchInput = document.getElementById("songs-search");
+
+    const filterPills = document.querySelectorAll("#songs-filter-pills .songs-filter-btn");
+    const sortPills = document.querySelectorAll("#songs-sort-pills .songs-filter-btn");
+
+    let allSongs = [];
+    let currentStyleFilter = "";
+    let currentSortMode = "recientes";
+
+    // === MINI PLAYER GLOBAL ===
+    const miniPlayer = document.getElementById("mini-player");
+    const miniCover = document.getElementById("mini-player-cover");
+    const miniTitle = document.getElementById("mini-player-title");
+    const miniArtist = document.getElementById("mini-player-artist");
+    const miniPlayPauseBtn = document.getElementById("mini-play-pause-btn");
+    const miniPrevBtn = document.getElementById("mini-prev-btn");
+    const miniNextBtn = document.getElementById("mini-next-btn");
+    const miniProgressBar = document.getElementById("mini-progress-bar");
+    const miniCurrentTime = document.getElementById("mini-current-time");
+    const miniDuration = document.getElementById("mini-duration");
+
+    let globalPlayers = []; // { audio, playerEl }
+    let currentGlobalIndex = -1;
+    let currentAudio = null;
+
+    function setMiniPlaying(isPlaying) {
+      miniPlayPauseBtn.classList.toggle("is-playing", isPlaying);
+      miniPlayer.classList.toggle("is-active", isPlaying);
+    }
+
+    function formatTimeGlobal(sec) {
+      if (!sec || isNaN(sec)) return "0:00";
+      const total = Math.floor(sec);
+      const minutes = Math.floor(total / 60);
+      const seconds = total % 60;
+      return minutes + ":" + String(seconds).padStart(2, "0");
+    }
+
+    function activarMiniPlayerDesdePlayer(playerEl, audioEl) {
+      currentAudio = audioEl;
+      currentGlobalIndex = globalPlayers.findIndex((p) => p.audio === audioEl);
+
+      const title = playerEl.getAttribute("data-title") || "Tema sin título";
+      const artist = playerEl.getAttribute("data-artist") || "@anónimo";
+
+      miniTitle.textContent = title;
+      miniArtist.textContent = artist;
+
+      const duration = audioEl.duration || 0;
+      miniCurrentTime.textContent = formatTimeGlobal(audioEl.currentTime || 0);
+      miniDuration.textContent = formatTimeGlobal(duration);
+      miniProgressBar.max = duration || 0;
+      miniProgressBar.value = audioEl.currentTime || 0;
+
+      setMiniPlaying(!audioEl.paused);
+    }
+
+    function reproducirPorIndice(index) {
+      if (!globalPlayers.length) return;
+      if (index < 0) index = 0;
+      if (index >= globalPlayers.length) index = 0;
+
+      const { audio, playerEl } = globalPlayers[index];
+
+      globalPlayers.forEach(({ audio: a, playerEl: p }) => {
+        if (a !== audio) {
+          a.pause();
+          p.classList.remove("is-playing");
+        }
+      });
+
+      audio.play();
+      playerEl.classList.add("is-playing");
+      activarMiniPlayerDesdePlayer(playerEl, audio);
+      setMiniPlaying(true);
+    }
+
+    miniPlayPauseBtn.addEventListener("click", () => {
+      if (!currentAudio) {
+        if (globalPlayers.length > 0) reproducirPorIndice(0);
+        return;
+      }
+
+      if (currentAudio.paused) {
+        currentAudio.play();
+        setMiniPlaying(true);
+        const currentPlayer = globalPlayers[currentGlobalIndex]?.playerEl;
+        if (currentPlayer) currentPlayer.classList.add("is-playing");
+      } else {
+        currentAudio.pause();
+        setMiniPlaying(false);
+        const currentPlayer = globalPlayers[currentGlobalIndex]?.playerEl;
+        if (currentPlayer) currentPlayer.classList.remove("is-playing");
+      }
+    });
+
+    miniNextBtn.addEventListener("click", () => {
+      if (!globalPlayers.length) return;
+      if (currentGlobalIndex === -1) { reproducirPorIndice(0); return; }
+      let nextIndex = currentGlobalIndex + 1;
+      if (nextIndex >= globalPlayers.length) nextIndex = 0;
+      reproducirPorIndice(nextIndex);
+    });
+
+    miniPrevBtn.addEventListener("click", () => {
+      if (!globalPlayers.length) return;
+      if (currentGlobalIndex === -1) { reproducirPorIndice(0); return; }
+      let prevIndex = currentGlobalIndex - 1;
+      if (prevIndex < 0) prevIndex = globalPlayers.length - 1;
+      reproducirPorIndice(prevIndex);
+    });
+
+    miniProgressBar.addEventListener("input", () => {
+      if (!currentAudio || !currentAudio.duration) return;
+      currentAudio.currentTime = miniProgressBar.value;
+    });
+
+    // ===== Comentarios (modal) =====
+    const commentsBackdrop = document.getElementById("song-comments-backdrop");
+    const commentsCloseBtn = document.getElementById("song-comments-close");
+    const commentsTitle = document.getElementById("song-comments-title");
+    const commentsSub = document.getElementById("song-comments-sub");
+    const commentsRoot = document.getElementById("song-comments-root");
+    const commentInput = document.getElementById("song-comment-input");
+    const commentSendBtn = document.getElementById("song-comment-send");
+    const commentsReloadBtn = document.getElementById("song-comments-reload");
+    const commentStatus = document.getElementById("song-comment-status");
+
+    let currentCommentsSongId = null;
+
+    function getToken(){ return localStorage.getItem("beefmusic_user_token") || ""; }
+
+    async function apiFetch(path, { method="GET", body=null, auth=false } = {}) {
+      const headers = { "Content-Type": "application/json" };
+      if (auth) {
+        const t = getToken();
+        if (t) headers.Authorization = `Bearer ${t}`;
+      }
+      const res = await fetch(API_URL + path, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Error de petición");
+      return data;
+    }
+
+    function escapeHtml(s){
+      const div = document.createElement("div");
+      div.textContent = s ?? "";
+      return div.innerHTML;
+    }
+    function formatDate(iso){
+      try { return new Date(iso).toLocaleString(); } catch { return ""; }
+    }
+    function setCommentStatus(msg){ commentStatus.textContent = msg; }
+
+    function renderCommentNode(node){
+      const username = node.user?.username || node.username || "unknown";
+      const replies = (node.replies || []).map(r => renderCommentNode(r)).join("");
+
+      return `
+        <div class="item comment-item" data-comment-id="${node.id}">
+          <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start; flex-wrap:wrap;">
             <div>
-                <div class="section-kicker">Colección BeefMusic</div>
-                <h1>Canciones creadas desde las peticiones</h1>
-                <p>
-                    Aquí se irán sumando los temas que vayáis pidiendo desde la web.
-                    Cada canción muestra su título, el género y quién la pidió, la puedes
-                    reproducir y votar con Me gusta / No me gusta.
-                </p>
-                <div class="songs-vote-hint">
-                    Para votar necesitas haber iniciado sesión como usuario BeefMusic.
-                </div>
+              <div><strong>@${escapeHtml(username)}</strong></div>
+              <div class="small">${formatDate(node.createdAt || node.created_at)}</div>
             </div>
-            <div class="songs-count" id="songs-count">
-                Cargando canciones...
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-ghost btn-sm" data-action="reply">Responder</button>
+              <button class="btn btn-ghost btn-sm" data-action="report">Reportar</button>
             </div>
-        </section>
+          </div>
 
-        <!-- BUSCADOR / FILTROS -->
-        <section class="songs-tools">
-            <!-- BUSCADOR -->
-            <div class="field">
-                <label for="songs-search">Buscar por título, usuario o estilo</label>
-                <input id="songs-search"
-                       type="text"
-                       placeholder="Ej: Código de Barrio, @user_404, drill..." />
-            </div>
+          <div style="margin-top:8px; white-space:pre-wrap; word-break:break-word;">${escapeHtml(node.body)}</div>
 
-            <!-- Píldoras de filtro por estilo -->
-            <div class="songs-filter-pills" id="songs-filter-pills">
-                <button class="songs-filter-btn active" data-style="">
-                    Todos
-                </button>
-                <button class="songs-filter-btn" data-style="drill">
-                    Drill
-                </button>
-                <button class="songs-filter-btn" data-style="trap">
-                    Trap
-                </button>
-                <button class="songs-filter-btn" data-style="dembow">
-                    Dembow
-                </button>
-                <button class="songs-filter-btn" data-style="reggaeton">
-                    Reggaetón
-                </button>
-                <button class="songs-filter-btn" data-style="rap">
-                    Rap
-                </button>
+          <div class="comment-replybox" data-replybox>
+            <textarea class="textarea" rows="2" maxlength="800" placeholder="Responder (máx 800)…"></textarea>
+            <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;">
+              <button class="btn btn-primary btn-sm" data-action="send-reply">Enviar</button>
+              <button class="btn btn-ghost btn-sm" data-action="cancel-reply">Cancelar</button>
             </div>
+          </div>
 
-            <!-- Píldoras de ORDEN (Recientes / Top Likes) -->
-            <div class="songs-filter-pills" id="songs-sort-pills">
-                <button class="songs-filter-btn active" data-sort="recientes">
-                    Recientes
-                </button>
-                <button class="songs-filter-btn" data-sort="top">
-                    Top Likes
-                </button>
-            </div>
-        </section>
-
-        <!-- GRID DE CANCIONES -->
-        <section>
-            <div class="songs-grid" id="songs-grid">
-                <!-- Se rellena por JS -->
-            </div>
-        </section>
-    </div>
-
-    <!-- === MINI REPRODUCTOR GLOBAL FIJO ABAJO === -->
-    <div class="mini-player" id="mini-player">
-        <div class="mini-player-left">
-            <div class="mini-player-cover" id="mini-player-cover"></div>
-            <div class="mini-player-text">
-                <div id="mini-player-title" class="mini-player-title">Nada reproduciéndose</div>
-                <div id="mini-player-artist" class="mini-player-artist">Selecciona una canción</div>
-            </div>
+          ${replies ? `<div class="comment-replies">${replies}</div>` : ""}
         </div>
+      `;
+    }
 
-        <div class="mini-player-controls">
-            <button id="mini-prev-btn" class="mini-btn mini-btn-skip" aria-label="Anterior">
-                <span class="icon-skip icon-skip-prev" aria-hidden="true"></span>
-            </button>
+    async function loadCommentsTree(){
+      const songId = currentCommentsSongId;
+      if (!songId) return;
 
-            <button id="mini-play-pause-btn" class="mini-btn mini-btn-play" aria-label="Reproducir / Pausar">
-                <span class="icon-play" aria-hidden="true"></span>
-                <span class="icon-pause" aria-hidden="true"></span>
-            </button>
+      setCommentStatus("Cargando comentarios…");
+      commentsRoot.innerHTML = `<div style="color:rgba(255,255,255,0.65);">Cargando…</div>`;
 
-            <button id="mini-next-btn" class="mini-btn mini-btn-skip" aria-label="Siguiente">
-                <span class="icon-skip icon-skip-next" aria-hidden="true"></span>
-            </button>
-        </div>
+      try{
+        const data = await apiFetch(`/api/canciones/${songId}/comments-tree?limit=50&offset=0&maxTotal=1200`);
+        const items = data.items || [];
+        commentsRoot.innerHTML = items.length
+          ? items.map(n => renderCommentNode(n)).join("")
+          : `<div style="color:rgba(255,255,255,0.65);">Aún no hay comentarios.</div>`;
+        setCommentStatus("Listo.");
+      } catch(e){
+        commentsRoot.innerHTML = `<div style="color:rgba(255,255,255,0.65);">❌ ${escapeHtml(e.message)}</div>`;
+        setCommentStatus("Error.");
+      }
+    }
 
-        <div class="mini-player-progress">
-            <span id="mini-current-time" class="mini-time">0:00</span>
-            <input type="range" id="mini-progress-bar" min="0" value="0" step="1">
-            <span id="mini-duration" class="mini-time">0:00</span>
-        </div>
-    </div>
+    async function sendRootComment(){
+      const songId = currentCommentsSongId;
+      if (!songId) return;
+      if (!getToken()) return alert("Inicia sesión para comentar.");
 
-    <script>
-        const API_URL = "https://beefmusic-backend.onrender.com";
+      const text = (commentInput.value || "").trim();
+      if (!text) return;
 
-        const grid = document.getElementById("songs-grid");
-        const countEl = document.getElementById("songs-count");
-        const searchInput = document.getElementById("songs-search");
-
-        // Píldoras de estilo y de orden
-        const filterPills = document.querySelectorAll("#songs-filter-pills .songs-filter-btn");
-        const sortPills = document.querySelectorAll("#songs-sort-pills .songs-filter-btn");
-
-        let allSongs = [];
-        let currentStyleFilter = "";      // "" = todos
-        let currentSortMode = "recientes"; // 'recientes' | 'top'
-
-        // === REFERENCIAS MINI PLAYER GLOBAL ===
-        const miniPlayer = document.getElementById("mini-player");
-        const miniCover = document.getElementById("mini-player-cover");
-        const miniTitle = document.getElementById("mini-player-title");
-        const miniArtist = document.getElementById("mini-player-artist");
-        const miniPlayPauseBtn = document.getElementById("mini-play-pause-btn");
-        const miniPrevBtn = document.getElementById("mini-prev-btn");
-        const miniNextBtn = document.getElementById("mini-next-btn");
-        const miniProgressBar = document.getElementById("mini-progress-bar");
-        const miniCurrentTime = document.getElementById("mini-current-time");
-        const miniDuration = document.getElementById("mini-duration");
-
-        let globalPlayers = []; // { audio, playerEl }
-        let currentGlobalIndex = -1;
-        let currentAudio = null;
-
-        // ✅ FIX: no usar textContent (rompe los spans de iconos)
-        function setMiniPlaying(isPlaying) {
-            miniPlayPauseBtn.classList.toggle("is-playing", isPlaying);
-            miniPlayer.classList.toggle("is-active", isPlaying);
-        }
-
-        function formatTimeGlobal(sec) {
-            if (!sec || isNaN(sec)) return "0:00";
-            const total = Math.floor(sec);
-            const minutes = Math.floor(total / 60);
-            const seconds = total % 60;
-            return minutes + ":" + String(seconds).padStart(2, "0");
-        }
-
-        function activarMiniPlayerDesdePlayer(playerEl, audioEl) {
-            currentAudio = audioEl;
-            currentGlobalIndex = globalPlayers.findIndex((p) => p.audio === audioEl);
-
-            const title = playerEl.getAttribute("data-title") || "Tema sin título";
-            const artist = playerEl.getAttribute("data-artist") || "@anónimo";
-
-            miniTitle.textContent = title;
-            miniArtist.textContent = artist;
-
-            const duration = audioEl.duration || 0;
-            miniCurrentTime.textContent = formatTimeGlobal(audioEl.currentTime || 0);
-            miniDuration.textContent = formatTimeGlobal(duration);
-            miniProgressBar.max = duration || 0;
-            miniProgressBar.value = audioEl.currentTime || 0;
-
-            // ✅ FIX: estado visual por clase
-            setMiniPlaying(!audioEl.paused);
-        }
-
-        function reproducirPorIndice(index) {
-            if (!globalPlayers.length) return;
-            if (index < 0) index = 0;
-            if (index >= globalPlayers.length) index = 0;
-
-            const { audio, playerEl } = globalPlayers[index];
-
-            // Pausar otros audios
-            globalPlayers.forEach(({ audio: a, playerEl: p }) => {
-                if (a !== audio) {
-                    a.pause();
-                    p.classList.remove("is-playing");
-                }
-            });
-
-            audio.play();
-            playerEl.classList.add("is-playing");
-
-            // ✅ FIX: glow + iconos con clase
-            setMiniPlaying(true);
-
-            activarMiniPlayerDesdePlayer(playerEl, audio);
-        }
-
-        miniPlayPauseBtn.addEventListener("click", () => {
-            if (!currentAudio) {
-                // Si no hay nada, reproduce la primera canción disponible
-                if (globalPlayers.length > 0) {
-                    reproducirPorIndice(0);
-                }
-                return;
-            }
-
-            if (currentAudio.paused) {
-                currentAudio.play();
-                setMiniPlaying(true);
-
-                const currentPlayer = globalPlayers[currentGlobalIndex]?.playerEl;
-                if (currentPlayer) currentPlayer.classList.add("is-playing");
-            } else {
-                currentAudio.pause();
-                setMiniPlaying(false);
-
-                const currentPlayer = globalPlayers[currentGlobalIndex]?.playerEl;
-                if (currentPlayer) currentPlayer.classList.remove("is-playing");
-            }
+      setCommentStatus("Enviando comentario…");
+      try{
+        await apiFetch(`/api/canciones/${songId}/comments`, {
+          method:"POST",
+          body:{ body: text, parentId: null },
+          auth:true
         });
+        commentInput.value = "";
+        await loadCommentsTree();
+      } catch(e){
+        setCommentStatus("❌ " + e.message);
+      }
+    }
 
-        miniNextBtn.addEventListener("click", () => {
-            if (!globalPlayers.length) return;
-            if (currentGlobalIndex === -1) {
-                reproducirPorIndice(0);
-                return;
-            }
-            let nextIndex = currentGlobalIndex + 1;
-            if (nextIndex >= globalPlayers.length) nextIndex = 0;
-            reproducirPorIndice(nextIndex);
-        });
+    async function sendReply(commentId, textarea){
+      const songId = currentCommentsSongId;
+      if (!songId) return;
+      if (!getToken()) return alert("Inicia sesión para responder.");
 
-        miniPrevBtn.addEventListener("click", () => {
-            if (!globalPlayers.length) return;
-            if (currentGlobalIndex === -1) {
-                reproducirPorIndice(0);
-                return;
-            }
-            let prevIndex = currentGlobalIndex - 1;
-            if (prevIndex < 0) prevIndex = globalPlayers.length - 1;
-            reproducirPorIndice(prevIndex);
-        });
+      const text = (textarea.value || "").trim();
+      if (!text) return;
 
-        miniProgressBar.addEventListener("input", () => {
-            if (!currentAudio || !currentAudio.duration) return;
-            currentAudio.currentTime = miniProgressBar.value;
-        });
+      setCommentStatus("Enviando respuesta…");
+      await apiFetch(`/api/canciones/${songId}/comments`, {
+        method:"POST",
+        body:{ body: text, parentId: commentId },
+        auth:true
+      });
+      await loadCommentsTree();
+    }
 
-        function crearCardCancion(song) {
-            const titulo = song.titulo || song.title || "Tema sin título";
-            const estilo = song.estilo || song.style || "Sin género";
-            const duracion = song.duracion || song.duration || "";
-            const descripcion =
-                song.descripcion ||
-                song.descripcion_peticion ||
-                song.description ||
-                "";
-            const autor =
-                song.autor || song.requester || song.nick || "@anónimo";
-            const estado = song.estado || "publicada";
-            const urlAudio = song.url_audio || song.audio_url || "";
+    async function reportComment(commentId){
+      if (!getToken()) return alert("Inicia sesión para reportar.");
+      const reason = prompt("Motivo del reporte (máx 500):");
+      if (!reason) return;
 
-            const likes = song.likes ?? 0;
-            const dislikes = song.dislikes ?? 0;
-            const userVote = song.userVote || song.votoUsuario || "";
+      setCommentStatus("Enviando reporte…");
+      await apiFetch(`/api/report/content`, {
+        method:"POST",
+        body:{ targetType:"comment", targetId: commentId, reason: reason.slice(0,500) },
+        auth:true
+      });
+      setCommentStatus("Reporte enviado ✅");
+      setTimeout(() => setCommentStatus("Listo."), 1200);
+    }
 
-            return `
-          <article class="song-card">
-            <div class="song-thumb">
-              <div class="song-wave"></div>
+    function openCommentsForSong(songId){
+      currentCommentsSongId = String(songId);
+
+      const song = allSongs.find(s => String(s.id) === String(songId));
+      const titulo = song?.titulo || song?.title || "Tema";
+      const autor  = song?.autor || song?.requester || song?.nick || "@anónimo";
+      const estilo = song?.estilo || song?.style || "—";
+
+      commentsTitle.textContent = titulo;
+      commentsSub.textContent = `${autor} · ${estilo} · ID ${songId}`;
+
+      commentsBackdrop.classList.add("open");
+      commentsBackdrop.setAttribute("aria-hidden", "false");
+
+      // poner ?song= en URL sin recargar
+      const url = new URL(location.href);
+      url.searchParams.set("song", String(songId));
+      history.replaceState({}, "", url.toString());
+
+      loadCommentsTree();
+    }
+
+    function closeComments(){
+      commentsBackdrop.classList.remove("open");
+      commentsBackdrop.setAttribute("aria-hidden", "true");
+      currentCommentsSongId = null;
+
+      // quitar ?song= de URL sin recargar
+      const url = new URL(location.href);
+      url.searchParams.delete("song");
+      history.replaceState({}, "", url.toString());
+    }
+
+    commentsCloseBtn.addEventListener("click", closeComments);
+    commentsBackdrop.addEventListener("click", (e) => {
+      if (e.target === commentsBackdrop) closeComments();
+    });
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && commentsBackdrop.classList.contains("open")) closeComments();
+    });
+
+    commentSendBtn.addEventListener("click", sendRootComment);
+    commentsReloadBtn.addEventListener("click", loadCommentsTree);
+
+    commentsRoot.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+
+      const item = btn.closest(".comment-item");
+      const commentId = item?.dataset?.commentId;
+      if (!commentId) return;
+
+      const action = btn.dataset.action;
+
+      if (action === "reply"){
+        const box = item.querySelector("[data-replybox]");
+        if (box) box.classList.toggle("open");
+        return;
+      }
+      if (action === "cancel-reply"){
+        const box = item.querySelector("[data-replybox]");
+        if (box) box.classList.remove("open");
+        return;
+      }
+      if (action === "send-reply"){
+        const textarea = item.querySelector("[data-replybox] textarea");
+        await sendReply(commentId, textarea);
+        return;
+      }
+      if (action === "report"){
+        await reportComment(commentId);
+        return;
+      }
+    });
+
+    // ===== Página canciones =====
+    function crearCardCancion(song) {
+      const titulo = song.titulo || song.title || "Tema sin título";
+      const estilo = song.estilo || song.style || "Sin género";
+      const duracion = song.duracion || song.duration || "";
+      const descripcion = song.descripcion || song.descripcion_peticion || song.description || "";
+      const autor = song.autor || song.requester || song.nick || "@anónimo";
+      const estado = song.estado || "publicada";
+      const urlAudio = song.url_audio || song.audio_url || "";
+
+      const likes = song.likes ?? 0;
+      const dislikes = song.dislikes ?? 0;
+      const userVote = song.userVote || song.votoUsuario || "";
+
+      return `
+        <article class="song-card">
+          <div class="song-thumb">
+            <div class="song-wave"></div>
+          </div>
+
+          <div class="song-body">
+            <div class="song-title">${titulo}</div>
+
+            <div class="song-meta">
+              <span class="song-badge">${estilo}</span>
+              <span class="song-req-author">${autor}</span>
+              ${duracion ? `<span>${duracion}</span>` : ""}
             </div>
-            <div class="song-body">
-              <!-- TÍTULO DEL TEMA -->
-              <div class="song-title">${titulo}</div>
 
-              <!-- GÉNERO + USUARIO + DURACIÓN -->
-              <div class="song-meta">
-                <span class="song-badge">${estilo}</span>
-                <span class="song-req-author">${autor}</span>
-                ${duracion ? `<span>${duracion}</span>` : ""}
-              </div>
+            ${descripcion ? `<div class="song-req">${descripcion}</div>` : ""}
 
-              <!-- DESCRIPCIÓN / RESUMEN -->
-              ${descripcion ? `<div class="song-req">${descripcion}</div>` : ""}
+            <div class="song-meta" style="margin-top:6px;">
+              <span class="song-badge">${estado}</span>
+            </div>
 
-              <!-- ESTADO -->
-              <div class="song-meta" style="margin-top:6px;">
-                <span class="song-badge">${estado}</span>
-              </div>
+            ${urlAudio ? `
+              <div class="song-player">
+                <div class="bm-player"
+                     data-title="${titulo}"
+                     data-artist="${autor}"
+                     data-style="${estilo}">
+                  <audio preload="none" class="bm-audio">
+                    <source src="${urlAudio}" type="audio/mpeg" />
+                    Tu navegador no soporta audio HTML5.
+                  </audio>
 
-              ${urlAudio
-                    ? `
-                <div class="song-player">
-                  <div class="bm-player"
-                       data-title="${titulo}"
-                       data-artist="${autor}"
-                       data-style="${estilo}">
-                    <audio preload="none" class="bm-audio">
-                      <source src="${urlAudio}" type="audio/mpeg" />
-                      Tu navegador no soporta audio HTML5.
-                    </audio>
-
-                    <button
-                    class="bm-play-btn"
-                    type="button"
-                    aria-label="Reproducir / Pausar">
+                  <button class="bm-play-btn" type="button" aria-label="Reproducir / Pausar">
                     <span class="bm-play-icon" aria-hidden="true"></span>
                     <span class="bm-pause-icon" aria-hidden="true"></span>
-                    </button>
+                  </button>
 
-                    <div class="bm-player-main">
-                      <div class="bm-time-row">
-                        <span class="bm-time bm-current">0:00</span>
-                        <span class="bm-time bm-duration">0:00</span>
-                      </div>
-                      <div class="bm-timeline">
-                        <div class="bm-timeline-progress"></div>
-                      </div>
+                  <div class="bm-player-main">
+                    <div class="bm-time-row">
+                      <span class="bm-time bm-current">0:00</span>
+                      <span class="bm-time bm-duration">0:00</span>
+                    </div>
+                    <div class="bm-timeline">
+                      <div class="bm-timeline-progress"></div>
                     </div>
                   </div>
                 </div>
-              `
-                    : `
-                <div class="song-player song-player--noaudio">
-                  El audio de este tema todavía no está disponible.
-                </div>
-              `
-                }
+              </div>
+            ` : `
+              <div class="song-player song-player--noaudio">
+                El audio de este tema todavía no está disponible.
+              </div>
+            `}
 
-              <!-- VOTOS -->
-              <div class="song-votes"
-                   data-id="${song.id}"
-                   data-user-vote="${userVote}">
-                <button class="vote-btn like ${userVote === "like" ? "voted" : ""}" data-type="like">
-                  👍 <span class="vote-count">${likes}</span>
-                </button>
-                <button class="vote-btn dislike ${userVote === "dislike" ? "voted" : ""}" data-type="dislike">
-                  👎 <span class="vote-count">${dislikes}</span>
-                </button>
-              </div>
-              <div class="songs-vote-hint">
-                Likes totales: ${likes} · Dislikes totales: ${dislikes}
-              </div>
+            <!-- VOTOS -->
+            <div class="song-votes"
+                 data-id="${song.id}"
+                 data-user-vote="${userVote}">
+              <button class="vote-btn like ${userVote === "like" ? "voted" : ""}" data-type="like">
+                👍 <span class="vote-count">${likes}</span>
+              </button>
+              <button class="vote-btn dislike ${userVote === "dislike" ? "voted" : ""}" data-type="dislike">
+                👎 <span class="vote-count">${dislikes}</span>
+              </button>
             </div>
-          </article>
-        `;
-        }
 
-        function renderSongs(list) {
-            // Si volvemos a pintar, paramos lo que se estuviera reproduciendo
-            if (currentAudio) {
-                try { currentAudio.pause(); } catch (e) { }
-            }
-            currentAudio = null;
-            currentGlobalIndex = -1;
+            <div class="song-actions">
+              <button class="song-more-btn" type="button" data-action="more" data-id="${song.id}">Ver más</button>
+            </div>
 
-            if (miniTitle) {
-                miniTitle.textContent = "Nada reproduciéndose";
-                miniArtist.textContent = "Selecciona una canción";
-                miniCurrentTime.textContent = "0:00";
-                miniDuration.textContent = "0:00";
-                miniProgressBar.value = 0;
-                miniProgressBar.max = 0;
-                // ✅ FIX: reset visual sin romper iconos
-                setMiniPlaying(false);
-            }
+            <div class="songs-vote-hint">
+              Likes totales: ${likes} · Dislikes totales: ${dislikes}
+            </div>
+          </div>
+        </article>
+      `;
+    }
 
-            if (!list || list.length === 0) {
-                grid.innerHTML = `
-            <div class="admin-empty" style="grid-column:1/-1;">
+    function renderSongs(list) {
+      if (currentAudio) { try { currentAudio.pause(); } catch(e){} }
+      currentAudio = null;
+      currentGlobalIndex = -1;
+
+      if (miniTitle) {
+        miniTitle.textContent = "Nada reproduciéndose";
+        miniArtist.textContent = "Selecciona una canción";
+        miniCurrentTime.textContent = "0:00";
+        miniDuration.textContent = "0:00";
+        miniProgressBar.value = 0;
+        miniProgressBar.max = 0;
+        setMiniPlaying(false);
+      }
+
+      if (!list || list.length === 0) {
+        grid.innerHTML = `
+          <div class="song-card" style="grid-column:1/-1;">
+            <div class="song-body" style="color:rgba(255,255,255,0.65);">
               Todavía no hay canciones publicadas. Cuando las subas desde tu backend, se verán aquí.
             </div>
-          `;
-                countEl.textContent = "";
-                return;
-            }
-
-            grid.innerHTML = list.map(crearCardCancion).join("");
-            countEl.textContent = list.length + " canciones";
-
-            // Inicializar players custom después de pintar el HTML
-            inicializarReproductores();
-        }
-
-        function aplicarFiltros() {
-            const text = (searchInput.value || "").toLowerCase().trim();
-            const estiloFiltro = (currentStyleFilter || "").toLowerCase();
-
-            // 1) Filtro por texto + estilo
-            const filtradas = allSongs.filter((song) => {
-                const titulo = (song.titulo || song.title || "").toLowerCase();
-                const autor = (song.autor || song.requester || song.nick || "").toLowerCase();
-                const estilo = (song.estilo || song.style || "").toLowerCase();
-                const descripcion = (song.descripcion || song.descripcion_peticion || song.description || "").toLowerCase();
-
-                const pasaTexto =
-                    !text ||
-                    titulo.includes(text) ||
-                    autor.includes(text) ||
-                    estilo.includes(text) ||
-                    descripcion.includes(text);
-
-                const pasaEstilo =
-                    !estiloFiltro || estilo.includes(estiloFiltro);
-
-                return pasaTexto && pasaEstilo;
-            });
-
-            // 2) Ordenar según el modo seleccionado
-            let listOrdenada = [...filtradas];
-
-            if (currentSortMode === "top") {
-                // Top por likes (si empatan, por más recientes)
-                listOrdenada.sort((a, b) => {
-                    const likesA = a.likes ?? 0;
-                    const likesB = b.likes ?? 0;
-                    if (likesB !== likesA) return likesB - likesA;
-
-                    const dateA = a.created_at ? new Date(a.created_at) : 0;
-                    const dateB = b.created_at ? new Date(b.created_at) : 0;
-                    return dateB - dateA;
-                });
-            } else {
-                // Recientes por defecto (created_at descendente)
-                listOrdenada.sort((a, b) => {
-                    const dateA = a.created_at ? new Date(a.created_at) : 0;
-                    const dateB = b.created_at ? new Date(b.created_at) : 0;
-                    return dateB - dateA;
-                });
-            }
-
-            renderSongs(listOrdenada);
-        }
-
-        async function cargarCanciones() {
-            grid.innerHTML = `
-          <div class="admin-empty" style="grid-column:1/-1;">
-            Cargando canciones...
           </div>
         `;
-            countEl.textContent = "Cargando canciones...";
+        countEl.textContent = "";
+        return;
+      }
 
-            try {
-                const token = localStorage.getItem("beefmusic_user_token");
+      grid.innerHTML = list.map(crearCardCancion).join("");
+      countEl.textContent = list.length + " canciones";
+      inicializarReproductores();
+    }
 
-                const res = await fetch(API_URL + "/api/canciones", {
-                    headers: token
-                        ? { Authorization: "Bearer " + token }
-                        : {}
-                });
+    function aplicarFiltros() {
+      const text = (searchInput.value || "").toLowerCase().trim();
+      const estiloFiltro = (currentStyleFilter || "").toLowerCase();
 
-                const data = await res.json();
+      const filtradas = allSongs.filter((song) => {
+        const titulo = (song.titulo || song.title || "").toLowerCase();
+        const autor = (song.autor || song.requester || song.nick || "").toLowerCase();
+        const estilo = (song.estilo || song.style || "").toLowerCase();
+        const descripcion = (song.descripcion || song.descripcion_peticion || song.description || "").toLowerCase();
 
-                if (!res.ok) {
-                    throw new Error(data.error || "Error al cargar canciones");
-                }
+        const pasaTexto =
+          !text ||
+          titulo.includes(text) ||
+          autor.includes(text) ||
+          estilo.includes(text) ||
+          descripcion.includes(text);
 
-                if (!Array.isArray(data)) {
-                    throw new Error("La API de canciones no devolvió una lista");
-                }
+        const pasaEstilo = !estiloFiltro || estilo.includes(estiloFiltro);
 
-                allSongs = data;
-                aplicarFiltros();
-            } catch (err) {
-                console.error(err);
-                grid.innerHTML = `
-            <div class="admin-empty" style="grid-column:1/-1;">
+        return pasaTexto && pasaEstilo;
+      });
+
+      let listOrdenada = [...filtradas];
+
+      if (currentSortMode === "top") {
+        listOrdenada.sort((a, b) => {
+          const likesA = a.likes ?? 0;
+          const likesB = b.likes ?? 0;
+          if (likesB !== likesA) return likesB - likesA;
+
+          const dateA = a.created_at ? new Date(a.created_at) : 0;
+          const dateB = b.created_at ? new Date(b.created_at) : 0;
+          return dateB - dateA;
+        });
+      } else {
+        listOrdenada.sort((a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at) : 0;
+          const dateB = b.created_at ? new Date(b.created_at) : 0;
+          return dateB - dateA;
+        });
+      }
+
+      renderSongs(listOrdenada);
+    }
+
+    async function cargarCanciones() {
+      grid.innerHTML = `
+        <div class="song-card" style="grid-column:1/-1;">
+          <div class="song-body" style="color:rgba(255,255,255,0.65);">
+            Cargando canciones...
+          </div>
+        </div>
+      `;
+      countEl.textContent = "Cargando canciones...";
+
+      try {
+        const token = localStorage.getItem("beefmusic_user_token");
+
+        const res = await fetch(API_URL + "/api/canciones", {
+          headers: token ? { Authorization: "Bearer " + token } : {}
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || "Error al cargar canciones");
+        if (!Array.isArray(data)) throw new Error("La API de canciones no devolvió una lista");
+
+        allSongs = data;
+        aplicarFiltros();
+
+        // ✅ auto-abrir comentarios si viene ?song=
+        const params = new URLSearchParams(location.search);
+        const song = (params.get("song") || "").trim();
+        if (song) openCommentsForSong(song);
+
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = `
+          <div class="song-card" style="grid-column:1/-1;">
+            <div class="song-body" style="color:rgba(255,255,255,0.65);">
               Error cargando las canciones desde el servidor.
               Cuando tengas listo el endpoint <code>/api/canciones</code>, se mostrarán aquí.
             </div>
-          `;
-                countEl.textContent = "";
+          </div>
+        `;
+        countEl.textContent = "";
+      }
+    }
+
+    function inicializarReproductores(){
+      globalPlayers = [];
+
+      const players = Array.from(document.querySelectorAll(".bm-player"));
+      players.forEach((playerEl) => {
+        const audio = playerEl.querySelector(".bm-audio");
+        const btn = playerEl.querySelector(".bm-play-btn");
+        const timeCurrent = playerEl.querySelector(".bm-current");
+        const timeDuration = playerEl.querySelector(".bm-duration");
+        const timeline = playerEl.querySelector(".bm-timeline");
+        const progress = playerEl.querySelector(".bm-timeline-progress");
+
+        if (!audio || !btn) return;
+
+        globalPlayers.push({ audio, playerEl });
+
+        audio.addEventListener("loadedmetadata", () => {
+          timeDuration.textContent = formatTimeGlobal(audio.duration);
+        });
+
+        audio.addEventListener("timeupdate", () => {
+          timeCurrent.textContent = formatTimeGlobal(audio.currentTime);
+          if (audio.duration) {
+            const pct = (audio.currentTime / audio.duration) * 100;
+            progress.style.width = pct + "%";
+          }
+          if (currentAudio === audio) {
+            miniCurrentTime.textContent = formatTimeGlobal(audio.currentTime);
+            miniProgressBar.value = audio.currentTime || 0;
+          }
+        });
+
+        audio.addEventListener("ended", () => {
+          playerEl.classList.remove("is-playing");
+          if (currentAudio === audio) {
+            setMiniPlaying(false);
+          }
+        });
+
+        btn.addEventListener("click", () => {
+          const isPlaying = !audio.paused;
+
+          globalPlayers.forEach(({ audio: a, playerEl: p }) => {
+            if (a !== audio) {
+              a.pause();
+              p.classList.remove("is-playing");
             }
+          });
+
+          if (isPlaying) {
+            audio.pause();
+            playerEl.classList.remove("is-playing");
+            setMiniPlaying(false);
+          } else {
+            audio.play();
+            playerEl.classList.add("is-playing");
+            activarMiniPlayerDesdePlayer(playerEl, audio);
+            setMiniPlaying(true);
+          }
+        });
+
+        timeline.addEventListener("click", (e) => {
+          if (!audio.duration) return;
+          const rect = timeline.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const pct = Math.min(1, Math.max(0, x / rect.width));
+          audio.currentTime = pct * audio.duration;
+        });
+      });
+    }
+
+    // Pills: filtro estilo
+    filterPills.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filterPills.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentStyleFilter = btn.getAttribute("data-style") || "";
+        aplicarFiltros();
+      });
+    });
+
+    // Pills: sort
+    sortPills.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        sortPills.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentSortMode = btn.getAttribute("data-sort") || "recientes";
+        aplicarFiltros();
+      });
+    });
+
+    // Search
+    searchInput.addEventListener("input", aplicarFiltros);
+
+    // Clicks (votos + ver más)
+    grid.addEventListener("click", async (e) => {
+      // ✅ Ver más
+      const moreBtn = e.target.closest("button[data-action='more']");
+      if (moreBtn){
+        const id = moreBtn.getAttribute("data-id");
+        if (id) openCommentsForSong(id);
+        return;
+      }
+
+      // Votar
+      const btn = e.target.closest("button.vote-btn");
+      if (!btn) return;
+
+      const votesWrapper = btn.closest(".song-votes");
+      if (!votesWrapper) return;
+
+      const token = localStorage.getItem("beefmusic_user_token");
+      if (!token) {
+        alert("Inicia sesión para votar.");
+        return;
+      }
+
+      const songId = votesWrapper.getAttribute("data-id");
+      const tipo = btn.getAttribute("data-type"); // 'like' o 'dislike'
+
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(API_URL + "/api/canciones/" + songId + "/vote", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+          body: JSON.stringify({ tipo }),
+        });
+
+        const json = await res.json();
+
+        if (!res.ok) {
+          console.error("Error votando:", json);
+          alert(json.error || "No se pudo registrar el voto");
+          btn.disabled = false;
+          return;
         }
 
-        // === PLAYER CUSTOM BEEF MUSIC + MINI PLAYER ===
-        function inicializarReproductores() {
-            const players = document.querySelectorAll(".bm-player");
-            const allAudios = [];
-            globalPlayers = [];
+        const likeCountEl = votesWrapper.querySelector(".vote-btn.like .vote-count");
+        const dislikeCountEl = votesWrapper.querySelector(".vote-btn.dislike .vote-count");
 
-            players.forEach((player) => {
-                const audio = player.querySelector(".bm-audio");
-                if (!audio) return;
+        if (likeCountEl && typeof json.likes === "number") likeCountEl.textContent = json.likes;
+        if (dislikeCountEl && typeof json.dislikes === "number") dislikeCountEl.textContent = json.dislikes;
 
-                allAudios.push(audio);
-                globalPlayers.push({ audio, playerEl: player });
+        const newUserVote = json.userVote ?? null;
+        votesWrapper.setAttribute("data-user-vote", newUserVote || "");
 
-                const playBtn = player.querySelector(".bm-play-btn");
-                const timeline = player.querySelector(".bm-timeline");
-                const progressBar = player.querySelector(".bm-timeline-progress");
-                const currentTimeEl = player.querySelector(".bm-time.bm-current");
-                const durationEl = player.querySelector(".bm-time.bm-duration");
+        votesWrapper.querySelectorAll(".vote-btn").forEach((b) => {
+          const bType = b.getAttribute("data-type");
+          if (newUserVote && bType === newUserVote) b.classList.add("voted");
+          else b.classList.remove("voted");
+        });
 
-                function formatTimeLocal(sec) {
-                    if (!sec || isNaN(sec)) return "0:00";
-                    const total = Math.floor(sec);
-                    const minutes = Math.floor(total / 60);
-                    const seconds = total % 60;
-                    return minutes + ":" + String(seconds).padStart(2, "0");
-                }
+        const hint = votesWrapper.parentElement.querySelector(".songs-vote-hint");
+        if (hint) hint.textContent = `Likes totales: ${json.likes} · Dislikes totales: ${json.dislikes}`;
 
-                audio.addEventListener("loadedmetadata", () => {
-                    durationEl.textContent = formatTimeLocal(audio.duration);
-                    if (audio === currentAudio) {
-                        miniDuration.textContent = formatTimeLocal(audio.duration);
-                        miniProgressBar.max = audio.duration || 0;
-                    }
-                });
-
-                audio.addEventListener("timeupdate", () => {
-                    const current = audio.currentTime || 0;
-                    const duration = audio.duration || 0;
-                    currentTimeEl.textContent = formatTimeLocal(current);
-
-                    const percent = duration ? (current / duration) * 100 : 0;
-                    progressBar.style.width = percent + "%";
-
-                    if (audio === currentAudio) {
-                        miniCurrentTime.textContent = formatTimeLocal(current);
-                        miniDuration.textContent = formatTimeLocal(duration);
-                        miniProgressBar.max = duration || 0;
-                        miniProgressBar.value = current;
-                    }
-                });
-
-                audio.addEventListener("ended", () => {
-                    player.classList.remove("is-playing");
-                    progressBar.style.width = "0%";
-                    currentTimeEl.textContent = "0:00";
-
-                    if (audio === currentAudio) {
-                        if (globalPlayers.length > 0) {
-                            let nextIndex = currentGlobalIndex + 1;
-                            if (nextIndex >= globalPlayers.length) nextIndex = 0;
-                            reproducirPorIndice(nextIndex);
-                        }
-                    }
-                });
-
-                playBtn.addEventListener("click", () => {
-                    // Si es la misma canción y está sonando -> pausamos
-                    if (!audio.paused && audio === currentAudio) {
-                        audio.pause();
-                        player.classList.remove("is-playing");
-                        // ✅ FIX: sin textContent
-                        setMiniPlaying(false);
-                        return;
-                    }
-
-                    // Pausar cualquier otro audio
-                    allAudios.forEach((a) => {
-                        if (a !== audio) {
-                            a.pause();
-                            const p = a.closest(".bm-player");
-                            if (p) p.classList.remove("is-playing");
-                        }
-                    });
-
-                    audio.play();
-                    player.classList.add("is-playing");
-                    // ✅ FIX: glow + iconos por clase
-                    setMiniPlaying(true);
-                    activarMiniPlayerDesdePlayer(player, audio);
-                });
-
-                if (timeline) {
-                    timeline.addEventListener("click", (e) => {
-                        const rect = timeline.getBoundingClientRect();
-                        const clickX = e.clientX - rect.left;
-                        const percent = clickX / rect.width;
-                        const duration = audio.duration || 0;
-
-                        if (duration) {
-                            audio.currentTime = duration * percent;
-                        }
-                    });
-                }
-            });
+        const songIndex = allSongs.findIndex((s) => String(s.id) === String(songId));
+        if (songIndex !== -1) {
+          allSongs[songIndex].likes = json.likes;
+          allSongs[songIndex].dislikes = json.dislikes;
         }
 
-        // Buscador
-        searchInput.addEventListener("input", aplicarFiltros);
+        aplicarFiltros();
+      } catch (err) {
+        console.error(err);
+        alert("Error de conexión al votar la canción.");
+      } finally {
+        btn.disabled = false;
+      }
+    });
 
-        // Filtro por estilo
-        filterPills.forEach((btn) => {
-            btn.addEventListener("click", () => {
-                filterPills.forEach((b) => b.classList.remove("active"));
-                btn.classList.add("active");
-
-                currentStyleFilter = btn.getAttribute("data-style") || "";
-                aplicarFiltros();
-            });
-        });
-
-        // Orden (Recientes / Top Likes)
-        sortPills.forEach((btn) => {
-            btn.addEventListener("click", () => {
-                sortPills.forEach((b) => b.classList.remove("active"));
-                btn.classList.add("active");
-
-                currentSortMode = btn.getAttribute("data-sort") || "recientes";
-                aplicarFiltros();
-            });
-        });
-
-        // Votos
-        grid.addEventListener("click", async (e) => {
-            const btn = e.target.closest(".vote-btn");
-            if (!btn) return;
-
-            const token = localStorage.getItem("beefmusic_user_token");
-            if (!token) {
-                alert("Necesitas iniciar sesión como usuario BeefMusic para votar canciones.");
-                return;
-            }
-
-            const votesWrapper = btn.closest(".song-votes");
-            const songId = votesWrapper.getAttribute("data-id");
-            const tipo = btn.getAttribute("data-type"); // 'like' o 'dislike'
-
-            btn.disabled = true;
-
-            try {
-                const res = await fetch(API_URL + "/api/canciones/" + songId + "/vote", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + token,
-                    },
-                    body: JSON.stringify({ tipo }),
-                });
-
-                const json = await res.json();
-
-                if (!res.ok) {
-                    console.error("Error votando:", json);
-                    alert(json.error || "No se pudo registrar el voto");
-                    btn.disabled = false;
-                    return;
-                }
-
-                const likeCountEl = votesWrapper.querySelector(".vote-btn.like .vote-count");
-                const dislikeCountEl = votesWrapper.querySelector(".vote-btn.dislike .vote-count");
-
-                if (likeCountEl && typeof json.likes === "number") {
-                    likeCountEl.textContent = json.likes;
-                }
-                if (dislikeCountEl && typeof json.dislikes === "number") {
-                    dislikeCountEl.textContent = json.dislikes;
-                }
-
-                const newUserVote = json.userVote ?? null;
-                votesWrapper.setAttribute("data-user-vote", newUserVote || "");
-
-                votesWrapper
-                    .querySelectorAll(".vote-btn")
-                    .forEach((b) => {
-                        const bType = b.getAttribute("data-type");
-                        if (newUserVote && bType === newUserVote) {
-                            b.classList.add("voted");
-                        } else {
-                            b.classList.remove("voted");
-                        }
-                    });
-
-                const hint = votesWrapper.parentElement.querySelector(".songs-vote-hint");
-                if (hint) {
-                    hint.textContent = `Likes totales: ${json.likes} · Dislikes totales: ${json.dislikes}`;
-                }
-
-                const songIndex = allSongs.findIndex((s) => String(s.id) === String(songId));
-                if (songIndex !== -1) {
-                    allSongs[songIndex].likes = json.likes;
-                    allSongs[songIndex].dislikes = json.dislikes;
-                }
-
-                aplicarFiltros();
-            } catch (err) {
-                console.error(err);
-                alert("Error de conexión al votar la canción.");
-            } finally {
-                btn.disabled = false;
-            }
-        });
-
-        // Carga inicial
-        cargarCanciones();
-    </script>
+    // Carga inicial
+    cargarCanciones();
+  </script>
 </body>
 </html>
