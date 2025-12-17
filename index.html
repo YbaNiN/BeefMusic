@@ -432,7 +432,7 @@
         height: auto;
         max-height: 75vh;   /* un pelín más alto en móvil */
     }
-}   
+}
         /* BREAKPOINTS */
 
         @media (max-width: 960px) {
@@ -532,7 +532,7 @@
                 border-radius: 16px;
             }
         }
-    
+
         @media (max-width: 700px) {
             .header-actions {
                 justify-content: space-between;
@@ -619,14 +619,18 @@
                     en el <strong>Discord</strong> y desde ahí se trabaja hasta que sale un tema
                     listo para escuchar y compartir desde la web.
                 </p>
-<div class="hero-meta">
+
+                <div class="hero-meta">
                     <div class="hero-meta-item">
                         <span>Comunidad</span>
-                        <div><span class="hero-meta-accent">+200</span> ideas convertidas en letras y beats</div>
+                        <div>
+                            <span class="hero-meta-accent" id="hero-requests">—</span>
+                            peticiones registradas
+                        </div>
                     </div>
                     <div class="hero-meta-item">
                         <span>Estilo</span>
-                        <div>Beefs, diss, drill, dembow, trap y lo que se venga</div>
+                        <div id="hero-style-line">Drill, trap, dembow, boom bap y lo que se venga</div>
                     </div>
                 </div>
             </div>
@@ -719,23 +723,23 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-label">Canciones en la colección</div>
-                    <div class="stat-value">120+</div>
-                    <div class="stat-extra">Temas montados a partir de historias reales.</div>
+                    <div class="stat-value" id="stat-songs">—</div>
+                    <div class="stat-extra">Número real de canciones cargadas desde la API.</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Peticiones totales</div>
-                    <div class="stat-value">480+</div>
-                    <div class="stat-extra">Ideas que han pasado por la web y por Discord.</div>
+                    <div class="stat-value" id="stat-requests">—</div>
+                    <div class="stat-extra">Total real contando todas las peticiones públicas.</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Gente implicada</div>
-                    <div class="stat-value">15</div>
-                    <div class="stat-extra">Productores, voces, composición y mezcla.</div>
+                    <div class="stat-value" id="stat-people">—</div>
+                    <div class="stat-extra">Autores únicos detectados en la colección.</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Sabores distintos</div>
-                    <div class="stat-value">8+</div>
-                    <div class="stat-extra">Trap, drill, reggaetón, dembow, boom bap y más.</div>
+                    <div class="stat-value" id="stat-genres">—</div>
+                    <div class="stat-extra">Estilos únicos detectados en la colección.</div>
                 </div>
             </div>
         </section>
@@ -746,75 +750,15 @@
                 <div class="section-kicker">Últimos lanzamientos</div>
                 <h2 class="section-title">Algunos de los temas que han salido de aquí</h2>
                 <p class="section-subtitle">
-                    De momento son ejemplos, pero la idea es que esta sección se alimente sola con
-                    las canciones que se vayan publicando desde las peticiones reales.
+                    Esta sección se alimenta sola desde tu backend (últimas canciones publicadas).
                 </p>
             </div>
 
-            <div class="songs-grid">
-                <!-- Song 1 -->
-                <article class="song-card">
-                    <div class="song-thumb">
-                        <div class="song-wave"></div>
-                    </div>
+            <div class="songs-grid" id="home-songs-grid">
+                <article class="song-card" style="grid-column:1/-1;">
                     <div class="song-body">
-                        <div class="song-title">“Código de Barrio”</div>
-                        <div class="song-meta">
-                            <span>Estilo: Drill</span>
-                            <span>Duración: 3:02</span>
-                        </div>
-                        <div class="song-req">
-                            Petición de <strong>@user_404</strong> – historia de lealtad, movidas en el bloque
-                            y alguien que ya no es de fiar.
-                        </div>
-                        <div class="song-meta">
-                            <span class="song-badge">Publicada</span>
-                            <span>Ver detalles →</span>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- Song 2 -->
-                <article class="song-card">
-                    <div class="song-thumb">
-                        <div class="song-wave"></div>
-                    </div>
-                    <div class="song-body">
-                        <div class="song-title">“Dembow del Server”</div>
-                        <div class="song-meta">
-                            <span>Estilo: Dembow</span>
-                            <span>Duración: 2:41</span>
-                        </div>
-                        <div class="song-req">
-                            Petición de <strong>@maria_beats</strong> – tema rápido y pegado para
-                            levantar el Discord a las tantas.
-                        </div>
-                        <div class="song-meta">
-                            <span class="song-badge">Publicada</span>
-                            <span>Escuchar →</span>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- Song 3 -->
-                <article class="song-card">
-                    <div class="song-thumb">
-                        <div class="song-wave"></div>
-                    </div>
-                    <div class="song-body">
-                        <div class="song-title">“Beef Digital”</div>
-                        <div class="song-meta">
-                            <span>Estilo: Trap</span>
-                            <span>Duración: 3:28</span>
-                        </div>
-                        <div class="song-req">
-                            Petición anónima – diss en clave de juego contra un rival del server,
-                            todo en modo roleplay.
-                        </div>
-                        <div class="song-meta">
-                            <span class="song-badge">En revisión</span>
-                            <span>Próximamente</span>
-                        </div>
+                        <div class="song-title">Cargando canciones…</div>
+                        <div class="song-req">Conectando con BeefMusic backend.</div>
                     </div>
                 </article>
             </div>
@@ -833,7 +777,7 @@
                         donde se revisa y se decide cómo convertirla en tema.
                     </div>
                 </div>
-</div>
+            </div>
         </section>
 
         <!-- FOOTER -->
@@ -1206,6 +1150,9 @@
                             if (storedUserName) {
                                 this.nick.value = "@" + storedUserName;
                             }
+
+                            // ⭐ refrescar contadores “reales” tras enviar
+                            refreshHomeRealData();
                         }
                     })
                     .catch((err) => {
@@ -1321,7 +1268,181 @@
             });
         }
 
+        // ==========================================================
+        // ✅ DATOS REALES HOME (stats + últimos lanzamientos)
+        // ==========================================================
+        function escapeHtml(s) {
+            const div = document.createElement("div");
+            div.textContent = s ?? "";
+            return div.innerHTML;
+        }
+
+        function formatDuration(d) {
+            if (d == null) return "—";
+            // si ya viene como "3:02"
+            if (typeof d === "string" && d.includes(":")) return d;
+            const n = Number(d);
+            if (!Number.isFinite(n) || n <= 0) return "—";
+            const mins = Math.floor(n / 60);
+            const secs = Math.floor(n % 60);
+            return mins + ":" + String(secs).padStart(2, "0");
+        }
+
+        async function fetchSongs() {
+            const token = localStorage.getItem("beefmusic_user_token");
+            const headers = token ? { Authorization: "Bearer " + token } : {};
+            const res = await fetch(API_URL + "/api/canciones", { headers });
+            const data = await res.json().catch(() => ([]));
+            if (!res.ok) throw new Error(data.error || "Error cargando canciones");
+            if (!Array.isArray(data)) throw new Error("La API de canciones no devolvió lista");
+            return data;
+        }
+
+        async function countAllPublicRequests({ pageSize = 100, maxPages = 60 } = {}) {
+            // /api/peticiones-publicas: paginación por offset/limit
+            let offset = 0;
+            let total = 0;
+
+            for (let i = 0; i < maxPages; i++) {
+                const url = API_URL + `/api/peticiones-publicas?limit=${pageSize}&offset=${offset}`;
+                const res = await fetch(url);
+                const data = await res.json().catch(() => ([]));
+                if (!res.ok) throw new Error(data.error || "Error cargando peticiones públicas");
+                if (!Array.isArray(data)) throw new Error("La API de peticiones no devolvió lista");
+
+                total += data.length;
+
+                if (data.length < pageSize) break;
+                offset += pageSize;
+            }
+
+            // Si se llegó al límite de páginas, devolvemos un “aprox”
+            const capped = maxPages * pageSize;
+            if (total >= capped) return { total: capped, capped: true };
+            return { total, capped: false };
+        }
+
+        function renderHomeSongs(list) {
+            const grid = document.getElementById("home-songs-grid");
+            if (!grid) return;
+
+            if (!Array.isArray(list) || list.length === 0) {
+                grid.innerHTML = `
+                  <article class="song-card" style="grid-column:1/-1;">
+                    <div class="song-body">
+                      <div class="song-title">Aún no hay canciones</div>
+                      <div class="song-req">Cuando publiques canciones en la API, saldrán aquí.</div>
+                    </div>
+                  </article>
+                `;
+                return;
+            }
+
+            grid.innerHTML = list.slice(0, 3).map((song) => {
+                const titulo = song.titulo || "Sin título";
+                const estilo = song.estilo || "—";
+                const dur = formatDuration(song.duracion);
+                const autor = song.autor || "Anónimo";
+                const estado = song.estado || "—";
+                const desc = (song.descripcion || "").trim();
+
+                const extraLine = desc
+                    ? desc
+                    : `Autor: @${autor}`;
+
+                return `
+                  <article class="song-card">
+                    <div class="song-thumb">
+                      <div class="song-wave"></div>
+                    </div>
+                    <div class="song-body">
+                      <div class="song-title">“${escapeHtml(titulo)}”</div>
+                      <div class="song-meta">
+                        <span>Estilo: ${escapeHtml(estilo)}</span>
+                        <span>Duración: ${escapeHtml(dur)}</span>
+                      </div>
+                      <div class="song-req">
+                        ${escapeHtml(extraLine)}
+                      </div>
+                      <div class="song-meta">
+                        <span class="song-badge">${escapeHtml(estado)}</span>
+                        <span style="cursor:pointer;" onclick="window.location.href='canciones.html'">Ver detalles →</span>
+                      </div>
+                    </div>
+                  </article>
+                `;
+            }).join("");
+        }
+
+        function setText(id, value) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+        }
+
+        async function refreshHomeRealData() {
+            // placeholders
+            setText("stat-songs", "—");
+            setText("stat-requests", "—");
+            setText("stat-people", "—");
+            setText("stat-genres", "—");
+            setText("hero-requests", "—");
+
+            try {
+                // 1) canciones
+                const songs = await fetchSongs();
+
+                const songsCount = songs.length;
+
+                const styles = new Set(
+                    songs.map(s => String(s.estilo || "").trim().toLowerCase()).filter(Boolean)
+                );
+                const genresCount = styles.size;
+
+                const authors = new Set(
+                    songs.map(s => String(s.autor || "").trim().toLowerCase()).filter(Boolean)
+                );
+                const peopleCount = authors.size;
+
+                setText("stat-songs", String(songsCount));
+                setText("stat-genres", String(genresCount));
+                setText("stat-people", String(peopleCount));
+
+                // 2) peticiones (paginando)
+                const { total: requestsCount, capped } = await countAllPublicRequests({ pageSize: 100, maxPages: 60 });
+
+                setText("stat-requests", capped ? `${requestsCount}+` : String(requestsCount));
+                setText("hero-requests", capped ? `${requestsCount}+` : String(requestsCount));
+
+                // 3) “últimos lanzamientos”
+                renderHomeSongs(songs);
+
+                // 4) línea de estilos del hero (dinámica si hay datos)
+                const heroStyleLine = document.getElementById("hero-style-line");
+                if (heroStyleLine && genresCount) {
+                    // sacamos hasta 6 estilos “bonitos” desde los originales
+                    const pretty = Array.from(new Set(songs.map(s => (s.estilo || "").trim()).filter(Boolean))).slice(0, 6);
+                    if (pretty.length) heroStyleLine.textContent = pretty.join(", ") + (genresCount > pretty.length ? " y más" : "");
+                }
+            } catch (e) {
+                console.error("Error cargando datos reales del home:", e);
+                // fallback visual suave, sin romper la página
+                const grid = document.getElementById("home-songs-grid");
+                if (grid) {
+                    grid.innerHTML = `
+                      <article class="song-card" style="grid-column:1/-1;">
+                        <div class="song-body">
+                          <div class="song-title">No se pudieron cargar datos</div>
+                          <div class="song-req">Revisa conexión o endpoints del backend.</div>
+                        </div>
+                      </article>
+                    `;
+                }
+            }
+        }
+
+        // ==========================================================
         // Botón flotante Asistente IA + panel desplegable
+        // ==========================================================
         const assistantFab = document.getElementById("assistant-fab");
         const assistantFloat = document.getElementById("assistant-float");
         const assistantFloatClose = document.getElementById("assistant-float-close");
@@ -1502,6 +1623,9 @@
                 window.open("https://discord.gg/DywmTT78Wx", "_blank");
             });
         }
+
+        // INIT: carga datos reales
+        refreshHomeRealData();
     </script>
 </body>
 </html>
