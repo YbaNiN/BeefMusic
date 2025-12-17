@@ -17,6 +17,33 @@ const supabase = createClient(
 );
 
 
+
+// ==========================================================
+// NOTIFICACIONES (USER)
+// ==========================================================
+// Requiere tabla "notifications" en Supabase y (recomendado) columnas:
+// - peticiones.usuario_id (para avisar cambios de estado)
+// - canciones.peticion_id (para avisar publicación ligada a una petición)
+async function createNotification(usuarioId, { type, title, body = null, linkUrl = null, meta = {} }) {
+    try {
+        if (!usuarioId) return;
+
+        const payload = {
+            usuario_id: usuarioId,
+            type: String(type || "generic").slice(0, 40),
+            title: String(title || "").slice(0, 120),
+            body: body ? String(body).slice(0, 800) : null,
+            link_url: linkUrl ? String(linkUrl).slice(0, 500) : null,
+            meta: meta || {},
+        };
+
+        const { error } = await supabase.from("notifications").insert(payload);
+        if (error) console.error("Supabase error (insert notifications):", error);
+    } catch (e) {
+        console.error("Error createNotification:", e?.message || e);
+    }
+}
+
 // === USER STATS (para logros) ===
 // Recomendación de tabla en Supabase:
 //   user_stats:
@@ -296,6 +323,106 @@ function getUserFromToken(req) {
     }
 }
 
+
+// ==========================================================
+// NOTIFICACIONES (USER) - ENDPOINTS
+// ==========================================================
+// GET /api/notifications?limit=20&offset=0&unreadOnly=1&after=ISO_DATE
+app.get("/api/notifications", authUser, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        const limit = Math.min(parseInt(req.query.limit || "20", 10), 50);
+        const offset = Math.max(parseInt(req.query.offset || "0", 10), 0);
+        const unreadOnly = String(req.query.unreadOnly || "") === "1";
+        const after = (req.query.after || "").trim(); // ISO opcional
+
+        let q = supabase
+            .from("notifications")
+            .select("id, type, title, body, link_url, meta, read_at, created_at")
+            .eq("usuario_id", userId)
+            .order("created_at", { ascending: false });
+
+        if (unreadOnly) q = q.is("read_at", null);
+        if (after) q = q.gt("created_at", after);
+
+        const { data: items, error } = await q.range(offset, offset + limit - 1);
+
+        if (error) {
+            console.error("Supabase error (select notifications):", error);
+            return res.status(500).json({ error: "Error obteniendo notificaciones" });
+        }
+
+        // unreadCount
+        const { count, error: cErr } = await supabase
+            .from("notifications")
+            .select("*", { count: "exact", head: true })
+            .eq("usuario_id", userId)
+            .is("read_at", null);
+
+        if (cErr) console.error("Supabase error (count unread notifications):", cErr);
+
+        return res.json({
+            items: items || [],
+            unreadCount: count || 0,
+            serverTime: new Date().toISOString(),
+            nextOffset: (items || []).length === limit ? offset + limit : null,
+        });
+    } catch (err) {
+        console.error("Error en GET /api/notifications:", err);
+        return res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
+// Marcar 1 como leída
+app.patch("/api/notifications/:id/read", authUser, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { id } = req.params;
+
+        const { data, error } = await supabase
+            .from("notifications")
+            .update({ read_at: new Date().toISOString() })
+            .eq("id", id)
+            .eq("usuario_id", userId)
+            .select("id, read_at")
+            .single();
+
+        if (error) {
+            console.error("Supabase error (read notification):", error);
+            return res.status(500).json({ error: "Error marcando notificación" });
+        }
+
+        return res.json({ ok: true, notification: data });
+    } catch (err) {
+        console.error("Error en PATCH /api/notifications/:id/read:", err);
+        return res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
+// Marcar todas como leídas
+app.post("/api/notifications/read-all", authUser, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        const { error } = await supabase
+            .from("notifications")
+            .update({ read_at: new Date().toISOString() })
+            .eq("usuario_id", userId)
+            .is("read_at", null);
+
+        if (error) {
+            console.error("Supabase error (read-all notifications):", error);
+            return res.status(500).json({ error: "Error marcando todas como leídas" });
+        }
+
+        return res.json({ ok: true });
+    } catch (err) {
+        console.error("Error en POST /api/notifications/read-all:", err);
+        return res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
 // === DISCORD WEBHOOKS (CONSTANTES GLOBALES) ===
 const DISCORD_WEBHOOK_PETICIONES =
     process.env.DISCORD_WEBHOOK_PETICIONES || process.env.DISCORD_WEBHOOK_URL;
@@ -480,6 +607,9 @@ app.post("/api/peticiones", async (req, res) => {
             return res.status(400).json({ error: "Faltan campos obligatorios" });
         }
 
+        // usuario opcional (si viene token)
+        const user = getUserFromToken(req);
+
         const { data, error } = await supabase
             .from("peticiones")
             .insert({
@@ -487,6 +617,7 @@ app.post("/api/peticiones", async (req, res) => {
                 estilo: style,
                 idea,
                 mostrar_nick: !!mostrarNick, // ✅ nuevo
+                usuario_id: user?.userId || null, // ✅ para notificaciones
             })
             .select()
             .single();
@@ -499,7 +630,6 @@ app.post("/api/peticiones", async (req, res) => {
         const idPeticion = data.id;
 
         // ⭐ XP (si viene token de usuario)
-        const user = getUserFromToken(req);
         if (user?.userId) {
             await addXp(user.userId, XP.REQUEST);
         }
@@ -1366,11 +1496,27 @@ app.patch("/api/peticiones/:id/estado", authAdmin, async (req, res) => {
             });
         }
 
+
+        // Para notificaciones: leemos el estado anterior y el dueño (si existe)
+        const { data: before, error: bErr } = await supabase
+            .from("peticiones")
+            .select("id, estado, usuario_id, estilo")
+            .eq("id", id)
+            .maybeSingle();
+
+        if (bErr) {
+            console.error("Supabase error (select peticion before):", bErr);
+            return res.status(500).json({ error: "Error buscando la petición" });
+        }
+        if (!before) {
+            return res.status(404).json({ error: "Petición no encontrada" });
+        }
+
         const { data, error } = await supabase
             .from("peticiones")
             .update({ estado })
             .eq("id", id)
-            .select("id, estado")
+            .select("id, estado, usuario_id, estilo")
             .single();
 
         if (error) {
@@ -1379,6 +1525,24 @@ app.patch("/api/peticiones/:id/estado", authAdmin, async (req, res) => {
                 .status(500)
                 .json({ error: "Error al actualizar el estado de la petición" });
         }
+
+
+// Notificación si cambia el estado y la petición tiene dueño
+if (before.estado !== data.estado && data.usuario_id) {
+    const mapLabel = {
+        pendiente: "PENDIENTE",
+        en_produccion: "EN PROCESO",
+        terminada: "TERMINADA",
+    };
+
+    await createNotification(data.usuario_id, {
+        type: "request_status_changed",
+        title: "Tu petición cambió de estado",
+        body: `Tu petición #${data.id} ahora está en: ${mapLabel[data.estado] || data.estado}.`,
+        linkUrl: "peticiones.html",
+        meta: { requestId: data.id, estado: data.estado, estilo: data.estilo || null },
+    });
+}
 
         res.json({
             message: "Estado actualizado correctamente",
@@ -1627,6 +1791,7 @@ app.post("/api/canciones", authAdmin, async (req, res) => {
             autor,
             estado = "publicada",
             url_audio,
+            peticionId,
         } = req.body;
 
         if (!titulo || !estilo || !autor) {
@@ -1643,6 +1808,7 @@ app.post("/api/canciones", authAdmin, async (req, res) => {
                 autor,
                 estado,
                 url_audio,
+                peticion_id: peticionId || null, // ✅ para notificar al dueño de la petición
             })
             .select()
             .single();
@@ -1651,6 +1817,28 @@ app.post("/api/canciones", authAdmin, async (req, res) => {
             console.error("Supabase error (insert cancion):", error);
             return res.status(500).json({ error: "Error creando la canción" });
         }
+
+
+// Notificación: si esta canción viene de una petición, avisamos al dueño
+if (peticionId) {
+    const { data: p, error: pErr } = await supabase
+        .from("peticiones")
+        .select("id, usuario_id")
+        .eq("id", peticionId)
+        .maybeSingle();
+
+    if (pErr) console.error("Supabase error (select peticion for song notify):", pErr);
+
+    if (p?.usuario_id) {
+        await createNotification(p.usuario_id, {
+            type: "song_published",
+            title: "Tu canción ya está publicada",
+            body: `Ya puedes escuchar: “${data.titulo}”.`,
+            linkUrl: `canciones.html?song=${data.id}`,
+            meta: { songId: data.id, requestId: p.id },
+        });
+    }
+}
 
         res.status(201).json({
             message: "Canción creada correctamente",
@@ -2040,10 +2228,11 @@ app.post("/api/canciones/:id/comments", authUser, async (req, res) => {
 
     // si es reply, comprobar que el parent existe y es de la misma canción
     let parent_id = null;
+    let parentUserId = null;
     if (parentId !== undefined && parentId !== null && String(parentId).trim() !== "") {
       const { data: parent, error: pErr } = await supabase
         .from("song_comments")
-        .select("id, cancion_id, status")
+        .select("id, cancion_id, status, usuario_id")
         .eq("id", parentId)
         .maybeSingle();
 
@@ -2055,6 +2244,7 @@ app.post("/api/canciones/:id/comments", authUser, async (req, res) => {
         return res.status(400).json({ error: "No puedes responder a ese comentario" });
       }
       parent_id = parent.id;
+      parentUserId = parent.usuario_id;
     }
 
     const { data: inserted, error } = await supabase
@@ -2073,6 +2263,18 @@ app.post("/api/canciones/:id/comments", authUser, async (req, res) => {
       console.error("Supabase error (insert song_comments):", error);
       return res.status(500).json({ error: "Error creando comentario" });
     }
+
+
+// Notificación: si es una respuesta a otro comentario, avisamos al autor del comentario padre
+if (parent_id && parentUserId && String(parentUserId) !== String(userId)) {
+  await createNotification(parentUserId, {
+    type: "comment_reply",
+    title: "Respondieron a tu comentario",
+    body: `Te respondieron en la canción #${id}.`,
+    linkUrl: `canciones.html?song=${id}`,
+    meta: { songId: id, parentCommentId: parent_id, replyCommentId: inserted.id },
+  });
+}
 
     // XP (opcional) — solo si añadiste XP.COMMENT :contentReference[oaicite:5]{index=5}
     if (XP?.COMMENT) await addXp(userId, XP.COMMENT);
