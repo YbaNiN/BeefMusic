@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidad · BeefMusic</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <meta name="description" content="Política de Privacidad de BeefMusic: datos que recogemos, finalidades, base legal, conservación, derechos y contacto." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#000000" />
+
+  <style>
+    :root{
+      --glass-bg: rgba(0,0,0,0.52);
+      --glass-bg-2: rgba(0,0,0,0.75);
+      --glass-b: rgba(255,255,255,.12);
+      --soft: rgba(255,255,255,.06);
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+      --radius: 22px;
+      --offset-anchor: 90px;
+    }
+    html { scroll-behavior: smooth; }
+    body { scroll-padding-top: var(--offset-anchor); }
+
+    .skip-link{
+      position:absolute; left:12px; top:12px;
+      padding:10px 12px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.85); color:#fff;
+      text-decoration:none;
+      transform: translateY(-140%);
+      transition: transform .18s ease;
+      z-index:999;
+    }
+    .skip-link:focus{ transform: translateY(0); outline:none; }
+
+    .reading-progress{
+      position:fixed; top:0; left:0; height:3px; width:0%;
+      background: rgba(255,255,255,.85);
+      box-shadow: 0 0 18px rgba(255,255,255,.22);
+      z-index:999;
+    }
+
+    .to-top{
+      position:fixed; right:24px; bottom:92px; z-index:70;
+      border-radius:999px; padding:10px 14px;
+      font-size:.9rem;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 18px 45px rgba(0,0,0,.45);
+      cursor:pointer;
+      opacity:0; transform: translateY(16px);
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .to-top.visible{ opacity:1; transform: translateY(0); pointer-events:auto; }
+    .to-top:focus{ outline:none; box-shadow: 0 0 0 2px rgba(255,255,255,.18), 0 18px 45px rgba(0,0,0,.45); }
+
+    .page{ max-width:1200px; margin:0 auto; padding:24px 20px 80px; }
+
+    .header-actions{
+      position: sticky; top:0; z-index:50;
+      display:flex; align-items:center; justify-content:flex-end;
+      gap:10px; flex-wrap:wrap;
+      padding:12px 0;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 18px;
+    }
+
+    .nav-actions{ display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+    .mobile-menu-btn{ display:none; }
+
+    @media (max-width: 768px){
+      .mobile-menu-btn{ display:inline-flex; align-items:center; justify-content:center; }
+      .nav-actions{
+        position:absolute;
+        left:8px; right:8px;
+        top: calc(100% + 10px);
+        z-index:70;
+        display:none;
+        flex-direction:column;
+        gap:8px;
+        padding:10px;
+        border-radius:18px;
+        border:1px solid rgba(255,255,255,.14);
+        background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 18px 45px rgba(0,0,0,.55);
+      }
+      .nav-actions.open{ display:flex; }
+      .nav-actions .btn, .nav-actions a.btn{ width:100%; justify-content:center; text-align:center; }
+    }
+
+    .user-profile{ display:flex; align-items:center; gap:8px; margin-right:auto; }
+    .user-profile-text{ display:flex; flex-direction:column; font-size:.8rem; }
+    .user-profile-label{ opacity:.7; }
+    .user-profile-name{ font-weight:500; }
+    .user-avatar{
+      width:32px; height:32px; border-radius:999px;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:600;
+    }
+
+    .notif-btn{ position:relative; }
+    .notif-badge{
+      position:absolute; top:-6px; right:-6px;
+      min-width:18px; height:18px; padding:0 6px;
+      border-radius:999px; font-size:.72rem;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,0,80,.95); color:#fff;
+      border:1px solid rgba(255,255,255,.25);
+      pointer-events:none;
+    }
+    .notif-panel{
+      position:absolute; right:12px; top: calc(100% + 10px);
+      width: min(420px, calc(100vw - 32px));
+      max-height: 70vh; overflow:hidden;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 18px 45px rgba(0,0,0,.55);
+      z-index:80;
+    }
+    .notif-panel-head{
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      padding:12px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .notif-panel-body{
+      padding:10px 12px;
+      overflow:auto;
+      max-height: calc(70vh - 54px);
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .notif-item{
+      padding:10px 10px; border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      cursor:pointer;
+    }
+    .notif-item.unread{
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.06);
+    }
+    .notif-item-title{ font-weight:600; font-size:.9rem; }
+    .notif-item-body{ opacity:.85; font-size:.82rem; margin-top:4px; white-space:pre-wrap; }
+    .notif-item-time{ opacity:.7; font-size:.75rem; margin-top:6px; }
+    @media (max-width: 768px){ .notif-panel{ right:8px; left:8px; width:auto; } }
+
+    .legal-wrap{ max-width: 1100px; margin:0 auto; padding:18px 16px 70px; }
+    .legal-card{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.52);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .legal-title{ font-size: 28px; margin:0 0 6px 0; letter-spacing:.2px; }
+    .legal-sub{ opacity:.82; margin:0 0 14px 0; line-height:1.55; }
+
+    .legal-meta{
+      display:flex; gap:10px; flex-wrap:wrap;
+      opacity:.78; font-size:13px;
+      margin:0 0 18px 0;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:7px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+    }
+    .pill b{ font-weight:600; opacity:.95; }
+
+    .legal-toc{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius:18px;
+      padding:12px 12px;
+      margin:0 0 18px 0;
+    }
+    .legal-toc strong{ display:block; margin-bottom:8px; }
+    .legal-toc a{
+      display:inline-block;
+      margin:6px 8px 0 0;
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.20);
+      text-decoration:none;
+      color:inherit;
+      opacity:.92;
+      transition: transform .12s ease, opacity .12s ease, border-color .12s ease;
+    }
+    .legal-toc a:hover{ opacity:1; transform: translateY(-1px); border-color: rgba(255,255,255,.22); }
+
+    .toc-mobile{
+      display:none;
+      margin-bottom:18px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      overflow:hidden;
+    }
+    .toc-mobile summary{
+      cursor:pointer;
+      padding:12px 12px;
+      list-style:none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      user-select:none;
+    }
+    .toc-mobile summary::-webkit-details-marker{ display:none; }
+    .toc-mobile .toc-mobile-body{
+      padding:0 12px 12px;
+      border-top:1px solid rgba(255,255,255,.08);
+    }
+
+    .legal-section{
+      padding:14px 2px;
+      border-top:1px solid rgba(255,255,255,.10);
+    }
+    .legal-section:first-of-type{ border-top:none; padding-top:2px; }
+    .legal-section h2{ margin:0 0 10px 0; font-size:18px; }
+    .legal-section p{ margin:0 0 10px 0; opacity:.92; line-height:1.58; }
+    .legal-section ul{ margin:0 0 10px 20px; opacity:.92; line-height:1.58; }
+
+    .legal-note{
+      border:1px dashed rgba(255,255,255,.18);
+      background: rgba(255,255,255,.04);
+      border-radius:16px;
+      padding:12px;
+      opacity:.92;
+      margin-top:12px;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .kv-card{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius:18px;
+      padding:12px;
+    }
+    .kv-card .k{ opacity:.75; font-size:.78rem; }
+    .kv-card .v{ margin-top:6px; font-weight:600; }
+
+    .table-like{
+      display:grid;
+      grid-template-columns: 1.2fr 1.8fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .row{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius:16px;
+      padding:10px 12px;
+    }
+    .row .t{ opacity:.75; font-size:.8rem; }
+    .row .d{ margin-top:6px; line-height:1.5; opacity:.92; }
+
+    .faq{ margin-top:10px; display:flex; flex-direction:column; gap:10px; }
+    .faq details{
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      overflow:hidden;
+    }
+    .faq summary{
+      cursor:pointer;
+      padding:12px 12px;
+      list-style:none;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .faq summary::-webkit-details-marker{ display:none; }
+    .faq .faq-body{
+      padding:0 12px 12px;
+      border-top:1px solid rgba(255,255,255,.08);
+      opacity:.92;
+      line-height:1.55;
+    }
+
+    footer{
+      margin-top:40px;
+      padding-top:16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      font-size:0.85rem;
+    }
+    .footer-links{ display:flex; gap:12px; flex-wrap:wrap; }
+
+    @media (max-width: 768px){
+      .page{ padding:20px 16px 60px; }
+      .legal-title{ font-size:24px; }
+      .legal-card{ padding:16px; }
+      .legal-toc{ display:none; }
+      .toc-mobile{ display:block; }
+      .grid-2{ grid-template-columns: 1fr; }
+      .table-like{ grid-template-columns: 1fr; }
+      footer{ flex-direction:column; align-items:flex-start; }
+      .to-top{ right:12px; bottom:86px; }
+    }
+    @media (max-width: 480px){
+      .page{ padding:16px 12px 48px; }
+      .to-top{ right:10px; bottom:82px; }
+    }
+
+    @media print{
+      .header-actions, .reading-progress, .to-top{ display:none !important; }
+      body{ background:#fff !important; color:#000 !important; }
+      .legal-card{ box-shadow:none; background:#fff; border:1px solid #ddd; }
+      a{ color:#000; text-decoration:underline; }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#contenido-principal">Saltar al contenido</a>
+  <div class="reading-progress" id="reading-progress"></div>
+
+  <div class="page">
+    <div class="header-actions">
+      <div class="user-profile">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div class="user-profile-text">
+          <span class="user-profile-label">Conectado</span>
+          <span class="user-profile-name" id="user-name-display">@usuario</span>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost notif-btn" id="notif-btn" title="Notificaciones">
+        🔔
+        <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
+      </button>
+
+      <div class="notif-panel" id="notif-panel" style="display:none;">
+        <div class="notif-panel-head">
+          <strong>Notificaciones</strong>
+          <button class="btn btn-ghost" id="notif-readall-btn">Marcar todo leído</button>
+        </div>
+        <div class="notif-panel-body" id="notif-list">
+          <div style="opacity:.75;">Cargando…</div>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost mobile-menu-btn" id="mobile-menu-btn"
+              aria-expanded="false" aria-controls="mobile-menu" title="Menú">
+        ☰
+      </button>
+
+      <div class="nav-actions" id="mobile-menu">
+        <button class="btn btn-ghost" id="open-request-1">Enviar petición</button>
+        <button class="btn btn-ghost" onclick="window.location.href='peticiones.html'">Peticiones en curso</button>
+        <button class="btn btn-ghost" id="open-suggestion">Sugerencia</button>
+        <button class="btn btn-ghost" id="open-report">Reportar problema</button>
+        <button class="btn btn-ghost" onclick="window.location.href='perfil.html'">Perfil sonoro</button>
+        <button class="btn btn-ghost" onclick="window.location.href='comunidad.html'">Comunidad</button>
+        <button class="btn btn-primary" onclick="window.location.href='canciones.html'">
+          <span class="btn-icon">▶</span> Ver canciones
+        </button>
+        <button class="btn btn-ghost" id="user-logout-btn">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <main class="legal-wrap" id="contenido-principal">
+      <article class="legal-card">
+        <h1 class="legal-title">Política de Privacidad</h1>
+        <p class="legal-sub">
+          Aquí te explicamos qué datos tratamos en <strong>BeefMusic</strong>, para qué los usamos, con qué base legal,
+          cuánto tiempo los conservamos y cómo puedes ejercer tus derechos.
+        </p>
+
+        <div class="legal-meta">
+          <span class="pill">🗓️ Última actualización: <b>22/12/2025</b></span>
+          <span class="pill">📩 Privacidad: <b>privacidad@tudominio.com</b> (edítalo)</span>
+          <span class="pill">🧾 Versión: <b>1.0</b></span>
+        </div>
+
+        <div class="grid-2" aria-label="Datos del responsable">
+          <div class="kv-card">
+            <div class="k">Responsable del tratamiento</div>
+            <div class="v">BeefMusic (edita el nombre legal)</div>
+          </div>
+          <div class="kv-card">
+            <div class="k">Domicilio</div>
+            <div class="v">España (edita dirección/ciudad)</div>
+          </div>
+          <div class="kv-card">
+            <div class="k">Email de contacto</div>
+            <div class="v">privacidad@tudominio.com (edítalo)</div>
+          </div>
+          <div class="kv-card">
+            <div class="k">Ámbito del servicio</div>
+            <div class="v">Plataforma musical / comunidad</div>
+          </div>
+        </div>
+
+        <details class="toc-mobile" aria-label="Índice plegable">
+          <summary>
+            <strong>Índice</strong>
+            <span style="opacity:.8;">Abrir ▾</span>
+          </summary>
+          <div class="toc-mobile-body">
+            <div class="legal-toc" style="margin: 0; border:none; background:transparent; padding:10px 0 0;">
+              <a href="#que-recogemos">Qué datos recogemos</a>
+              <a href="#finalidades">Finalidades</a>
+              <a href="#base-legal">Base legal</a>
+              <a href="#conservacion">Conservación</a>
+              <a href="#destinatarios">Destinatarios</a>
+              <a href="#transferencias">Transferencias</a>
+              <a href="#seguridad">Seguridad</a>
+              <a href="#derechos">Tus derechos</a>
+              <a href="#menores">Menores</a>
+              <a href="#cookies">Cookies y almacenamiento</a>
+              <a href="#terceros">Servicios de terceros</a>
+              <a href="#cambios">Cambios</a>
+              <a href="#contacto">Contacto</a>
+              <a href="#faq">FAQ</a>
+            </div>
+          </div>
+        </details>
+
+        <nav class="legal-toc" aria-label="Índice de privacidad">
+          <strong>Índice</strong>
+          <a href="#que-recogemos">Qué datos recogemos</a>
+          <a href="#finalidades">Finalidades</a>
+          <a href="#base-legal">Base legal</a>
+          <a href="#conservacion">Conservación</a>
+          <a href="#destinatarios">Destinatarios</a>
+          <a href="#transferencias">Transferencias</a>
+          <a href="#seguridad">Seguridad</a>
+          <a href="#derechos">Tus derechos</a>
+          <a href="#menores">Menores</a>
+          <a href="#cookies">Cookies y almacenamiento</a>
+          <a href="#terceros">Servicios de terceros</a>
+          <a href="#cambios">Cambios</a>
+          <a href="#contacto">Contacto</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+
+        <section class="legal-section" id="que-recogemos">
+          <h2>1. Qué datos recogemos</h2>
+          <p>Dependiendo de cómo uses BeefMusic, podemos tratar estas categorías de datos:</p>
+
+          <div class="table-like" role="list" aria-label="Categorías de datos">
+            <div class="row" role="listitem">
+              <div class="t">Datos de cuenta</div>
+              <div class="d">Nombre de usuario, email, contraseña (almacenada de forma cifrada/hasheada), foto/alias.</div>
+            </div>
+            <div class="row" role="listitem">
+              <div class="t">Contenido</div>
+              <div class="d">Canciones/archivos de audio, portadas, comentarios, publicaciones y cualquier material que subas.</div>
+            </div>
+            <div class="row" role="listitem">
+              <div class="t">Uso y actividad</div>
+              <div class="d">Interacciones en la app (likes, reproducciones, listas, follows), eventos de uso y preferencias.</div>
+            </div>
+            <div class="row" role="listitem">
+              <div class="t">Datos técnicos</div>
+              <div class="d">IP, tipo de navegador/dispositivo, idioma, identificadores y logs de seguridad.</div>
+            </div>
+            <div class="row" role="listitem">
+              <div class="t">Soporte</div>
+              <div class="d">Mensajes que envíes por formularios, reportes de problemas y comunicaciones con el equipo.</div>
+            </div>
+            <div class="row" role="listitem">
+              <div class="t">Pagos (si aplica)</div>
+              <div class="d">Si ofreces planes de pago, normalmente los gestiona un proveedor. Nosotros no guardamos la tarjeta completa.</div>
+            </div>
+          </div>
+
+          <div class="legal-note">
+            <strong>Ojo:</strong> BeefMusic no te pide “datos sensibles” (salud, ideología, etc.). Si los publicas tú en contenido/comentarios,
+            lo haces bajo tu responsabilidad.
+          </div>
+        </section>
+
+        <section class="legal-section" id="finalidades">
+          <h2>2. Para qué usamos tus datos</h2>
+          <ul>
+            <li><strong>Crear y gestionar tu cuenta</strong> (registro, acceso, seguridad).</li>
+            <li><strong>Prestar el servicio</strong> (subir música, reproducir, comunidad, listas, peticiones).</li>
+            <li><strong>Moderación y seguridad</strong> (prevenir fraude, abuso, ataques, y cumplir normas).</li>
+            <li><strong>Soporte</strong> (responder solicitudes, incidencias y consultas).</li>
+            <li><strong>Mejora del producto</strong> (analítica interna, rendimiento, nuevas funciones).</li>
+            <li><strong>Comunicaciones</strong> (avisos sobre cambios, seguridad o funcionamiento; y newsletters si aceptas).</li>
+            <li><strong>Cumplimiento legal</strong> (atender requerimientos, reclamaciones de derechos, etc.).</li>
+          </ul>
+        </section>
+
+        <section class="legal-section" id="base-legal">
+          <h2>3. Base legal del tratamiento</h2>
+          <p>Tratamos datos con una o varias de estas bases, según el caso:</p>
+          <ul>
+            <li><strong>Ejecución de contrato</strong>: para darte el servicio (cuenta, reproducción, comunidad).</li>
+            <li><strong>Consentimiento</strong>: por ejemplo, newsletter/marketing o cookies no esenciales (si las implementas).</li>
+            <li><strong>Interés legítimo</strong>: seguridad, prevención de abuso y mejora del servicio (siempre ponderando tus derechos).</li>
+            <li><strong>Obligación legal</strong>: cuando debamos conservar o comunicar datos por ley o requerimiento.</li>
+          </ul>
+          <div class="legal-note">
+            Puedes retirar tu consentimiento cuando sea la base del tratamiento, sin afectar a lo ya realizado antes de retirarlo.
+          </div>
+        </section>
+
+        <section class="legal-section" id="conservacion">
+          <h2>4. Cuánto tiempo conservamos los datos</h2>
+          <p>Conservamos los datos durante el tiempo necesario para cumplir las finalidades:</p>
+          <ul>
+            <li><strong>Cuenta</strong>: mientras la mantengas activa y, después, el tiempo necesario para obligaciones legales o defensa ante reclamaciones.</li>
+            <li><strong>Contenido</strong>: mientras esté publicado o hasta que lo elimines (salvo copias técnicas/backups por un tiempo limitado).</li>
+            <li><strong>Soporte</strong>: durante el tiempo necesario para resolver el caso y un período razonable posterior.</li>
+            <li><strong>Logs de seguridad</strong>: por un período limitado para detectar y prevenir incidentes.</li>
+          </ul>
+          <div class="legal-note">
+            <strong>Recomendación:</strong> define plazos concretos cuando pases a producción (p. ej., logs 30/90 días, backups X días).
+          </div>
+        </section>
+
+        <section class="legal-section" id="destinatarios">
+          <h2>5. Con quién compartimos tus datos</h2>
+          <p>Podemos compartir datos en estos casos:</p>
+          <ul>
+            <li><strong>Proveedores</strong> que nos ayudan a operar el servicio (hosting, email, analítica, almacenamiento).</li>
+            <li><strong>Obligaciones legales</strong>: autoridades, tribunales o requerimientos válidos.</li>
+            <li><strong>Protección de derechos</strong>: para investigar abuso, fraude o infracciones (por ejemplo, reclamaciones de derechos).</li>
+          </ul>
+          <p>No vendemos tus datos personales.</p>
+        </section>
+
+        <section class="legal-section" id="transferencias">
+          <h2>6. Transferencias internacionales</h2>
+          <p>
+            Si utilizas proveedores ubicados fuera del Espacio Económico Europeo, puede haber transferencias internacionales.
+            En ese caso, se aplicarán garantías adecuadas (por ejemplo, cláusulas contractuales tipo u otros mecanismos).
+          </p>
+          <div class="legal-note">
+            Si tu proyecto aún está en fase escolar/prototipo, deja esta sección y rellénala cuando decidas hosting y proveedores.
+          </div>
+        </section>
+
+        <section class="legal-section" id="seguridad">
+          <h2>7. Seguridad</h2>
+          <p>
+            Aplicamos medidas técnicas y organizativas razonables para proteger los datos (control de acceso, cifrado/hashed de contraseñas,
+            monitorización y prevención de abuso).
+          </p>
+          <p>
+            Aun así, ningún sistema es 100% infalible. Si detectas una vulnerabilidad o incidente, contacta con nosotros.
+          </p>
+        </section>
+
+        <section class="legal-section" id="derechos">
+          <h2>8. Tus derechos</h2>
+          <p>Según la normativa aplicable, puedes ejercer:</p>
+          <ul>
+            <li><strong>Acceso</strong>: saber qué datos tratamos.</li>
+            <li><strong>Rectificación</strong>: corregir datos inexactos.</li>
+            <li><strong>Supresión</strong>: solicitar borrado cuando proceda.</li>
+            <li><strong>Limitación</strong>: restringir ciertos tratamientos.</li>
+            <li><strong>Portabilidad</strong>: recibir tus datos en formato estructurado (cuando aplique).</li>
+            <li><strong>Oposición</strong>: oponerte a tratamientos basados en interés legítimo.</li>
+            <li><strong>Retirar consentimiento</strong>: cuando la base sea consentimiento.</li>
+          </ul>
+          <p>
+            Para ejercerlos, escribe a <strong>privacidad@tudominio.com</strong> indicando tu usuario/email y el derecho que quieres ejercer.
+            Podemos pedir información para verificar tu identidad.
+          </p>
+          <div class="legal-note">
+            Si consideras que tus derechos no han sido atendidos, puedes presentar una reclamación ante la autoridad de control correspondiente
+            (en España, la AEPD).
+          </div>
+        </section>
+
+        <section class="legal-section" id="menores">
+          <h2>9. Menores de edad</h2>
+          <p>
+            Si eres menor de edad, usa la Plataforma con autorización de tu madre/padre/tutor legal según la normativa aplicable.
+            No recopilamos intencionalmente datos de menores sin esa autorización.
+          </p>
+        </section>
+
+        <section class="legal-section" id="cookies">
+          <h2>10. Cookies, localStorage y tecnologías similares</h2>
+          <p>
+            BeefMusic puede usar tecnologías como cookies y <strong>localStorage</strong> para recordar sesión, preferencias o seguridad.
+          </p>
+          <ul>
+            <li><strong>Necesarias</strong>: para funcionamiento básico (p. ej., mantener sesión o seguridad).</li>
+            <li><strong>Preferencias</strong>: idioma, UI, opciones de reproducción (si las implementas).</li>
+            <li><strong>Analítica</strong>: métricas de uso para mejorar el servicio (si decides activarla).</li>
+          </ul>
+          <div class="legal-note">
+            Si vas a poner cookies/analítica real, crea un banner de consentimiento y/o una “Política de Cookies” separada.
+          </div>
+        </section>
+
+        <section class="legal-section" id="terceros">
+          <h2>11. Servicios de terceros</h2>
+          <p>
+            Podemos integrar proveedores externos (hosting, analítica, email, almacenamiento, pagos). Cada proveedor
+            puede tratar datos según sus políticas.
+          </p>
+          <div class="legal-note">
+            <strong>Plantilla:</strong> cuando decidas proveedores, lista aquí cuáles son (p. ej. “Firebase”, “Cloudflare”, “Stripe”, “SendGrid”, etc.)
+            y qué datos implican.
+          </div>
+        </section>
+
+        <section class="legal-section" id="cambios">
+          <h2>12. Cambios en esta política</h2>
+          <p>
+            Podemos actualizar esta Política para reflejar cambios del servicio o requisitos legales.
+            Publicaremos la versión vigente en esta página con su fecha de actualización.
+          </p>
+        </section>
+
+        <section class="legal-section" id="contacto">
+          <h2>13. Contacto</h2>
+          <p>
+            Si tienes dudas sobre privacidad, escribe a <strong>privacidad@tudominio.com</strong> (edítalo) o usa
+            <a href="contacto.html">Contacto</a>.
+          </p>
+        </section>
+
+        <section class="legal-section" id="faq">
+          <h2>FAQ rápido</h2>
+          <div class="faq" aria-label="Preguntas frecuentes">
+            <details>
+              <summary>
+                <strong>¿Qué pasa si borro mi cuenta?</strong>
+                <span style="opacity:.8;">▾</span>
+              </summary>
+              <div class="faq-body">
+                Tu cuenta dejará de estar activa y, en general, tus datos se eliminarán o anonimizarán cuando proceda.
+                Puede quedar información mínima por obligaciones legales o copias técnicas durante un tiempo limitado.
+              </div>
+            </details>
+
+            <details>
+              <summary>
+                <strong>¿Mis canciones son públicas?</strong>
+                <span style="opacity:.8;">▾</span>
+              </summary>
+              <div class="faq-body">
+                Si las publicas como “públicas”, otros usuarios podrán verlas/reproducirlas dentro de la Plataforma.
+                Si implementas modos privados o enlaces ocultos, descríbelo aquí.
+              </div>
+            </details>
+
+            <details>
+              <summary>
+                <strong>¿Usáis analítica?</strong>
+                <span style="opacity:.8;">▾</span>
+              </summary>
+              <div class="faq-body">
+                Depende de cómo configures el proyecto. Si activas analítica/cookies no esenciales, muestra un aviso y permite gestionarlas.
+              </div>
+            </details>
+          </div>
+
+          <div class="legal-note" style="margin-top:16px;">
+            <strong>Nota:</strong> esta política es una base para tu web. Si vas a publicar el proyecto como servicio real,
+            adapta texto, plazos y lista de proveedores a tu implementación.
+          </div>
+        </section>
+
+      </article>
+    </main>
+
+    <footer>
+      <span>© <span id="year"></span> BeefMusic. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="terminos.html">Términos</a>
+        <a href="privacidad.html">Privacidad</a>
+        <a href="contacto.html">Contacto</a>
+      </div>
+    </footer>
+  </div>
+
+  <button class="to-top" id="to-top" type="button" aria-label="Volver arriba">⬆ Arriba</button>
+
+  <script>
+    // Año footer
+    (function(){
+      const y = document.getElementById("year");
+      if (y) y.textContent = new Date().getFullYear();
+    })();
+
+    // Mostrar usuario (si existe)
+    (function initUserHeader(){
+      const nameEl = document.getElementById("user-name-display");
+      const avatarEl = document.getElementById("user-avatar");
+      const name = localStorage.getItem("beefmusic_user_name") || "@usuario";
+      if (nameEl) nameEl.textContent = name;
+      if (avatarEl) avatarEl.textContent = (name.replace("@","").trim()[0] || "U").toUpperCase();
+    })();
+
+    // Logout
+    (function initLogout(){
+      const btn = document.getElementById("user-logout-btn");
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        localStorage.removeItem("beefmusic_user_token");
+        localStorage.removeItem("beefmusic_user_name");
+        window.location.href = "user-login.html";
+      });
+    })();
+
+    // Notificaciones (básico: abrir/cerrar panel)
+    (function initNotifBasic(){
+      const btn = document.getElementById("notif-btn");
+      const panel = document.getElementById("notif-panel");
+      const list = document.getElementById("notif-list");
+      const readAll = document.getElementById("notif-readall-btn");
+      if (!btn || !panel) return;
+
+      if (list && !list.dataset.ready) {
+        list.innerHTML = '<div style="opacity:.75;">No hay notificaciones por ahora.</div>';
+        list.dataset.ready = "1";
+      }
+
+      function setOpen(open){ panel.style.display = open ? "block" : "none"; }
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = panel.style.display === "block";
+        setOpen(!isOpen);
+      });
+
+      if (readAll) {
+        readAll.addEventListener("click", () => {
+          // engancha tu lógica real aquí
+          setOpen(false);
+        });
+      }
+
+      window.addEventListener("click", (e) => {
+        if (panel.style.display !== "block") return;
+        if (panel.contains(e.target) || btn.contains(e.target)) return;
+        setOpen(false);
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+      });
+    })();
+
+    // Menú móvil (☰)
+    (function initMobileMenu(){
+      const btn = document.getElementById("mobile-menu-btn");
+      const menu = document.getElementById("mobile-menu");
+      if (!btn || !menu) return;
+
+      function setOpen(isOpen){
+        menu.classList.toggle("open", isOpen);
+        btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      }
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = menu.classList.contains("open");
+        setOpen(!isOpen);
+      });
+
+      window.addEventListener("click", (e) => {
+        if (!menu.classList.contains("open")) return;
+        if (menu.contains(e.target) || btn.contains(e.target)) return;
+        setOpen(false);
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+      });
+
+      menu.addEventListener("click", (e) => {
+        const item = e.target.closest("button, a");
+        if (!item) return;
+        if (window.innerWidth <= 768) setOpen(false);
+      });
+    })();
+
+    // Barra progreso lectura + botón arriba
+    (function initReadingUI(){
+      const progress = document.getElementById("reading-progress");
+      const toTop = document.getElementById("to-top");
+      if (!progress || !toTop) return;
+
+      function update(){
+        const doc = document.documentElement;
+        const scrollTop = doc.scrollTop || document.body.scrollTop;
+        const scrollHeight = doc.scrollHeight - doc.clientHeight;
+        const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+        progress.style.width = pct + "%";
+
+        if (scrollTop > 650) toTop.classList.add("visible");
+        else toTop.classList.remove("visible");
+      }
+
+      window.addEventListener("scroll", update, { passive: true });
+      window.addEventListener("resize", update);
+      update();
+
+      toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    })();
+  </script>
+</body>
+</html>

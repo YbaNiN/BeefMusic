@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Términos de uso · BeefMusic</title>
+
+  <!-- Fuente futurista y limpia -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <meta name="description" content="Términos de uso de BeefMusic: reglas de comunidad, contenido, licencias, moderación, responsabilidad, y políticas aplicables." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#000000" />
+
+  <style>
+    /* =========================
+       Base / Utilidades
+       ========================= */
+    :root{
+      --glass-bg: rgba(0,0,0,0.52);
+      --glass-bg-2: rgba(0,0,0,0.75);
+      --glass-b: rgba(255,255,255,.12);
+      --glass-b-2: rgba(255,255,255,.14);
+      --soft: rgba(255,255,255,.06);
+      --soft-2: rgba(255,255,255,.04);
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+      --shadow-2: 0 18px 45px rgba(0,0,0,.55);
+      --radius: 22px;
+      --radius-sm: 16px;
+      --offset-anchor: 90px; /* para sticky header */
+    }
+
+    html { scroll-behavior: smooth; }
+    body { scroll-padding-top: var(--offset-anchor); }
+
+    /* Skip link (accesibilidad) */
+    .skip-link{
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.85);
+      color: #fff;
+      text-decoration: none;
+      transform: translateY(-140%);
+      transition: transform .18s ease;
+      z-index: 999;
+    }
+    .skip-link:focus{ transform: translateY(0); outline: none; }
+
+    /* Barra progreso lectura */
+    .reading-progress{
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      width: 0%;
+      background: rgba(255,255,255,.85);
+      box-shadow: 0 0 18px rgba(255,255,255,.22);
+      z-index: 999;
+    }
+
+    /* Botón volver arriba */
+    .to-top{
+      position: fixed;
+      right: 24px;
+      bottom: 92px;
+      z-index: 70;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: .9rem;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 18px 45px rgba(0,0,0,.45);
+      cursor: pointer;
+
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .to-top.visible{
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .to-top:focus{ outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,.18), 0 18px 45px rgba(0,0,0,.45); }
+
+    /* =========================
+       LAYOUT GENERAL
+       ========================= */
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 20px 80px;
+    }
+
+    /* HEADER CON BOTONES AND USER */
+    .header-actions {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 12px 0;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 18px;
+    }
+
+    /* MENÚ MÓVIL (header) */
+    .nav-actions{
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .mobile-menu-btn{ display:none; }
+
+    @media (max-width: 768px){
+      .mobile-menu-btn{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        width:auto;
+      }
+      .nav-actions{
+        position:absolute;
+        left: 8px;
+        right: 8px;
+        top: calc(100% + 10px);
+        z-index: 70;
+
+        display:none;
+        flex-direction:column;
+        gap: 8px;
+        padding: 10px;
+
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,.14);
+        background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 18px 45px rgba(0,0,0,.55);
+      }
+      .nav-actions.open{ display:flex; }
+      .nav-actions .btn,
+      .nav-actions a.btn{
+        width: 100%;
+        justify-content:center;
+        text-align:center;
+      }
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: auto;
+    }
+    .user-profile-text {
+      display:flex;
+      flex-direction:column;
+      font-size: .8rem;
+    }
+    .user-profile-label { opacity:.7; }
+    .user-profile-name { font-weight:500; }
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:600;
+    }
+
+    /* NOTIFICACIONES */
+    .notif-btn { position: relative; }
+    .notif-badge{
+      position:absolute;
+      top:-6px; right:-6px;
+      min-width:18px; height:18px;
+      padding:0 6px;
+      border-radius:999px;
+      font-size:.72rem;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,0,80,.95);
+      color:#fff;
+      border: 1px solid rgba(255,255,255,.25);
+      pointer-events: none;
+    }
+    .notif-panel{
+      position:absolute;
+      right: 12px;
+      top: calc(100% + 10px);
+      width: min(420px, calc(100vw - 32px));
+      max-height: 70vh;
+      overflow: hidden;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 18px 45px rgba(0,0,0,.55);
+      z-index: 80;
+    }
+    .notif-panel-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:12px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .notif-panel-body{
+      padding: 10px 12px;
+      overflow:auto;
+      max-height: calc(70vh - 54px);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .notif-item{
+      padding:10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      cursor:pointer;
+    }
+    .notif-item.unread{
+      border-color: rgba(255,255,255,.22);
+      background: rgba(255,255,255,.06);
+    }
+    .notif-item-title{ font-weight:600; font-size:.9rem; }
+    .notif-item-body{ opacity:.85; font-size:.82rem; margin-top:4px; white-space:pre-wrap; }
+    .notif-item-time{ opacity:.7; font-size:.75rem; margin-top:6px; }
+    @media (max-width: 768px) { .notif-panel { right: 8px; left: 8px; width: auto; } }
+
+    /* =========================
+       PÁGINA LEGAL
+       ========================= */
+    .legal-wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px 16px 70px;
+    }
+    .legal-card{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.52);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 18px 55px rgba(0,0,0,.55);
+    }
+    .legal-title{
+      font-size: 28px;
+      margin: 0 0 6px 0;
+      letter-spacing: .2px;
+    }
+    .legal-sub{
+      opacity: .82;
+      margin: 0 0 14px 0;
+      line-height: 1.55;
+    }
+
+    .legal-meta{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      opacity:.78;
+      font-size: 13px;
+      margin: 0 0 18px 0;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+    }
+    .pill b{ font-weight: 600; opacity: .95; }
+
+    /* Índice */
+    .legal-toc{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 18px;
+      padding: 12px 12px;
+      margin: 0 0 18px 0;
+    }
+    .legal-toc strong{ display:block; margin-bottom: 8px; }
+    .legal-toc a{
+      display:inline-block;
+      margin: 6px 8px 0 0;
+      padding: 8px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.20);
+      text-decoration:none;
+      color: inherit;
+      opacity: .92;
+      transition: transform .12s ease, opacity .12s ease, border-color .12s ease;
+    }
+    .legal-toc a:hover{ opacity: 1; transform: translateY(-1px); border-color: rgba(255,255,255,.22); }
+
+    /* TOC plegable en móvil */
+    .toc-mobile{
+      display:none;
+      margin-bottom: 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      overflow: hidden;
+    }
+    .toc-mobile summary{
+      cursor:pointer;
+      padding: 12px 12px;
+      list-style:none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      user-select:none;
+    }
+    .toc-mobile summary::-webkit-details-marker{ display:none; }
+    .toc-mobile .toc-mobile-body{
+      padding: 0 12px 12px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+
+    .legal-section{
+      padding: 14px 2px;
+      border-top: 1px solid rgba(255,255,255,.10);
+    }
+    .legal-section:first-of-type{ border-top: none; padding-top: 2px; }
+    .legal-section h2{
+      margin: 0 0 10px 0;
+      font-size: 18px;
+    }
+    .legal-section p{
+      margin: 0 0 10px 0;
+      opacity: .92;
+      line-height: 1.58;
+    }
+    .legal-section ul{
+      margin: 0 0 10px 20px;
+      opacity: .92;
+      line-height: 1.58;
+    }
+
+    .legal-note{
+      border: 1px dashed rgba(255,255,255,.18);
+      background: rgba(255,255,255,.04);
+      border-radius: 16px;
+      padding: 12px;
+      opacity: .92;
+      margin-top: 12px;
+    }
+
+    .legal-kv{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 12px 0 0;
+    }
+    .kv-card{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 18px;
+      padding: 12px;
+    }
+    .kv-card .k{ opacity:.75; font-size:.78rem; }
+    .kv-card .v{ margin-top:6px; font-weight:600; }
+
+    .faq{
+      margin-top: 10px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+    .faq details{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      overflow:hidden;
+    }
+    .faq summary{
+      cursor:pointer;
+      padding: 12px 12px;
+      list-style:none;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .faq summary::-webkit-details-marker{ display:none; }
+    .faq .faq-body{
+      padding: 0 12px 12px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      opacity: .92;
+      line-height: 1.55;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 40px;
+      padding-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+    }
+    .footer-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Breakpoints */
+    @media (max-width: 768px){
+      .page{ padding: 20px 16px 60px; }
+      .legal-title{ font-size: 24px; }
+      .legal-card{ padding: 16px; }
+
+      .legal-toc{ display:none; }
+      .toc-mobile{ display:block; }
+
+      .legal-kv{ grid-template-columns: 1fr; }
+
+      footer{ flex-direction:column; align-items:flex-start; }
+      .to-top{ right: 12px; bottom: 86px; }
+    }
+
+    @media (max-width: 480px){
+      .page{ padding: 16px 12px 48px; }
+      .to-top{ right: 10px; bottom: 82px; }
+    }
+
+    /* Modo impresión */
+    @media print{
+      .header-actions, .reading-progress, .to-top { display:none !important; }
+      body{ background: #fff !important; color: #000 !important; }
+      .legal-card{ box-shadow:none; background: #fff; border: 1px solid #ddd; }
+      a{ color:#000; text-decoration: underline; }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#contenido-principal">Saltar al contenido</a>
+  <div class="reading-progress" id="reading-progress"></div>
+
+  <div class="page">
+    <div class="header-actions">
+      <div class="user-profile">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div class="user-profile-text">
+          <span class="user-profile-label">Conectado</span>
+          <span class="user-profile-name" id="user-name-display">@usuario</span>
+        </div>
+      </div>
+
+      <!-- NOTIFICACIONES (se queda visible siempre) -->
+      <button class="btn btn-ghost notif-btn" id="notif-btn" title="Notificaciones">
+        🔔
+        <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
+      </button>
+
+      <div class="notif-panel" id="notif-panel" style="display:none;">
+        <div class="notif-panel-head">
+          <strong>Notificaciones</strong>
+          <button class="btn btn-ghost" id="notif-readall-btn">Marcar todo leído</button>
+        </div>
+        <div class="notif-panel-body" id="notif-list">
+          <div style="opacity:.75;">Cargando…</div>
+        </div>
+      </div>
+
+      <!-- BOTÓN MENÚ MÓVIL -->
+      <button class="btn btn-ghost mobile-menu-btn" id="mobile-menu-btn"
+              aria-expanded="false" aria-controls="mobile-menu" title="Menú">
+        ☰
+      </button>
+
+      <!-- ACCIONES / NAVEGACIÓN -->
+      <div class="nav-actions" id="mobile-menu">
+        <button class="btn btn-ghost" id="open-request-1">Enviar petición</button>
+        <button class="btn btn-ghost" onclick="window.location.href='peticiones.html'">Peticiones en curso</button>
+        <button class="btn btn-ghost" id="open-suggestion">Sugerencia</button>
+        <button class="btn btn-ghost" id="open-report">Reportar problema</button>
+        <button class="btn btn-ghost" onclick="window.location.href='perfil.html'">Perfil sonoro</button>
+        <button class="btn btn-ghost" onclick="window.location.href='comunidad.html'">Comunidad</button>
+        <button class="btn btn-primary" onclick="window.location.href='canciones.html'">
+          <span class="btn-icon">▶</span> Ver canciones
+        </button>
+        <button class="btn btn-ghost" id="user-logout-btn">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <main class="legal-wrap" id="contenido-principal">
+      <article class="legal-card">
+        <h1 class="legal-title">Términos de uso</h1>
+        <p class="legal-sub">
+          Estos términos regulan el acceso y uso de <strong>BeefMusic</strong> (la “Plataforma”).
+          Si no estás de acuerdo con alguno, no uses la Plataforma.
+        </p>
+
+        <div class="legal-meta">
+          <span class="pill">🗓️ Última actualización: <b>22/12/2025</b></span>
+          <span class="pill">📩 Contacto: <b>soporte@tudominio.com</b> (edítalo)</span>
+          <span class="pill">🧾 Versión: <b>1.0</b></span>
+        </div>
+
+        <!-- Información “rápida” (placeholders) -->
+        <div class="legal-kv" aria-label="Datos del titular">
+          <div class="kv-card">
+            <div class="k">Titular / Responsable</div>
+            <div class="v">BeefMusic (edita el nombre legal)</div>
+          </div>
+          <div class="kv-card">
+            <div class="k">Domicilio</div>
+            <div class="v">España (edita la dirección o ciudad)</div>
+          </div>
+          <div class="kv-card">
+            <div class="k">Email legal</div>
+            <div class="v">legal@tudominio.com (edítalo)</div>
+          </div>
+          <div class="kv-card">
+            <div class="k">Uso principal</div>
+            <div class="v">Descubrir, publicar y compartir música / comunidad</div>
+          </div>
+        </div>
+
+        <!-- TOC Mobile -->
+        <details class="toc-mobile" aria-label="Índice plegable">
+          <summary>
+            <strong>Índice</strong>
+            <span style="opacity:.8;">Abrir ▾</span>
+          </summary>
+          <div class="toc-mobile-body">
+            <div class="legal-toc" style="margin: 0; border: none; background: transparent; padding: 10px 0 0;">
+              <a href="#aceptacion">Aceptación</a>
+              <a href="#definiciones">Definiciones</a>
+              <a href="#elegibilidad">Elegibilidad</a>
+              <a href="#cuenta">Cuenta y seguridad</a>
+              <a href="#uso">Uso permitido</a>
+              <a href="#normas">Normas comunidad</a>
+              <a href="#contenido">Contenido del usuario</a>
+              <a href="#derechos">Reclamaciones de derechos</a>
+              <a href="#terceros">Terceros y enlaces</a>
+              <a href="#moderacion">Moderación</a>
+              <a href="#terminacion">Suspensión/terminación</a>
+              <a href="#disponibilidad">Disponibilidad y cambios</a>
+              <a href="#responsabilidad">Responsabilidad</a>
+              <a href="#indemnizacion">Indemnización</a>
+              <a href="#ley">Ley aplicable</a>
+              <a href="#contacto">Contacto</a>
+              <a href="#faq">FAQ</a>
+            </div>
+          </div>
+        </details>
+
+        <!-- TOC Desktop -->
+        <nav class="legal-toc" aria-label="Índice de términos">
+          <strong>Índice</strong>
+          <a href="#aceptacion">Aceptación</a>
+          <a href="#definiciones">Definiciones</a>
+          <a href="#elegibilidad">Elegibilidad</a>
+          <a href="#cuenta">Cuenta y seguridad</a>
+          <a href="#uso">Uso permitido</a>
+          <a href="#normas">Normas comunidad</a>
+          <a href="#contenido">Contenido del usuario</a>
+          <a href="#derechos">Reclamaciones de derechos</a>
+          <a href="#terceros">Terceros y enlaces</a>
+          <a href="#moderacion">Moderación</a>
+          <a href="#terminacion">Suspensión/terminación</a>
+          <a href="#disponibilidad">Disponibilidad y cambios</a>
+          <a href="#responsabilidad">Responsabilidad</a>
+          <a href="#indemnizacion">Indemnización</a>
+          <a href="#ley">Ley aplicable</a>
+          <a href="#contacto">Contacto</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+
+        <section class="legal-section" id="aceptacion">
+          <h2>1. Aceptación de los términos</h2>
+          <p>
+            Al acceder o usar la Plataforma, aceptas estos Términos y cualquier política vinculada (por ejemplo,
+            <a href="privacidad.html">Política de Privacidad</a>).
+            Si no estás de acuerdo, no uses la Plataforma.
+          </p>
+          <div class="legal-note">
+            <strong>Consejo:</strong> si estás montando un proyecto “real”, revisa con un profesional
+            la parte de jurisdicción, reclamaciones de derechos y cumplimiento RGPD.
+          </div>
+        </section>
+
+        <section class="legal-section" id="definiciones">
+          <h2>2. Definiciones</h2>
+          <ul>
+            <li><strong>Plataforma / Servicio:</strong> el sitio web y funcionalidades de BeefMusic.</li>
+            <li><strong>Usuario:</strong> cualquier persona que navega o usa funciones del Servicio.</li>
+            <li><strong>Cuenta:</strong> perfil asociado a un Usuario registrado.</li>
+            <li><strong>Contenido:</strong> audio, texto, imágenes, portadas, comentarios, enlaces u otro material publicado por Usuarios.</li>
+            <li><strong>Contenido de terceros:</strong> material no controlado por BeefMusic (por ejemplo, enlaces externos).</li>
+          </ul>
+        </section>
+
+        <section class="legal-section" id="elegibilidad">
+          <h2>3. Elegibilidad y edad mínima</h2>
+          <p>
+            Debes tener capacidad legal para aceptar estos Términos. Si eres menor de edad, deberías usar la Plataforma
+            con autorización de tu padre/madre/tutor legal, según la normativa aplicable.
+          </p>
+          <p>
+            Podemos restringir el uso a personas que incumplan estos requisitos o que estén sujetas a sanciones legales.
+          </p>
+        </section>
+
+        <section class="legal-section" id="cuenta">
+          <h2>4. Cuenta, acceso y seguridad</h2>
+          <p>
+            Algunas funciones requieren una cuenta. Te comprometes a proporcionar información veraz y mantenerla actualizada.
+          </p>
+          <ul>
+            <li>Eres responsable de la actividad realizada desde tu cuenta.</li>
+            <li>No compartas credenciales ni uses cuentas de terceros sin autorización.</li>
+            <li>Si sospechas un acceso no autorizado, avísanos de inmediato.</li>
+          </ul>
+          <div class="legal-note">
+            <strong>Seguridad:</strong> está prohibido intentar vulnerar el sistema (fuerza bruta, scraping agresivo, explotación de bugs, etc.).
+            Si detectas una vulnerabilidad, repórtala por un canal responsable.
+          </div>
+        </section>
+
+        <section class="legal-section" id="uso">
+          <h2>5. Uso permitido de la Plataforma</h2>
+          <p>
+            Te damos una licencia limitada, personal, no exclusiva y revocable para usar la Plataforma conforme a estos Términos.
+          </p>
+          <ul>
+            <li>Usa la Plataforma de forma razonable y respetuosa.</li>
+            <li>No interfieras con el funcionamiento (por ejemplo, saturar servidores o automatizar sin permiso).</li>
+            <li>No intentes acceder a zonas no autorizadas ni eludir medidas de seguridad.</li>
+          </ul>
+        </section>
+
+        <section class="legal-section" id="normas">
+          <h2>6. Normas de la comunidad</h2>
+          <p>Para mantener un espacio seguro y agradable, no está permitido:</p>
+          <ul>
+            <li>Acoso, amenazas, incitación al odio o discriminación.</li>
+            <li>Spam, fraudes, suplantación de identidad o manipulación de métricas.</li>
+            <li>Publicar contenido ilegal o que infrinja derechos de terceros.</li>
+            <li>Compartir información personal de otras personas sin consentimiento (doxxing).</li>
+          </ul>
+        </section>
+
+        <section class="legal-section" id="contenido">
+          <h2>7. Contenido subido por usuarios (música, texto, portadas, etc.)</h2>
+          <p>
+            Si publicas Contenido, declaras que tienes los derechos necesarios (o autorización) para usarlo y publicarlo.
+            No publiques música/portadas que infrinjan copyright, marcas o derechos de imagen.
+          </p>
+          <ul>
+            <li><strong>Tu titularidad:</strong> conservas la titularidad de tu Contenido.</li>
+            <li>
+              <strong>Licencia a BeefMusic:</strong> nos concedes una licencia no exclusiva, mundial, libre de royalties y sublicenciable
+              (solo en lo necesario) para alojar, reproducir, distribuir, comunicar públicamente y mostrar tu Contenido dentro de la Plataforma,
+              con el fin de operar el Servicio (p. ej., reproducción en listas, perfiles, comunidad y previews).
+            </li>
+            <li><strong>Retirada:</strong> podemos retirar Contenido si incumple estos Términos o ante una reclamación.</li>
+            <li><strong>Copia de seguridad:</strong> no garantizamos la conservación indefinida; guarda copias de tus archivos.</li>
+          </ul>
+
+          <div class="legal-note">
+            <strong>Importante (música):</strong> si subes un tema con samples, beats o voces de terceros,
+            asegúrate de tener permisos. Para un servicio comercial real, añade cláusulas específicas sobre licencias musicales,
+            editoriales y gestión de reclamaciones.
+          </div>
+        </section>
+
+        <section class="legal-section" id="derechos">
+          <h2>8. Reclamaciones de derechos (copyright / IP)</h2>
+          <p>
+            Si crees que un Contenido infringe tus derechos, envíanos una notificación con:
+          </p>
+          <ul>
+            <li>Identificación del material supuestamente infractor (enlace y descripción).</li>
+            <li>Prueba razonable de titularidad o autorización.</li>
+            <li>Tus datos de contacto y una declaración de buena fe.</li>
+          </ul>
+          <p>
+            Podemos solicitar información adicional y, si procede, retirar el Contenido. También podemos actuar contra
+            cuentas reincidentes.
+          </p>
+          <div class="legal-note">
+            <strong>Email de reclamaciones:</strong> <b>copyright@tudominio.com</b> (edítalo).
+          </div>
+        </section>
+
+        <section class="legal-section" id="terceros">
+          <h2>9. Servicios de terceros y enlaces</h2>
+          <p>
+            La Plataforma puede mostrar enlaces o contenido de terceros. No controlamos esos sitios/servicios y no somos responsables
+            de su disponibilidad, seguridad o políticas. Úsalos bajo tu propio criterio.
+          </p>
+        </section>
+
+        <section class="legal-section" id="moderacion">
+          <h2>10. Moderación y medidas</h2>
+          <p>
+            Podemos aplicar medidas para proteger la comunidad y el Servicio, incluyendo:
+            eliminación de contenido, limitación de funciones, avisos, suspensiones o cierre de cuentas.
+          </p>
+          <p>
+            Estas medidas pueden aplicarse ante incumplimientos, abuso, riesgo de seguridad o para cumplir obligaciones legales.
+          </p>
+        </section>
+
+        <section class="legal-section" id="terminacion">
+          <h2>11. Suspensión y terminación</h2>
+          <p>
+            Puedes dejar de usar la Plataforma en cualquier momento. Nosotros podemos suspender o terminar tu acceso si:
+          </p>
+          <ul>
+            <li>Incumples estos Términos.</li>
+            <li>Tu actividad supone riesgo para otros Usuarios o para la seguridad del Servicio.</li>
+            <li>Debemos hacerlo para cumplir una obligación legal.</li>
+          </ul>
+          <p>
+            En caso de terminación, algunas secciones seguirán aplicando (por ejemplo: propiedad intelectual, responsabilidad, ley aplicable).
+          </p>
+        </section>
+
+        <section class="legal-section" id="disponibilidad">
+          <h2>12. Disponibilidad, cambios y funciones beta</h2>
+          <p>
+            La Plataforma se ofrece “tal cual”. Puede haber interrupciones, mantenimiento o cambios (incluyendo añadir, modificar o eliminar
+            funcionalidades). Algunas funciones pueden estar en beta y fallar o cambiar sin aviso.
+          </p>
+        </section>
+
+        <section class="legal-section" id="responsabilidad">
+          <h2>13. Limitación de responsabilidad</h2>
+          <p>
+            En la medida permitida por la ley, BeefMusic no será responsable por daños indirectos o consecuenciales derivados del uso
+            o imposibilidad de uso del Servicio (p. ej., pérdida de datos, pérdida de oportunidades, interrupciones).
+          </p>
+          <p>
+            Nada en estos Términos limita la responsabilidad cuando la ley no lo permita (por ejemplo, dolo o responsabilidad imperativa).
+          </p>
+        </section>
+
+        <section class="legal-section" id="indemnizacion">
+          <h2>14. Indemnización</h2>
+          <p>
+            Te comprometes a indemnizar y mantener indemne a BeefMusic frente a reclamaciones de terceros derivadas de:
+            (i) tu Contenido, (ii) tu uso del Servicio, o (iii) tu incumplimiento de estos Términos.
+          </p>
+        </section>
+
+        <section class="legal-section" id="ley">
+          <h2>15. Ley aplicable y jurisdicción</h2>
+          <p>
+            Estos Términos se regirán por la legislación aplicable en <strong>España</strong> (ajusta si tu caso es distinto).
+            Salvo que una norma obligatoria indique lo contrario, las partes se someten a los juzgados y tribunales de
+            <strong>Madrid</strong> (ajusta ciudad).
+          </p>
+          <div class="legal-note">
+            <strong>Editable:</strong> si ofreces un servicio internacional o de consumo, esta parte cambia bastante.
+            Ajusta con asesoría legal.
+          </div>
+        </section>
+
+        <section class="legal-section" id="contacto">
+          <h2>16. Contacto</h2>
+          <p>
+            Para soporte, sugerencias o temas legales, escribe a <strong>soporte@tudominio.com</strong> o usa el formulario en
+            <a href="contacto.html">Contacto</a>.
+          </p>
+        </section>
+
+        <section class="legal-section" id="faq">
+          <h2>FAQ rápido</h2>
+          <div class="faq" aria-label="Preguntas frecuentes">
+            <details>
+              <summary>
+                <strong>¿Puedo subir música de otra persona?</strong>
+                <span style="opacity:.8;">▾</span>
+              </summary>
+              <div class="faq-body">
+                Solo si tienes permiso/licencia. Si no, te arriesgas a retirada del contenido y medidas sobre tu cuenta.
+              </div>
+            </details>
+
+            <details>
+              <summary>
+                <strong>¿BeefMusic se queda con mis derechos?</strong>
+                <span style="opacity:.8;">▾</span>
+              </summary>
+              <div class="faq-body">
+                No. Tú mantienes la titularidad. Nos das una licencia para poder alojar y mostrar tu contenido dentro de la Plataforma
+                (lo típico para que el servicio funcione).
+              </div>
+            </details>
+
+            <details>
+              <summary>
+                <strong>¿Cómo reporto un problema o abuso?</strong>
+                <span style="opacity:.8;">▾</span>
+              </summary>
+              <div class="faq-body">
+                Usa el botón “Reportar problema” del header o el formulario de Contacto. Si es urgente, escribe a soporte@tudominio.com (edítalo).
+              </div>
+            </details>
+          </div>
+
+          <div class="legal-note" style="margin-top:16px;">
+            <strong>Nota:</strong> este texto es una base para proyectos web y puede requerir adaptación legal según tu caso y país.
+          </div>
+        </section>
+
+      </article>
+    </main>
+
+    <footer>
+      <span>© <span id="year"></span> BeefMusic. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="terminos.html">Términos</a>
+        <a href="privacidad.html">Privacidad</a>
+        <a href="contacto.html">Contacto</a>
+      </div>
+    </footer>
+  </div>
+
+  <button class="to-top" id="to-top" type="button" aria-label="Volver arriba">⬆ Arriba</button>
+
+  <script>
+    // Año footer
+    (function(){
+      const y = document.getElementById("year");
+      if (y) y.textContent = new Date().getFullYear();
+    })();
+
+    // Mostrar usuario (si existe)
+    (function initUserHeader(){
+      const nameEl = document.getElementById("user-name-display");
+      const avatarEl = document.getElementById("user-avatar");
+      const name = localStorage.getItem("beefmusic_user_name") || "@usuario";
+      if (nameEl) nameEl.textContent = name;
+      if (avatarEl) avatarEl.textContent = (name.replace("@","").trim()[0] || "U").toUpperCase();
+    })();
+
+    // Logout
+    (function initLogout(){
+      const btn = document.getElementById("user-logout-btn");
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        localStorage.removeItem("beefmusic_user_token");
+        localStorage.removeItem("beefmusic_user_name");
+        window.location.href = "user-login.html";
+      });
+    })();
+
+    // Notificaciones (básico: abrir/cerrar panel)
+    (function initNotifBasic(){
+      const btn = document.getElementById("notif-btn");
+      const panel = document.getElementById("notif-panel");
+      const list = document.getElementById("notif-list");
+      const readAll = document.getElementById("notif-readall-btn");
+      if (!btn || !panel) return;
+
+      if (list && !list.dataset.ready) {
+        list.innerHTML = '<div style="opacity:.75;">No hay notificaciones por ahora.</div>';
+        list.dataset.ready = "1";
+      }
+
+      function setOpen(open){ panel.style.display = open ? "block" : "none"; }
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = panel.style.display === "block";
+        setOpen(!isOpen);
+      });
+
+      if (readAll) {
+        readAll.addEventListener("click", () => {
+          // engancha tu lógica real aquí
+          setOpen(false);
+        });
+      }
+
+      window.addEventListener("click", (e) => {
+        if (panel.style.display !== "block") return;
+        if (panel.contains(e.target) || btn.contains(e.target)) return;
+        setOpen(false);
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+      });
+    })();
+
+    // Menú móvil (☰)
+    (function initMobileMenu(){
+      const btn = document.getElementById("mobile-menu-btn");
+      const menu = document.getElementById("mobile-menu");
+      if (!btn || !menu) return;
+
+      function setOpen(isOpen){
+        menu.classList.toggle("open", isOpen);
+        btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      }
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = menu.classList.contains("open");
+        setOpen(!isOpen);
+      });
+
+      window.addEventListener("click", (e) => {
+        if (!menu.classList.contains("open")) return;
+        if (menu.contains(e.target) || btn.contains(e.target)) return;
+        setOpen(false);
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+      });
+
+      menu.addEventListener("click", (e) => {
+        const item = e.target.closest("button, a");
+        if (!item) return;
+        if (window.innerWidth <= 768) setOpen(false);
+      });
+    })();
+
+    // Barra de progreso lectura + botón arriba
+    (function initReadingUI(){
+      const progress = document.getElementById("reading-progress");
+      const toTop = document.getElementById("to-top");
+      if (!progress || !toTop) return;
+
+      function update(){
+        const doc = document.documentElement;
+        const scrollTop = doc.scrollTop || document.body.scrollTop;
+        const scrollHeight = doc.scrollHeight - doc.clientHeight;
+        const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+        progress.style.width = pct + "%";
+
+        if (scrollTop > 650) toTop.classList.add("visible");
+        else toTop.classList.remove("visible");
+      }
+
+      window.addEventListener("scroll", update, { passive: true });
+      window.addEventListener("resize", update);
+      update();
+
+      toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    })();
+  </script>
+</body>
+</html>

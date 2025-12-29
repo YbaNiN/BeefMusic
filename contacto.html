@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contacto · BeefMusic</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <meta name="description" content="Contacta con BeefMusic: soporte, reportes y sugerencias." />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#000000" />
+
+  <style>
+    :root{
+      --glass-bg: rgba(0,0,0,0.52);
+      --glass-bg-2: rgba(0,0,0,0.75);
+      --glass-b: rgba(255,255,255,.12);
+      --soft: rgba(255,255,255,.06);
+      --soft-2: rgba(255,255,255,.04);
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+      --radius: 22px;
+      --radius-sm: 16px;
+      --offset-anchor: 90px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { scroll-padding-top: var(--offset-anchor); }
+
+    .skip-link{
+      position:absolute; left:12px; top:12px;
+      padding:10px 12px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(0,0,0,.85); color:#fff;
+      text-decoration:none;
+      transform: translateY(-140%);
+      transition: transform .18s ease;
+      z-index:999;
+    }
+    .skip-link:focus{ transform: translateY(0); outline:none; }
+
+    .page{
+      max-width:1200px;
+      margin:0 auto;
+      padding:24px 20px 80px;
+    }
+
+    /* Header reutilizable (igual que términos/privacidad) */
+    .header-actions{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 12px 0;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 18px;
+    }
+
+    .user-profile{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-right:auto;
+    }
+    .user-profile-text{ display:flex; flex-direction:column; font-size:.8rem; }
+    .user-profile-label{ opacity:.7; }
+    .user-profile-name{ font-weight:500; }
+    .user-avatar{
+      width:32px; height:32px; border-radius:999px;
+      display:flex; align-items:center; justify-content:center;
+      font-weight:600;
+    }
+
+    .nav-actions{ display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+    .mobile-menu-btn{ display:none; }
+
+    @media (max-width: 768px){
+      .mobile-menu-btn{ display:inline-flex; align-items:center; justify-content:center; }
+      .nav-actions{
+        position:absolute;
+        left:8px; right:8px;
+        top: calc(100% + 10px);
+        z-index:70;
+        display:none;
+        flex-direction:column;
+        gap:8px;
+        padding:10px;
+        border-radius:18px;
+        border:1px solid rgba(255,255,255,.14);
+        background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 18px 45px rgba(0,0,0,.55);
+      }
+      .nav-actions.open{ display:flex; }
+      .nav-actions .btn, .nav-actions a.btn{ width:100%; justify-content:center; text-align:center; }
+    }
+
+    /* Notificaciones (panel básico) */
+    .notif-btn{ position:relative; }
+    .notif-badge{
+      position:absolute; top:-6px; right:-6px;
+      min-width:18px; height:18px; padding:0 6px;
+      border-radius:999px; font-size:.72rem;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,0,80,.95); color:#fff;
+      border:1px solid rgba(255,255,255,.25);
+      pointer-events:none;
+    }
+    .notif-panel{
+      position:absolute; right:12px; top: calc(100% + 10px);
+      width: min(420px, calc(100vw - 32px));
+      max-height: 70vh; overflow:hidden;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 18px 45px rgba(0,0,0,.55);
+      z-index:80;
+    }
+    .notif-panel-head{
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+      padding:12px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .notif-panel-body{
+      padding:10px 12px;
+      overflow:auto;
+      max-height: calc(70vh - 54px);
+      display:flex; flex-direction:column; gap:10px;
+    }
+
+    /* Contacto */
+    .contact-wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px 16px 70px;
+    }
+
+    .card{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.52);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .title{
+      font-size: 28px;
+      margin: 0 0 8px 0;
+      letter-spacing: .2px;
+    }
+    .subtitle{
+      margin: 0 0 16px 0;
+      opacity: .84;
+      line-height: 1.55;
+    }
+
+    .meta{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      opacity:.78;
+      font-size: 13px;
+      margin: 0 0 18px 0;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+    }
+    .pill b{ font-weight:600; opacity:.95; }
+
+    .contact-grid{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 14px;
+    }
+
+    .panel{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding: 14px;
+    }
+
+    .panel h2{
+      font-size: 16px;
+      margin: 0 0 10px 0;
+    }
+    .panel p{
+      margin: 0 0 10px 0;
+      opacity: .9;
+      line-height: 1.55;
+    }
+
+    .form{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+
+    label{
+      font-size: .9rem;
+      opacity: .92;
+    }
+
+    input, textarea, select{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.35);
+      color: inherit;
+      outline: none;
+    }
+    textarea{ min-height: 140px; resize: vertical; }
+
+    input:focus, textarea:focus, select:focus{
+      box-shadow: 0 0 0 2px rgba(255,255,255,.16);
+      border-color: rgba(255,255,255,.24);
+    }
+
+    .row2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .hint{
+      font-size: .82rem;
+      opacity: .75;
+      line-height: 1.45;
+    }
+
+    .inline{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap:wrap;
+    }
+
+    .status{
+      display:none;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      padding: 12px;
+      opacity: .92;
+      line-height: 1.5;
+    }
+    .status.ok{
+      border-color: rgba(120,255,170,.22);
+      background: rgba(120,255,170,.06);
+    }
+    .status.err{
+      border-color: rgba(255,120,140,.22);
+      background: rgba(255,120,140,.06);
+    }
+
+    .quick-links{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .qbtn{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.25);
+      text-decoration:none;
+      color: inherit;
+      opacity: .95;
+      transition: transform .12s ease, opacity .12s ease, border-color .12s ease;
+    }
+    .qbtn:hover{
+      opacity:1;
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,.22);
+    }
+    .qbtn small{ opacity:.75; font-size:.8rem; }
+
+    footer{
+      margin-top: 40px;
+      padding-top: 16px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 12px;
+      flex-wrap:wrap;
+      font-size: 0.85rem;
+    }
+    .footer-links{ display:flex; gap: 12px; flex-wrap:wrap; }
+
+    @media (max-width: 900px){
+      .contact-grid{ grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px){
+      .page{ padding: 20px 16px 60px; }
+      .card{ padding: 16px; }
+      .title{ font-size: 24px; }
+      .row2{ grid-template-columns: 1fr; }
+      footer{ flex-direction:column; align-items:flex-start; }
+    }
+    @media print{
+      .header-actions{ display:none !important; }
+      body{ background:#fff !important; color:#000 !important; }
+      .card{ box-shadow:none; background:#fff; border:1px solid #ddd; }
+      a{ color:#000; text-decoration: underline; }
+    }
+  </style>
+</head>
+
+<body>
+  <a class="skip-link" href="#contenido-principal">Saltar al contenido</a>
+
+  <div class="page">
+    <div class="header-actions">
+      <div class="user-profile">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div class="user-profile-text">
+          <span class="user-profile-label">Conectado</span>
+          <span class="user-profile-name" id="user-name-display">@usuario</span>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost notif-btn" id="notif-btn" title="Notificaciones">
+        🔔
+        <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
+      </button>
+
+      <div class="notif-panel" id="notif-panel" style="display:none;">
+        <div class="notif-panel-head">
+          <strong>Notificaciones</strong>
+          <button class="btn btn-ghost" id="notif-readall-btn">Marcar todo leído</button>
+        </div>
+        <div class="notif-panel-body" id="notif-list">
+          <div style="opacity:.75;">No hay notificaciones por ahora.</div>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost mobile-menu-btn" id="mobile-menu-btn"
+              aria-expanded="false" aria-controls="mobile-menu" title="Menú">
+        ☰
+      </button>
+
+      <div class="nav-actions" id="mobile-menu">
+        <button class="btn btn-ghost" id="open-request-1">Enviar petición</button>
+        <button class="btn btn-ghost" onclick="window.location.href='peticiones.html'">Peticiones en curso</button>
+        <button class="btn btn-ghost" id="open-suggestion">Sugerencia</button>
+        <button class="btn btn-ghost" id="open-report">Reportar problema</button>
+        <button class="btn btn-ghost" onclick="window.location.href='perfil.html'">Perfil sonoro</button>
+        <button class="btn btn-ghost" onclick="window.location.href='comunidad.html'">Comunidad</button>
+        <button class="btn btn-primary" onclick="window.location.href='canciones.html'">
+          <span class="btn-icon">▶</span> Ver canciones
+        </button>
+        <button class="btn btn-ghost" id="user-logout-btn">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <main class="contact-wrap" id="contenido-principal">
+      <section class="card">
+        <h1 class="title">Contacto</h1>
+        <p class="subtitle">
+          ¿Tienes dudas, un reporte o una sugerencia? Escríbenos desde aquí.
+          Si es un tema legal/privacidad, revisa también <a href="privacidad.html">Privacidad</a>.
+        </p>
+
+        <div class="meta">
+          <span class="pill">📩 Soporte: <b>soporte@tudominio.com</b> (edítalo)</span>
+          <span class="pill">⏱️ Respuesta típica: <b>24–72h</b> (orientativo)</span>
+          <span class="pill">🧾 Formulario: <b>1.0</b></span>
+        </div>
+
+        <div class="contact-grid">
+          <!-- FORM -->
+          <div class="panel">
+            <h2>Envíanos un mensaje</h2>
+
+            <div class="status" id="form-status" role="status" aria-live="polite"></div>
+
+            <form class="form" id="contact-form" novalidate>
+              <div class="row2">
+                <div>
+                  <label for="name">Nombre</label>
+                  <input id="name" name="name" type="text" autocomplete="name" placeholder="Tu nombre" required />
+                  <div class="hint">Cómo quieres que te llamemos.</div>
+                </div>
+                <div>
+                  <label for="email">Email</label>
+                  <input id="email" name="email" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" required />
+                  <div class="hint">Para poder responderte.</div>
+                </div>
+              </div>
+
+              <div class="row2">
+                <div>
+                  <label for="type">Tipo</label>
+                  <select id="type" name="type" required>
+                    <option value="">Selecciona…</option>
+                    <option value="soporte">Soporte</option>
+                    <option value="reporte">Reportar problema</option>
+                    <option value="sugerencia">Sugerencia</option>
+                    <option value="derechos">Derechos de autor</option>
+                    <option value="privacidad">Privacidad</option>
+                    <option value="otro">Otro</option>
+                  </select>
+                  <div class="hint">Nos ayuda a enrutar tu mensaje.</div>
+                </div>
+                <div>
+                  <label for="username">Usuario (opcional)</label>
+                  <input id="username" name="username" type="text" autocomplete="nickname" placeholder="@tuusuario" />
+                  <div class="hint">Si estás registrado.</div>
+                </div>
+              </div>
+
+              <div>
+                <label for="subject">Asunto</label>
+                <input id="subject" name="subject" type="text" placeholder="Ej: No puedo iniciar sesión" required maxlength="120" />
+                <div class="hint">Máx. 120 caracteres.</div>
+              </div>
+
+              <div>
+                <label for="message">Mensaje</label>
+                <textarea id="message" name="message" placeholder="Cuéntanos qué ocurre y, si puedes, pasos para reproducirlo." required maxlength="2000"></textarea>
+                <div class="hint">Máx. 2000 caracteres. No incluyas contraseñas.</div>
+              </div>
+
+              <div class="inline">
+                <label style="display:flex;align-items:center;gap:10px;">
+                  <input id="consent" type="checkbox" required />
+                  <span>Confirmo que la información es veraz y acepto que se use para responder a mi solicitud.</span>
+                </label>
+              </div>
+
+              <div class="inline" style="justify-content:flex-start;">
+                <button class="btn btn-primary" type="submit">Enviar</button>
+                <button class="btn btn-ghost" type="button" id="reset-btn">Limpiar</button>
+              </div>
+
+              <div class="hint">
+                Al enviar, aceptas el tratamiento de tus datos para gestionar tu solicitud. Más info en
+                <a href="privacidad.html">Política de Privacidad</a>.
+              </div>
+            </form>
+          </div>
+
+          <!-- INFO / LINKS -->
+          <aside class="panel">
+            <h2>Canales rápidos</h2>
+            <p>
+              Si lo prefieres, también puedes escribirnos por correo. Para reportes importantes, incluye capturas o detalles técnicos.
+            </p>
+
+            <div class="quick-links">
+              <a class="qbtn" href="mailto:soporte@tudominio.com?subject=Soporte%20BeefMusic">
+                <span>
+                  <strong>Soporte</strong><br />
+                  <small>soporte@tudominio.com</small>
+                </span>
+                <span>→</span>
+              </a>
+
+              <a class="qbtn" href="mailto:privacidad@tudominio.com?subject=Privacidad%20BeefMusic">
+                <span>
+                  <strong>Privacidad</strong><br />
+                  <small>privacidad@tudominio.com</small>
+                </span>
+                <span>→</span>
+              </a>
+
+              <a class="qbtn" href="mailto:copyright@tudominio.com?subject=Reclamaci%C3%B3n%20de%20derechos%20BeefMusic">
+                <span>
+                  <strong>Derechos de autor</strong><br />
+                  <small>copyright@tudominio.com</small>
+                </span>
+                <span>→</span>
+              </a>
+            </div>
+
+            <div class="legal-note" style="margin-top:12px;">
+              <strong>Tip:</strong> Si reportas un bug, dime: dispositivo, navegador, pasos, y si pasa siempre o a veces.
+            </div>
+
+            <div class="legal-note" style="margin-top:12px;">
+              <strong>Enlace útil:</strong> revisa <a href="terminos.html">Términos</a> y <a href="privacidad.html">Privacidad</a> para conocer reglas y datos.
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>© <span id="year"></span> BeefMusic. Todos los derechos reservados.</span>
+      <div class="footer-links">
+        <a href="terminos.html">Términos</a>
+        <a href="privacidad.html">Privacidad</a>
+        <a href="contacto.html">Contacto</a>
+      </div>
+    </footer>
+  </div>
+
+  <button class="to-top" id="to-top" type="button" aria-label="Volver arriba">⬆ Arriba</button>
+
+  <script>
+    // Año footer
+    (function(){
+      const y = document.getElementById("year");
+      if (y) y.textContent = new Date().getFullYear();
+    })();
+
+    // Mostrar usuario (si existe)
+    (function initUserHeader(){
+      const nameEl = document.getElementById("user-name-display");
+      const avatarEl = document.getElementById("user-avatar");
+      const name = localStorage.getItem("beefmusic_user_name") || "@usuario";
+      if (nameEl) nameEl.textContent = name;
+      if (avatarEl) avatarEl.textContent = (name.replace("@","").trim()[0] || "U").toUpperCase();
+    })();
+
+    // Logout
+    (function initLogout(){
+      const btn = document.getElementById("user-logout-btn");
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        localStorage.removeItem("beefmusic_user_token");
+        localStorage.removeItem("beefmusic_user_name");
+        window.location.href = "user-login.html";
+      });
+    })();
+
+    // Notificaciones (básico: abrir/cerrar panel)
+    (function initNotifBasic(){
+      const btn = document.getElementById("notif-btn");
+      const panel = document.getElementById("notif-panel");
+      const readAll = document.getElementById("notif-readall-btn");
+      if (!btn || !panel) return;
+
+      function setOpen(open){ panel.style.display = open ? "block" : "none"; }
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = panel.style.display === "block";
+        setOpen(!isOpen);
+      });
+
+      if (readAll) {
+        readAll.addEventListener("click", () => setOpen(false));
+      }
+
+      window.addEventListener("click", (e) => {
+        if (panel.style.display !== "block") return;
+        if (panel.contains(e.target) || btn.contains(e.target)) return;
+        setOpen(false);
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+      });
+    })();
+
+    // Menú móvil (☰)
+    (function initMobileMenu(){
+      const btn = document.getElementById("mobile-menu-btn");
+      const menu = document.getElementById("mobile-menu");
+      if (!btn || !menu) return;
+
+      function setOpen(isOpen){
+        menu.classList.toggle("open", isOpen);
+        btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      }
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = menu.classList.contains("open");
+        setOpen(!isOpen);
+      });
+
+      window.addEventListener("click", (e) => {
+        if (!menu.classList.contains("open")) return;
+        if (menu.contains(e.target) || btn.contains(e.target)) return;
+        setOpen(false);
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+      });
+
+      menu.addEventListener("click", (e) => {
+        const item = e.target.closest("button, a");
+        if (!item) return;
+        if (window.innerWidth <= 768) setOpen(false);
+      });
+    })();
+
+    // Botón volver arriba
+    (function initToTop(){
+      const toTop = document.getElementById("to-top");
+      if (!toTop) return;
+
+      function update(){
+        const doc = document.documentElement;
+        const scrollTop = doc.scrollTop || document.body.scrollTop;
+        if (scrollTop > 650) toTop.classList.add("visible");
+        else toTop.classList.remove("visible");
+      }
+
+      window.addEventListener("scroll", update, { passive: true });
+      window.addEventListener("resize", update);
+      update();
+
+      toTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    })();
+
+    // Formulario: validación + envío (sin backend)
+    // - MODO DEMO: guarda en localStorage como "salida" y muestra estado.
+    // - Si quieres enviarlo a un PHP/endpoint, cambia CONTACT_ENDPOINT y usa fetch().
+    (function initContactForm(){
+      const form = document.getElementById("contact-form");
+      const status = document.getElementById("form-status");
+      const resetBtn = document.getElementById("reset-btn");
+
+      const CONTACT_ENDPOINT = ""; // Ej: "api/contact.php" (si lo implementas)
+
+      function showStatus(kind, msg){
+        status.className = "status " + (kind || "");
+        status.textContent = msg;
+        status.style.display = "block";
+      }
+
+      function clearStatus(){
+        status.style.display = "none";
+        status.textContent = "";
+        status.className = "status";
+      }
+
+      function getFormData(){
+        return {
+          name: (document.getElementById("name").value || "").trim(),
+          email: (document.getElementById("email").value || "").trim(),
+          type: (document.getElementById("type").value || "").trim(),
+          username: (document.getElementById("username").value || "").trim(),
+          subject: (document.getElementById("subject").value || "").trim(),
+          message: (document.getElementById("message").value || "").trim(),
+          consent: document.getElementById("consent").checked,
+          createdAt: new Date().toISOString()
+        };
+      }
+
+      function validate(data){
+        if (!data.name) return "Escribe tu nombre.";
+        if (!data.email) return "Escribe tu email.";
+        if (!/^\S+@\S+\.\S+$/.test(data.email)) return "El email no parece válido.";
+        if (!data.type) return "Selecciona el tipo.";
+        if (!data.subject) return "Escribe el asunto.";
+        if (data.subject.length > 120) return "El asunto es demasiado largo (máx. 120).";
+        if (!data.message) return "Escribe tu mensaje.";
+        if (data.message.length > 2000) return "El mensaje es demasiado largo (máx. 2000).";
+        if (!data.consent) return "Debes confirmar la casilla de consentimiento.";
+        return null;
+      }
+
+      async function sendToEndpoint(data){
+        // Si implementas un endpoint real, descomenta y ajusta:
+        const res = await fetch(CONTACT_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error("Error enviando el formulario.");
+        return res.json().catch(() => ({}));
+      }
+
+      function saveDemo(data){
+        const key = "beefmusic_contact_outbox";
+        const outbox = JSON.parse(localStorage.getItem(key) || "[]");
+        outbox.unshift(data);
+        localStorage.setItem(key, JSON.stringify(outbox.slice(0, 30)));
+      }
+
+      if (!form) return;
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearStatus();
+
+        const data = getFormData();
+        const err = validate(data);
+        if (err){
+          showStatus("err", "❌ " + err);
+          return;
+        }
+
+        try{
+          if (CONTACT_ENDPOINT){
+            showStatus("", "Enviando…");
+            await sendToEndpoint(data);
+            showStatus("ok", "✅ ¡Mensaje enviado! Te responderemos lo antes posible.");
+          } else {
+            // demo local
+            saveDemo(data);
+            showStatus("ok", "✅ (Modo demo) Mensaje guardado localmente. Añade un endpoint para enviarlo de verdad.");
+          }
+          form.reset();
+        } catch (ex){
+          showStatus("err", "❌ No se pudo enviar. Inténtalo de nuevo o escribe a soporte@tudominio.com.");
+        }
+      });
+
+      if (resetBtn){
+        resetBtn.addEventListener("click", () => {
+          form.reset();
+          clearStatus();
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
