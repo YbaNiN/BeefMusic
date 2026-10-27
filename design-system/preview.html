@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#09090b" />
+  <title>BeefMusic · Sistema de diseño</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="components.css" />
+  <style>
+    /* Estilos solo de esta página de muestra (no forman parte del sistema) */
+    .ds-intro { padding: var(--s-6) 0 var(--s-2); display: grid; gap: var(--s-3); }
+    .ds-divider { margin: var(--s-16) 0 var(--s-6); padding-top: var(--s-6); border-top: 1px solid var(--line); display: grid; gap: var(--s-2); }
+    .ds-grid { display: grid; gap: var(--s-3); grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .ds-grid--wide { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+    .ds-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); }
+    .ds-label { font-family: var(--font-mono); font-size: var(--fs-caption); color: var(--text-3); }
+    .ds-note { font-size: var(--fs-meta); color: var(--text-2); max-width: 64ch; }
+
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--r-md);
+      padding: var(--s-6) var(--s-5);
+      background:
+        radial-gradient(60% 90% at 100% 0%, rgba(139, 92, 246, 0.45), transparent 70%),
+        radial-gradient(70% 90% at 0% 100%, rgba(255, 51, 88, 0.42), transparent 70%),
+        var(--surface-2);
+      display: grid;
+      gap: var(--s-4);
+    }
+    .hero-card .t-display { max-width: 9ch; }
+    .hero-card__cta { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+
+    .swatch { border-radius: var(--r-md); overflow: hidden; background: var(--surface-2); }
+    .swatch__chip { height: 72px; }
+    .swatch__info { padding: var(--s-2) var(--s-3) var(--s-3); display: grid; gap: 2px; }
+    .swatch__name { font-size: var(--fs-meta); font-weight: 600; }
+
+    .type-spec { display: grid; gap: var(--s-1); padding: var(--s-4) 0; border-bottom: 1px solid var(--line); }
+    .type-spec:last-child { border-bottom: 0; }
+
+    .principle { padding: var(--s-4); border-radius: var(--r-md); background: var(--surface-2); display: grid; gap: var(--s-2); align-content: start; }
+    .principle__n { font-family: var(--font-display); font-stretch: 62.5%; font-weight: 900; font-size: 2.25rem; line-height: 1; color: var(--beef); }
+
+    .ia-table { width: 100%; border-collapse: collapse; font-size: var(--fs-ui); }
+    .ia-table th, .ia-table td { text-align: left; padding: var(--s-3) var(--s-2); border-bottom: 1px solid var(--line); vertical-align: top; }
+    .ia-table th { font-size: var(--fs-caption); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2); font-weight: 600; }
+    .ia-table td:first-child { font-weight: 600; white-space: nowrap; }
+    .ia-table code { font-family: var(--font-mono); font-size: var(--fs-caption); color: var(--text-2); }
+    .table-scroll { overflow-x: auto; margin: 0 calc(var(--gutter) * -1); padding: 0 var(--gutter); }
+
+    .token-list { display: grid; gap: 2px; font-size: var(--fs-meta); }
+    .token-list div { display: flex; align-items: center; gap: var(--s-3); padding: 6px 0; }
+    .token-list .bar { height: 12px; background: var(--beef); border-radius: 2px; }
+    .radius-demo { width: 56px; height: 56px; background: var(--surface-3); box-shadow: inset 0 0 0 1px var(--line-strong); }
+
+    .profile-head { display: flex; align-items: center; gap: var(--s-4); }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s-2); }
+    @media (min-width: 640px) { .stats { grid-template-columns: repeat(4, 1fr); } .hero-card { padding: var(--s-10) var(--s-8); } }
+    @media (min-width: 1024px) { .hero-card .t-display { max-width: 13ch; font-size: clamp(3.5rem, 1rem + 4.4vw, 5.5rem); } }
+  </style>
+</head>
+<body>
+  <!-- ==================== ICONOS (Lucide, inline) ==================== -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-library" viewBox="0 0 24 24"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 5.5v13a1 1 0 0 0 1.53.85l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 5 5.5Z"/><rect x="17" y="4" width="2.5" height="16" rx="1"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M19 5.5v13a1 1 0 0 1-1.53.85l-10-6.5a1 1 0 0 1 0-1.7l10-6.5A1 1 0 0 1 19 5.5Z"/><rect x="4.5" y="4" width="2.5" height="16" rx="1"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/></symbol>
+    <symbol id="i-comment" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M21 15V6"/><path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path d="M12 12H3"/><path d="M16 6H3"/><path d="M12 18H3"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+  </svg>
+
+  <div class="app">
+    <!-- ==================== SIDEBAR (escritorio) ==================== -->
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="sidebar__block">
+        <a class="logo" href="#inicio" aria-label="BeefMusic, inicio">
+          <span class="logo__mark" aria-hidden="true"></span>
+          <span class="logo__word">BeefMusic</span>
+        </a>
+        <nav class="nav">
+          <a class="nav__item" href="#inicio" data-nav="inicio" aria-current="page"><svg class="icon"><use href="#i-home"/></svg>Inicio</a>
+          <a class="nav__item" href="#canciones" data-nav="canciones"><svg class="icon"><use href="#i-library"/></svg>Canciones</a>
+          <a class="nav__item" href="#comunidad" data-nav="comunidad"><svg class="icon"><use href="#i-users"/></svg>Comunidad</a>
+          <a class="nav__item" href="#perfil" data-nav="perfil"><svg class="icon"><use href="#i-user"/></svg>Perfil sonoro</a>
+        </nav>
+        <button class="btn btn--primary btn--block" style="margin-top:var(--s-3)" data-open="pedir">
+          <svg class="icon icon--sm"><use href="#i-plus"/></svg>Pedir canción
+        </button>
+      </div>
+
+      <div class="sidebar__block sidebar__block--grow">
+        <div class="t-kicker nav__label">Peticiones</div>
+        <nav class="nav">
+          <a class="nav__item" href="#peticiones"><svg class="icon"><use href="#i-list"/></svg>En curso</a>
+          <button class="nav__item" style="border:0;background:none;cursor:pointer;text-align:left" data-open="pedir" data-tab="ia"><svg class="icon"><use href="#i-sparkles"/></svg>Asistente de letras</button>
+        </nav>
+        <div class="t-kicker nav__label">Sistema de diseño</div>
+        <nav class="nav">
+          <a class="nav__item" href="#principios">Principios</a>
+          <a class="nav__item" href="#color">Color</a>
+          <a class="nav__item" href="#tipografia">Tipografía</a>
+          <a class="nav__item" href="#portadas">Portadas</a>
+          <a class="nav__item" href="#componentes">Componentes</a>
+          <a class="nav__item" href="#navegacion">Navegación</a>
+        </nav>
+        <div class="sidebar__legal">
+          <a href="../terminos.html">Términos</a>
+          <a href="../privacidad.html">Privacidad</a>
+          <a href="../contacto.html">Contacto</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==================== CONTENIDO ==================== -->
+    <main class="app__main" id="main">
+      <header class="appbar">
+        <div class="appbar__brand">
+          <a class="logo" href="#inicio" aria-label="BeefMusic, inicio">
+            <span class="logo__mark" aria-hidden="true"></span>
+            <span class="logo__word">BeefMusic</span>
+          </a>
+        </div>
+        <button class="icon-btn" aria-label="Buscar" data-jump="canciones"><svg class="icon"><use href="#i-search"/></svg></button>
+        <button class="icon-btn" aria-label="Notificaciones, 2 sin leer" data-open="notifs">
+          <svg class="icon"><use href="#i-bell"/></svg><span class="badge-dot">2</span>
+        </button>
+        <a class="avatar avatar--sm" href="#perfil" aria-label="Tu perfil">I</a>
+      </header>
+
+      <div class="app__content">
+        <!-- Intro de la propuesta -->
+        <section class="ds-intro">
+          <div class="t-kicker">Propuesta · Sistema de diseño v1</div>
+          <p class="ds-note">Esta página <strong>es</strong> la app con el sistema aplicado: navega con las pestañas de abajo (móvil) o la barra lateral (escritorio), dale al play y abre “Pedir”. Las canciones son <strong>datos de ejemplo</strong> con los mp3 de <code>audios/</code>.</p>
+        </section>
+
+        <!-- ============ INICIO ============ -->
+        <section id="inicio" data-section="inicio">
+          <div class="hero-card">
+            <div class="t-kicker" style="color:var(--text)">Taller de temas a la carta</div>
+            <h1 class="t-display">Tu historia, hecha tema</h1>
+            <p class="t-body" style="max-width:46ch">Cuéntanos la movida, pasa por Discord y vuelve convertida en canción. Drill, trap, dembow, boom bap y lo que se venga.</p>
+            <div class="hero-card__cta">
+              <button class="btn btn--primary" data-open="pedir"><svg class="icon icon--sm"><use href="#i-plus"/></svg>Pedir canción</button>
+              <a class="btn btn--outline" href="#peticiones">Ver peticiones</a>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section__head">
+              <h2 class="t-h2">Novedades</h2>
+              <a class="section__link" href="#canciones">Ver todo</a>
+            </div>
+            <div class="shelf shelf--scroll" id="shelf-new"></div>
+          </div>
+        </section>
+
+        <!-- ============ CANCIONES ============ -->
+        <section id="canciones" class="section" data-section="canciones">
+          <div class="section__head">
+            <h2 class="t-h2">Canciones</h2>
+            <span class="t-meta tabular" id="songs-count"></span>
+          </div>
+          <label class="search">
+            <svg class="icon icon--sm"><use href="#i-search"/></svg>
+            <span class="sr-only">Buscar canciones</span>
+            <input id="search" type="search" placeholder="Título, autor o estilo" autocomplete="off" />
+          </label>
+          <div class="chips" style="margin-top:var(--s-3)" id="genre-chips" role="group" aria-label="Filtrar por estilo">
+            <button class="chip" aria-pressed="true" data-genre="">Todo</button>
+            <button class="chip" aria-pressed="false" data-genre="trap">Trap</button>
+            <button class="chip" aria-pressed="false" data-genre="drill">Drill</button>
+            <button class="chip" aria-pressed="false" data-genre="dembow">Dembow</button>
+            <button class="chip" aria-pressed="false" data-genre="reggaet">Reggaetón</button>
+            <button class="chip" aria-pressed="false" data-genre="boom">Boom bap</button>
+          </div>
+          <div class="ds-row" style="justify-content:space-between; margin:var(--s-3) 0">
+            <div class="segmented" role="tablist" aria-label="Orden">
+              <button role="tab" aria-selected="true" data-sort="recent">Recientes</button>
+              <button role="tab" aria-selected="false" data-sort="top"><svg class="icon icon--sm"><use href="#i-flame"/></svg>Top</button>
+            </div>
+          </div>
+          <div class="list" id="song-list"></div>
+        </section>
+
+        <!-- ============ PETICIONES ============ -->
+        <section id="peticiones" class="section">
+          <div class="section__head">
+            <h2 class="t-h2">Peticiones en curso</h2>
+            <a class="section__link" href="#peticiones">Ver todas</a>
+          </div>
+          <div class="list">
+            <div class="row" style="grid-template-columns:48px minmax(0,1fr) auto; cursor:default">
+              <div class="cover" data-variant="type" style="--c1:hsl(24 88% 60%);--c2:hsl(50 80% 48%);--c3:hsl(24 55% 12%)"><span class="cover__word">?</span></div>
+              <div class="row__body"><div class="row__title clamp-1">Dembow y salsa</div><div class="row__meta">Petición anónima · hace 2 h</div></div>
+              <span class="status status--pendiente">Pendiente</span>
+            </div>
+            <div class="row" style="grid-template-columns:48px minmax(0,1fr) auto; cursor:default">
+              <div class="cover" data-variant="type" style="--c1:hsl(200 88% 60%);--c2:hsl(230 80% 48%);--c3:hsl(200 55% 12%)"><span class="cover__word">?</span></div>
+              <div class="row__body"><div class="row__title clamp-1">Drill para el grupo de clase</div><div class="row__meta">@marcos · ayer</div></div>
+              <span class="status status--produccion">En producción</span>
+            </div>
+            <div class="row" style="grid-template-columns:48px minmax(0,1fr) auto; cursor:default">
+              <div class="cover" data-variant="type" style="--c1:hsl(265 88% 60%);--c2:hsl(300 80% 48%);--c3:hsl(265 55% 12%)"><span class="cover__word">?</span></div>
+              <div class="row__body"><div class="row__title clamp-1">Trap oscuro de cumpleaños</div><div class="row__meta">@anais · 3 días</div></div>
+              <span class="status status--terminada">Terminada</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ COMUNIDAD ============ -->
+        <section id="comunidad" class="section" data-section="comunidad">
+          <div class="section__head"><h2 class="t-h2">Comunidad</h2></div>
+          <div class="ds-grid ds-grid--wide">
+            <div class="panel panel--raised">
+              <div class="t-kicker">Comentarios · Sol de Boca</div>
+              <div class="comment">
+                <span class="avatar avatar--sm">A</span>
+                <div>
+                  <div class="comment__head"><span class="comment__name">@anais</span><span class="t-caption">hace 3 h</span></div>
+                  <p class="comment__body">El estribillo se me ha quedado pegado todo el día 🔥</p>
+                  <div class="comment__actions">
+                    <button class="btn btn--ghost btn--sm">Responder</button>
+                    <button class="btn btn--ghost btn--sm">Reportar</button>
+                  </div>
+                  <div class="comment__replies">
+                    <div class="comment">
+                      <span class="avatar avatar--sm" style="background:var(--surface-4);color:var(--text)">K</span>
+                      <div>
+                        <div class="comment__head"><span class="comment__name">@kevo</span><span class="t-caption">hace 1 h</span></div>
+                        <p class="comment__body">Temazo del verano, sin más.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <label class="search" style="margin-top:var(--s-3); padding-right:4px">
+                <span class="sr-only">Escribe un comentario</span>
+                <input placeholder="Añade un comentario…" />
+                <button class="icon-btn" aria-label="Enviar comentario" style="color:var(--beef)"><svg class="icon icon--sm"><use href="#i-send"/></svg></button>
+              </label>
+            </div>
+
+            <div class="panel panel--raised">
+              <div class="t-kicker">Actividad de gente que sigues</div>
+              <div class="list" style="margin-top:var(--s-2)">
+                <div class="notif"><span class="avatar avatar--sm">M</span><div><div class="t-ui"><strong>@marcos</strong> le dio like a <strong>No Perdono</strong></div><div class="t-caption">hace 20 min</div></div><svg class="icon icon--sm" style="color:var(--beef)"><use href="#i-up"/></svg></div>
+                <div class="notif"><span class="avatar avatar--sm" style="background:var(--surface-4);color:var(--text)">L</span><div><div class="t-ui"><strong>@lucia</strong> comentó en <strong>Titi</strong></div><div class="t-caption">hace 2 h</div></div><svg class="icon icon--sm" style="color:var(--text-3)"><use href="#i-comment"/></svg></div>
+                <div class="notif"><span class="avatar avatar--sm">A</span><div><div class="t-ui"><strong>@anais</strong> empezó a seguir a <strong>@kevo</strong></div><div class="t-caption">ayer</div></div><svg class="icon icon--sm" style="color:var(--text-3)"><use href="#i-users"/></svg></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ PERFIL ============ -->
+        <section id="perfil" class="section" data-section="perfil">
+          <div class="section__head"><h2 class="t-h2">Perfil sonoro</h2></div>
+          <div class="panel panel--raised" style="display:grid; gap:var(--s-4)">
+            <div class="profile-head">
+              <span class="avatar avatar--lg">I</span>
+              <div style="min-width:0">
+                <div class="t-kicker">Nivel 7 · Cazador de beats</div>
+                <div class="t-h1">@ivan</div>
+                <div class="ds-row" style="gap:var(--s-2); margin-top:var(--s-2)">
+                  <span class="genre" style="--c:var(--g-dembow)">Dembow</span>
+                  <span class="genre" style="--c:var(--g-trap)">Trap</span>
+                  <span class="genre" style="--c:var(--g-drill)">Drill</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="ds-row" style="justify-content:space-between; margin-bottom:6px"><span class="t-meta">340 / 500 XP</span><span class="t-meta">Nivel 8</span></div>
+              <div class="xp" role="progressbar" aria-valuenow="68" aria-valuemin="0" aria-valuemax="100" aria-label="Progreso de nivel"><span style="--v:68%"></span></div>
+            </div>
+            <div class="stats">
+              <div class="stat"><div class="stat__label">Votos</div><div class="stat__value">48</div></div>
+              <div class="stat"><div class="stat__label">Likes</div><div class="stat__value">41</div></div>
+              <div class="stat"><div class="stat__label">Dislikes</div><div class="stat__value">7</div></div>
+              <div class="stat"><div class="stat__label">Toxicidad</div><div class="stat__value">15%</div></div>
+            </div>
+          </div>
+          <div class="section__head" style="margin-top:var(--s-6)"><h3 class="t-h3">Logros</h3><span class="t-meta tabular">12 / 100</span></div>
+          <div class="ds-grid ds-grid--wide">
+            <div class="achv"><div class="achv__icon"><svg class="icon"><use href="#i-trophy"/></svg></div><div><div class="achv__title">Primer voto</div><div class="achv__desc">Vota tu primera canción</div></div></div>
+            <div class="achv"><div class="achv__icon"><svg class="icon"><use href="#i-flame"/></svg></div><div><div class="achv__title">Dembowsero</div><div class="achv__desc">10 likes a dembow</div></div></div>
+            <div class="achv achv--locked"><div class="achv__icon"><svg class="icon"><use href="#i-lock"/></svg></div><div><div class="achv__title">Drill mode</div><div class="achv__desc">25 likes a drill · 9/25</div><div class="xp"><span style="--v:36%"></span></div></div></div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             FUNDAMENTOS DEL SISTEMA
+             ================================================================ -->
+        <div class="ds-divider" id="principios">
+          <div class="t-kicker">Fundamentos</div>
+          <h2 class="t-h1">Principios</h2>
+        </div>
+        <div class="ds-grid ds-grid--wide">
+          <div class="principle"><div class="principle__n">01</div><div class="t-h3">El color lo ponen las portadas</div><p class="t-meta">La interfaz es negra y neutra (Spotify, Suno). Cada canción aporta su color con su portada y tiñe el reproductor.</p></div>
+          <div class="principle"><div class="principle__n">02</div><div class="t-h3">Un solo rojo, una sola acción</div><p class="t-meta">El rojo “beef” solo marca lo que se puede hacer ya: reproducir, pedir canción y el estado activo. Nada de degradados en todo.</p></div>
+          <div class="principle"><div class="principle__n">03</div><div class="t-h3">Capas, no bordes</div><p class="t-meta">La profundidad se crea con 4 niveles de gris. Las sombras solo para lo que flota: mini‑player, hojas y menús.</p></div>
+          <div class="principle"><div class="principle__n">04</div><div class="t-h3">Pulgar primero</div><p class="t-meta">Lo importante está abajo en móvil: pestañas, reproductor y hojas. Objetivos táctiles de 44px como mínimo.</p></div>
+        </div>
+
+        <div class="ds-divider" id="color">
+          <div class="t-kicker">Fundamentos</div>
+          <h2 class="t-h1">Color</h2>
+          <p class="ds-note">Fondo casi negro neutro (sin el tinte morado actual). El texto secundario cumple contraste AA en todas las superficies. Sobre el rojo se escribe en negro (5.5:1), igual que Spotify con su verde.</p>
+        </div>
+        <div class="ds-grid" id="swatches"></div>
+        <h3 class="t-h3" style="margin:var(--s-6) 0 var(--s-3)">Estados y géneros</h3>
+        <div class="ds-row">
+          <span class="status status--pendiente">Pendiente</span>
+          <span class="status status--produccion">En producción</span>
+          <span class="status status--terminada">Terminada</span>
+        </div>
+        <div class="ds-row" style="margin-top:var(--s-3)">
+          <span class="genre" style="--c:var(--g-trap)">Trap</span>
+          <span class="genre" style="--c:var(--g-drill)">Drill</span>
+          <span class="genre" style="--c:var(--g-dembow)">Dembow</span>
+          <span class="genre" style="--c:var(--g-reggaeton)">Reggaetón</span>
+          <span class="genre" style="--c:var(--g-boombap)">Boom bap</span>
+          <span class="genre" style="--c:var(--g-salsa)">Salsa</span>
+        </div>
+
+        <div class="ds-divider" id="tipografia">
+          <div class="t-kicker">Fundamentos</div>
+          <h2 class="t-h1">Tipografía</h2>
+          <p class="ds-note"><strong>Archivo</strong> estrecha y negra para titulares, con aire de cartel callejero. <strong>Geist</strong> para toda la interfaz (legible a 13px). <strong>Geist Mono</strong> para tiempos y contadores, así los números no bailan.</p>
+        </div>
+        <div>
+          <div class="type-spec"><span class="ds-label">Display · Archivo 900 · 48→104px</span><div class="t-display">Beef Music</div></div>
+          <div class="type-spec"><span class="ds-label">H1 · Archivo 800 condensada · 28→40px</span><div class="t-h1">Perfil sonoro</div></div>
+          <div class="type-spec"><span class="ds-label">H2 · Geist 700 · 22px</span><div class="t-h2">Novedades de la semana</div></div>
+          <div class="type-spec"><span class="ds-label">H3 · Geist 600 · 18px</span><div class="t-h3">Relaciones Venenosas</div></div>
+          <div class="type-spec"><span class="ds-label">Body · Geist 400 · 16px</span><p class="t-body">Tú escribes la movida que quieres contar, la petición entra en el Discord y vuelve hecha canción.</p></div>
+          <div class="type-spec"><span class="ds-label">Meta · Geist 400 · 13px</span><div class="t-meta">@anais · Dembow · 2:41</div></div>
+          <div class="type-spec"><span class="ds-label">Kicker · Geist 600 · 12px · mayúsculas</span><div class="t-kicker">Taller de temas a la carta</div></div>
+          <div class="type-spec"><span class="ds-label">Mono · Geist Mono · 12px</span><div class="tabular t-meta">1:07 / 3:42</div></div>
+        </div>
+
+        <div class="ds-divider" id="portadas">
+          <div class="t-kicker">Fundamentos</div>
+          <h2 class="t-h1">Portadas generadas</h2>
+          <p class="ds-note">Las canciones no tienen imagen, así que cada una recibe una portada única y estable: el <strong>estilo</strong> elige el color (trap violeta, drill azul hielo, dembow naranja…) y el <strong>título</strong> elige el diseño entre 4 variantes (malla, vinilo, tipográfica y partida). Sin imágenes que cargar: es CSS puro.</p>
+        </div>
+        <div class="ds-grid" id="cover-gallery"></div>
+
+        <div class="ds-divider" id="espacios">
+          <div class="t-kicker">Fundamentos</div>
+          <h2 class="t-h1">Espacio, forma y movimiento</h2>
+        </div>
+        <div class="ds-grid ds-grid--wide">
+          <div class="panel panel--raised">
+            <div class="t-h3" style="margin-bottom:var(--s-2)">Espaciado · base 4px</div>
+            <div class="token-list">
+              <div><span class="ds-label" style="width:48px">4</span><span class="bar" style="width:4px"></span></div>
+              <div><span class="ds-label" style="width:48px">8</span><span class="bar" style="width:8px"></span></div>
+              <div><span class="ds-label" style="width:48px">12</span><span class="bar" style="width:12px"></span></div>
+              <div><span class="ds-label" style="width:48px">16</span><span class="bar" style="width:16px"></span></div>
+              <div><span class="ds-label" style="width:48px">24</span><span class="bar" style="width:24px"></span></div>
+              <div><span class="ds-label" style="width:48px">32</span><span class="bar" style="width:32px"></span></div>
+              <div><span class="ds-label" style="width:48px">48</span><span class="bar" style="width:48px"></span></div>
+              <div><span class="ds-label" style="width:48px">64</span><span class="bar" style="width:64px"></span></div>
+            </div>
+          </div>
+          <div class="panel panel--raised">
+            <div class="t-h3" style="margin-bottom:var(--s-3)">Radios</div>
+            <div class="ds-row">
+              <div style="display:grid;gap:4px;justify-items:center"><div class="radius-demo" style="border-radius:var(--r-xs)"></div><span class="ds-label">4 fila</span></div>
+              <div style="display:grid;gap:4px;justify-items:center"><div class="radius-demo" style="border-radius:var(--r-md)"></div><span class="ds-label">8 panel</span></div>
+              <div style="display:grid;gap:4px;justify-items:center"><div class="radius-demo" style="border-radius:var(--r-lg)"></div><span class="ds-label">12 flota</span></div>
+              <div style="display:grid;gap:4px;justify-items:center"><div class="radius-demo" style="border-radius:var(--r-xl) var(--r-xl) 0 0"></div><span class="ds-label">20 hoja</span></div>
+              <div style="display:grid;gap:4px;justify-items:center"><div class="radius-demo" style="border-radius:var(--r-pill)"></div><span class="ds-label">pill</span></div>
+            </div>
+            <p class="t-meta" style="margin-top:var(--s-3)">Los 32px actuales se reducen: radios grandes en todo restan seriedad.</p>
+          </div>
+          <div class="panel panel--raised">
+            <div class="t-h3" style="margin-bottom:var(--s-2)">Movimiento</div>
+            <div class="token-list">
+              <div><span class="ds-label" style="width:96px">120ms</span><span class="t-meta">Pulsar (escala 0.96)</span></div>
+              <div><span class="ds-label" style="width:96px">180ms</span><span class="t-meta">Hover y colores</span></div>
+              <div><span class="ds-label" style="width:96px">240ms</span><span class="t-meta">Aparecer / toasts</span></div>
+              <div><span class="ds-label" style="width:96px">380ms</span><span class="t-meta">Hojas inferiores</span></div>
+              <div><span class="ds-label" style="width:96px">600ms</span><span class="t-meta">Tinte del reproductor</span></div>
+            </div>
+            <p class="t-meta" style="margin-top:var(--s-3)">Entradas con curva de frenado suave; se respeta “reducir movimiento” del sistema.</p>
+          </div>
+        </div>
+
+        <!-- ================================================================
+             COMPONENTES
+             ================================================================ -->
+        <div class="ds-divider" id="componentes">
+          <div class="t-kicker">Componentes</div>
+          <h2 class="t-h1">Piezas reutilizables</h2>
+        </div>
+
+        <div class="ds-grid ds-grid--wide">
+          <div class="panel panel--raised" style="display:grid;gap:var(--s-3)">
+            <span class="ds-label">Botones</span>
+            <div class="ds-row">
+              <button class="btn btn--primary">Pedir canción</button>
+              <button class="btn">Secundario</button>
+              <button class="btn btn--outline">Borde</button>
+              <button class="btn btn--ghost">Fantasma</button>
+              <button class="btn btn--primary" disabled>Desactivado</button>
+            </div>
+            <div class="ds-row">
+              <button class="play" aria-label="Reproducir"><svg class="icon icon--fill i-play"><use href="#i-play"/></svg></button>
+              <button class="play play--light" aria-label="Reproducir"><svg class="icon icon--fill i-play"><use href="#i-play"/></svg></button>
+              <button class="icon-btn" aria-label="Más opciones"><svg class="icon"><use href="#i-more"/></svg></button>
+              <button class="icon-btn" aria-label="Notificaciones"><svg class="icon"><use href="#i-bell"/></svg><span class="badge-dot">3</span></button>
+            </div>
+          </div>
+
+          <div class="panel panel--raised" style="display:grid;gap:var(--s-3)">
+            <span class="ds-label">Votos (pulsa)</span>
+            <div class="votes">
+              <button class="vote" aria-pressed="true" aria-label="Me gusta"><svg class="icon icon--sm"><use href="#i-up"/></svg><span class="tabular">24</span></button>
+              <button class="vote" aria-pressed="false" aria-label="No me gusta"><svg class="icon icon--sm"><use href="#i-down"/></svg><span class="tabular">3</span></button>
+            </div>
+            <span class="ds-label">Toast</span>
+            <div><button class="btn btn--sm" id="toast-demo">Mostrar aviso</button></div>
+          </div>
+
+          <div class="panel panel--raised" style="display:grid;gap:var(--s-3)">
+            <span class="ds-label">Formulario</span>
+            <div class="field">
+              <label class="field__label" for="f1">Tu nick</label>
+              <input class="input" id="f1" placeholder="@tu_usuario" />
+            </div>
+            <div class="field field--error">
+              <label class="field__label" for="f2">Estilo</label>
+              <input class="input" id="f2" value="" placeholder="Drill, trap, dembow…" />
+              <span class="field__hint">Dinos al menos un estilo.</span>
+            </div>
+          </div>
+
+          <div class="panel panel--raised" style="display:grid;gap:var(--s-3)">
+            <span class="ds-label">Cargando y vacío</span>
+            <div style="display:grid;grid-template-columns:48px 1fr;gap:var(--s-3);align-items:center">
+              <div class="skel" style="aspect-ratio:1"></div>
+              <div style="display:grid;gap:6px"><div class="skel" style="height:12px;width:70%"></div><div class="skel" style="height:10px;width:40%"></div></div>
+            </div>
+            <div class="empty"><svg class="icon"><use href="#i-music"/></svg><div class="t-ui" style="color:var(--text)">Aún no hay canciones</div><div class="t-meta">Cuando se publique la primera, saldrá aquí.</div></div>
+          </div>
+        </div>
+
+        <!-- ================================================================
+             NAVEGACIÓN
+             ================================================================ -->
+        <div class="ds-divider" id="navegacion">
+          <div class="t-kicker">Arquitectura</div>
+          <h2 class="t-h1">Dónde va cada cosa</h2>
+          <p class="ds-note">Hoy hay 8 botones apilados en un menú ☰. Se reorganizan en 5 pestañas, y el asistente IA deja de ser un botón flotante (que chocaría con el mini‑player): pasa a vivir dentro de “Pedir”.</p>
+        </div>
+        <div class="table-scroll">
+          <table class="ia-table">
+            <thead><tr><th>Pestaña</th><th>Contiene</th><th>Viene de</th></tr></thead>
+            <tbody>
+              <tr><td>Inicio</td><td>Portada, novedades, top, estadísticas</td><td><code>index.html</code></td></tr>
+              <tr><td>Canciones</td><td>Buscar, filtrar, votar, comentarios (hoja)</td><td><code>canciones.html</code></td></tr>
+              <tr><td>Pedir ＋</td><td>Petición · Asistente IA · Peticiones en curso</td><td>modales de <code>index.html</code>, <code>peticiones.html</code></td></tr>
+              <tr><td>Comunidad</td><td>Feed, buscar perfiles, seguir</td><td><code>comunidad.html</code></td></tr>
+              <tr><td>Perfil</td><td>Nivel, logros, editar perfil, sugerencia, reportar, legal, cerrar sesión</td><td><code>perfil.html</code>, parte de <code>comunidad.html</code>, <code>contacto.html</code></td></tr>
+              <tr><td>Fuera de pestañas</td><td>Login, registro, admin, términos, privacidad</td><td>mismo sistema, sin pestañas</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="height:var(--s-16)"></div>
+      </div>
+    </main>
+
+    <!-- ==================== BARRA DE REPRODUCTOR (escritorio) ==================== -->
+    <footer class="playerbar" aria-label="Reproductor">
+      <div class="playerbar__now">
+        <div class="cover" data-player="cover"></div>
+        <div style="min-width:0">
+          <div class="t-ui clamp-1" style="font-weight:600" data-player="title">Nada sonando</div>
+          <div class="t-meta clamp-1" data-player="artist">Elige una canción</div>
+        </div>
+        <button class="icon-btn" aria-label="Me gusta" aria-pressed="false" data-player="like"><svg class="icon icon--sm"><use href="#i-up"/></svg></button>
+      </div>
+      <div class="playerbar__center">
+        <div class="playerbar__controls">
+          <button class="icon-btn" aria-label="Anterior" data-player="prev"><svg class="icon icon--sm icon--fill"><use href="#i-prev"/></svg></button>
+          <button class="play" aria-label="Reproducir" data-player="toggle"><svg class="icon icon--sm icon--fill i-play"><use href="#i-play"/></svg><svg class="icon icon--sm icon--fill i-pause"><use href="#i-pause"/></svg></button>
+          <button class="icon-btn" aria-label="Siguiente" data-player="next"><svg class="icon icon--sm icon--fill"><use href="#i-next"/></svg></button>
+        </div>
+        <div class="playerbar__scrub">
+          <span data-player="cur">0:00</span>
+          <input class="range" type="range" min="0" max="100" step="0.1" value="0" aria-label="Posición" data-player="seek" />
+          <span data-player="dur">0:00</span>
+        </div>
+      </div>
+      <div class="playerbar__end">
+        <button class="icon-btn" aria-label="Comentarios"><svg class="icon icon--sm"><use href="#i-comment"/></svg></button>
+        <svg class="icon icon--sm" style="color:var(--text-2)"><use href="#i-volume"/></svg>
+        <input class="range" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volumen" data-player="vol" style="--p:90%" />
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==================== MINI‑PLAYER (móvil) ==================== -->
+  <div class="mini" id="mini" hidden role="button" tabindex="0" aria-label="Abrir reproductor">
+    <div class="cover" data-player="cover"></div>
+    <div class="mini__text">
+      <div class="mini__title clamp-1" data-player="title">—</div>
+      <div class="mini__artist clamp-1" data-player="artist">—</div>
+    </div>
+    <button class="icon-btn" aria-label="Me gusta" aria-pressed="false" data-player="like" style="color:var(--text)"><svg class="icon"><use href="#i-up"/></svg></button>
+    <button class="icon-btn" aria-label="Reproducir" data-player="toggle" style="color:var(--text)"><span class="play-glyph"><svg class="icon icon--fill i-play"><use href="#i-play"/></svg><svg class="icon icon--fill i-pause" style="display:none"><use href="#i-pause"/></svg></span></button>
+    <div class="mini__progress"><span data-player="bar"></span></div>
+  </div>
+
+  <!-- ==================== TAB BAR (móvil) ==================== -->
+  <nav class="tabbar" aria-label="Navegación principal">
+    <a class="tabbar__item" href="#inicio" data-nav="inicio" aria-current="page"><svg class="icon"><use href="#i-home"/></svg>Inicio</a>
+    <a class="tabbar__item" href="#canciones" data-nav="canciones"><svg class="icon"><use href="#i-library"/></svg>Canciones</a>
+    <button class="tabbar__item" data-open="pedir"><span class="tabbar__create"><svg class="icon"><use href="#i-plus"/></svg></span>Pedir</button>
+    <a class="tabbar__item" href="#comunidad" data-nav="comunidad"><svg class="icon"><use href="#i-users"/></svg>Comunidad</a>
+    <a class="tabbar__item" href="#perfil" data-nav="perfil"><svg class="icon"><use href="#i-user"/></svg>Perfil</a>
+  </nav>
+
+  <!-- ==================== HOJA: PEDIR ==================== -->
+  <dialog class="sheet" id="sheet-pedir" aria-labelledby="pedir-title">
+    <div class="sheet__grab" data-drag></div>
+    <div class="sheet__head">
+      <h2 class="t-h2" id="pedir-title" style="margin-right:auto">Pedir canción</h2>
+      <button class="icon-btn" aria-label="Cerrar" data-close><svg class="icon"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="sheet__body">
+      <div class="segmented" role="tablist" aria-label="Tipo de petición" style="display:grid">
+        <button role="tab" aria-selected="true" data-pane="form">Petición</button>
+        <button role="tab" aria-selected="false" data-pane="ia"><svg class="icon icon--sm"><use href="#i-sparkles"/></svg>Asistente IA</button>
+      </div>
+      <form id="pedir-form" data-pane-id="form" style="display:grid;gap:var(--s-4)" novalidate>
+        <div class="field">
+          <label class="field__label" for="p-nick">Tu nick</label>
+          <input class="input" id="p-nick" value="@ivan" />
+        </div>
+        <div class="field">
+          <span class="field__label" id="p-style-label">Estilo</span>
+          <div class="chips" role="group" aria-labelledby="p-style-label" id="p-style">
+            <button type="button" class="chip" aria-pressed="false">Drill</button>
+            <button type="button" class="chip" aria-pressed="false">Trap</button>
+            <button type="button" class="chip" aria-pressed="false">Dembow</button>
+            <button type="button" class="chip" aria-pressed="false">Reggaetón</button>
+            <button type="button" class="chip" aria-pressed="false">Boom bap</button>
+            <button type="button" class="chip" aria-pressed="false">Otro</button>
+          </div>
+        </div>
+        <div class="field" id="p-idea-field">
+          <label class="field__label" for="p-idea">Cuéntanos la historia</label>
+          <textarea class="textarea" id="p-idea" placeholder="Nombres, detalles, frases que quieras que salgan…"></textarea>
+          <span class="field__hint">Ejemplo: beef amistoso, historia de amor, intro para tu canal.</span>
+        </div>
+        <button class="btn btn--primary btn--block" type="submit"><svg class="icon icon--sm"><use href="#i-send"/></svg>Enviar petición</button>
+      </form>
+      <div data-pane-id="ia" hidden style="display:grid;gap:var(--s-3)">
+        <p class="t-meta">Pide ideas de letras, títulos o un plan de lanzamiento.</p>
+        <div class="chips">
+          <button type="button" class="chip">Letra reggaetón triste</button>
+          <button type="button" class="chip">Títulos de drill</button>
+          <button type="button" class="chip">Plan de lanzamiento 7 días</button>
+        </div>
+        <textarea class="textarea" placeholder="Quiero un tema de trap oscuro sobre crecer en el barrio…"></textarea>
+        <button class="btn btn--primary btn--block" type="button"><svg class="icon icon--sm"><use href="#i-sparkles"/></svg>Generar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ==================== HOJA: NOTIFICACIONES ==================== -->
+  <dialog class="sheet" id="sheet-notifs" aria-labelledby="notifs-title">
+    <div class="sheet__grab" data-drag></div>
+    <div class="sheet__head">
+      <h2 class="t-h2" id="notifs-title" style="margin-right:auto">Notificaciones</h2>
+      <button class="btn btn--ghost btn--sm">Marcar leídas</button>
+      <button class="icon-btn" aria-label="Cerrar" data-close><svg class="icon"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="sheet__body" style="gap:0">
+      <div class="notif"><span class="notif__dot"></span><div><div class="t-ui"><strong>Tu petición está en producción</strong></div><div class="t-meta">“Drill para el grupo de clase” ya se está cocinando.</div><div class="t-caption">hace 5 min</div></div><svg class="icon icon--sm" style="color:var(--text-3)"><use href="#i-chevron-right"/></svg></div>
+      <div class="notif"><span class="notif__dot"></span><div><div class="t-ui"><strong>@anais respondió a tu comentario</strong></div><div class="t-meta">en Sol de Boca</div><div class="t-caption">hace 1 h</div></div><svg class="icon icon--sm" style="color:var(--text-3)"><use href="#i-chevron-right"/></svg></div>
+      <div class="notif notif--read"><span class="notif__dot"></span><div><div class="t-ui">Nuevo logro: <strong>Primer voto</strong></div><div class="t-caption">ayer</div></div><svg class="icon icon--sm" style="color:var(--text-3)"><use href="#i-chevron-right"/></svg></div>
+    </div>
+  </dialog>
+
+  <!-- ==================== HOJA: REPRODUCTOR COMPLETO (móvil) ==================== -->
+  <dialog class="sheet nowplaying" id="sheet-np" aria-label="Reproduciendo">
+    <div class="sheet__head" style="padding-top:calc(var(--s-3) + var(--safe-t))" data-drag>
+      <button class="icon-btn" aria-label="Cerrar reproductor" data-close style="color:var(--text)"><svg class="icon"><use href="#i-chevron-down"/></svg></button>
+      <div style="flex:1;text-align:center" class="t-kicker">Reproduciendo</div>
+      <button class="icon-btn" aria-label="Más opciones" style="color:var(--text)"><svg class="icon"><use href="#i-more"/></svg></button>
+    </div>
+    <div class="sheet__body">
+      <div class="cover" data-player="cover"></div>
+      <div style="display:flex;align-items:center;gap:var(--s-3)">
+        <div style="flex:1;min-width:0">
+          <div class="np__title clamp-1" data-player="title">—</div>
+          <div class="t-meta clamp-1" data-player="artist">—</div>
+        </div>
+        <div class="votes">
+          <button class="vote" aria-pressed="false" aria-label="Me gusta" data-player="like"><svg class="icon icon--sm"><use href="#i-up"/></svg></button>
+          <button class="vote" aria-pressed="false" aria-label="No me gusta"><svg class="icon icon--sm"><use href="#i-down"/></svg></button>
+        </div>
+      </div>
+      <div class="scrub">
+        <input class="range" type="range" min="0" max="100" step="0.1" value="0" aria-label="Posición" data-player="seek" />
+        <div class="scrub__times"><span data-player="cur">0:00</span><span data-player="dur">0:00</span></div>
+      </div>
+      <div class="np__controls">
+        <button class="icon-btn" aria-label="Comentarios"><svg class="icon"><use href="#i-comment"/></svg></button>
+        <button class="icon-btn" aria-label="Anterior" data-player="prev"><svg class="icon icon--fill"><use href="#i-prev"/></svg></button>
+        <button class="play play--lg play--light" aria-label="Reproducir" data-player="toggle"><svg class="icon icon--fill i-play"><use href="#i-play"/></svg><svg class="icon icon--fill i-pause"><use href="#i-pause"/></svg></button>
+        <button class="icon-btn" aria-label="Siguiente" data-player="next"><svg class="icon icon--fill"><use href="#i-next"/></svg></button>
+        <button class="icon-btn" aria-label="Compartir"><svg class="icon"><use href="#i-send"/></svg></button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="covers.js"></script>
+  <script>
+    /* ---------- Datos de ejemplo (en la app real vienen de /api/canciones) ---------- */
+    const SONGS = [
+      { id: 1, titulo: "Sol de Boca", estilo: "Dembow", autor: "anais", file: "Sol Boca.mp3", likes: 24 },
+      { id: 2, titulo: "Titi", estilo: "Reggaetón", autor: "kevo", file: "Titi.mp3", likes: 31 },
+      { id: 3, titulo: "No Perdono", estilo: "Drill", autor: "marcos", file: "No Perdono.mp3", likes: 18 },
+      { id: 4, titulo: "Relaciones Venenosas", estilo: "Trap", autor: "lucia", file: "Relaciones Venenosas.mp3", likes: 27 },
+      { id: 5, titulo: "Mambo Inquieto", estilo: "Mambo", autor: "anais", file: "Mambo Inquieto.mp3", likes: 12 },
+      { id: 6, titulo: "Que Queda", estilo: "Boom bap", autor: "dani", file: "Que Queda.mp3", likes: 9 },
+      { id: 7, titulo: "Perreo Sentimiento", estilo: "Reggaetón", autor: "kevo", file: "Perreo Sentimiento.mp3", likes: 22 },
+      { id: 8, titulo: "Tota Mística", estilo: "Trap", autor: "lucia", file: "Tota Mística.mp3", likes: 15 },
+      { id: 9, titulo: "La Peruana", estilo: "Dembow", autor: "marcos", file: "La Peruana.mp3", likes: 20 },
+      { id: 10, titulo: "Navidad Miente", estilo: "R&B", autor: "dani", file: "Navidad Miente.mp3", likes: 7 },
+    ];
+    const GENRE_VAR = { trap: "--g-trap", drill: "--g-drill", dembow: "--g-dembow", "reggaetón": "--g-reggaeton", "boom bap": "--g-boombap" };
+    const $ = (s, r = document) => r.querySelector(s);
+    const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const fmt = (t) => { t = Math.max(0, Math.floor(t || 0)); return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0"); };
+    const genreTag = (estilo) => { const v = GENRE_VAR[estilo.toLowerCase()]; return `<span class="genre" style="--c:var(${v || "--text-2"})">${esc(estilo)}</span>`; };
+
+    /* ---------- Render: estantería, lista y galería ---------- */
+    function renderShelf() {
+      $("#shelf-new").innerHTML = SONGS.slice(0, 8).map((s) => `
+        <div class="card" data-play="${s.id}" role="button" tabindex="0" aria-label="Reproducir ${esc(s.titulo)}">
+          <div class="card__art">
+            ${BeefCover.html(s)}
+            <span class="play" aria-hidden="true"><svg class="icon icon--fill i-play"><use href="#i-play"/></svg><svg class="icon icon--fill i-pause"><use href="#i-pause"/></svg></span>
+          </div>
+          <div><div class="card__title clamp-1">${esc(s.titulo)}</div><div class="card__meta clamp-1">@${esc(s.autor)} · ${esc(s.estilo)}</div></div>
+        </div>`).join("");
+    }
+
+    let filterGenre = "", sortMode = "recent", query = "";
+    function renderList() {
+      let list = SONGS.filter((s) =>
+        (!filterGenre || s.estilo.toLowerCase().includes(filterGenre)) &&
+        (!query || (s.titulo + " " + s.autor + " " + s.estilo).toLowerCase().includes(query)));
+      if (sortMode === "top") list = [...list].sort((a, b) => b.likes - a.likes);
+      $("#songs-count").textContent = list.length + " temas";
+      $("#song-list").innerHTML = list.length ? list.map((s, i) => `
+        <div class="row" data-play="${s.id}" role="button" tabindex="0" aria-label="Reproducir ${esc(s.titulo)}">
+          <div class="row__n"><span>${i + 1}</span><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span></div>
+          ${BeefCover.html(s)}
+          <div class="row__body">
+            <div class="row__title clamp-1">${esc(s.titulo)}</div>
+            <div class="row__meta">${genreTag(s.estilo)}<span class="clamp-1">@${esc(s.autor)}</span></div>
+          </div>
+          <span class="row__dur" data-dur="${s.id}">—</span>
+          <div class="row__end">
+            <span class="tabular" style="display:inline-flex;align-items:center;gap:4px"><svg class="icon icon--sm"><use href="#i-up"/></svg>${s.likes}</span>
+            <button class="icon-btn" aria-label="Más opciones de ${esc(s.titulo)}" data-stop><svg class="icon icon--sm"><use href="#i-more"/></svg></button>
+          </div>
+        </div>`).join("")
+        : `<div class="empty"><svg class="icon"><use href="#i-search"/></svg><div class="t-ui" style="color:var(--text)">Nada con ese filtro</div><div class="t-meta">Prueba con otro estilo o búsqueda.</div></div>`;
+      syncCurrent();
+    }
+
+    function renderGallery() {
+      const extra = [
+        { id: 11, titulo: "Barrio Frío", estilo: "Drill" }, { id: 12, titulo: "Noche Larga", estilo: "Trap" },
+        { id: 13, titulo: "Calor", estilo: "Dembow" }, { id: 14, titulo: "Boom Viejo", estilo: "Boom bap" },
+      ];
+      $("#cover-gallery").innerHTML = [...SONGS.slice(0, 8), ...extra].map((s) => {
+        const sp = BeefCover.spec(s);
+        return `<div style="display:grid;gap:6px">${BeefCover.html(s)}<div class="t-meta clamp-1"><strong style="color:var(--text)">${esc(s.titulo)}</strong> · ${esc(s.estilo)}</div><div class="ds-label">${sp.variant}</div></div>`;
+      }).join("");
+    }
+
+    function renderSwatches() {
+      const sw = [
+        ["--bg", "#09090B", "Lienzo"], ["--surface-1", "#131316", "Paneles"], ["--surface-2", "#1B1B1F", "Tarjetas"],
+        ["--surface-3", "#25252A", "Inputs / chips"], ["--surface-4", "#303036", "Seleccionado"],
+        ["--text", "#F4F4F5", "Texto"], ["--text-2", "#A1A1AA", "Secundario · 7.7:1"], ["--text-3", "#8B8B94", "Metadatos · 5.1:1"],
+        ["--beef", "#FF3358", "Acción · texto negro"], ["--violet", "#8B5CF6", "Solo en degradados"],
+      ];
+      $("#swatches").innerHTML = sw.map(([v, hex, use]) => `
+        <div class="swatch"><div class="swatch__chip" style="background:var(${v});box-shadow:inset 0 0 0 1px var(--line)"></div>
+        <div class="swatch__info"><span class="swatch__name">${use}</span><span class="ds-label">${v} · ${hex}</span></div></div>`).join("")
+        + `<div class="swatch"><div class="swatch__chip" style="background:var(--grad-beef)"></div><div class="swatch__info"><span class="swatch__name">Degradado beef</span><span class="ds-label">Solo XP, avatar y portada</span></div></div>`;
+    }
+
+    /* ---------- Reproductor compartido ---------- */
+    const audio = new Audio();
+    audio.preload = "metadata";
+    audio.volume = 0.9;
+    let current = -1;
+    const mini = $("#mini");
+
+    function load(index, autoplay = true) {
+      current = (index + SONGS.length) % SONGS.length;
+      const s = SONGS[current];
+      audio.src = "../audios/" + encodeURIComponent(s.file);
+      const sp = BeefCover.spec(s);
+      $$('[data-player="cover"]').forEach((el) => BeefCover.paint(el, s));
+      $$('[data-player="title"]').forEach((el) => (el.textContent = s.titulo));
+      $$('[data-player="artist"]').forEach((el) => (el.textContent = "@" + s.autor + " · " + s.estilo));
+      mini.style.setProperty("--tint", sp.tint);
+      $("#sheet-np").style.setProperty("--tint", sp.tint);
+      mini.hidden = false;
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({ title: s.titulo, artist: "@" + s.autor, album: "BeefMusic" });
+      }
+      if (autoplay) audio.play().catch(() => {});
+      syncCurrent();
+    }
+
+    function toggle() {
+      if (current < 0) return load(0);
+      audio.paused ? audio.play() : audio.pause();
+    }
+
+    function syncCurrent() {
+      const id = current >= 0 ? SONGS[current].id : null;
+      const playing = !audio.paused;
+      $$("[data-play]").forEach((el) => {
+        const is = Number(el.dataset.play) === id;
+        el.classList.toggle("is-current", is);
+        el.classList.toggle("is-playing", is && playing);
+      });
+      $$('[data-player="toggle"]').forEach((b) => {
+        b.classList.toggle("is-playing", playing);
+        b.setAttribute("aria-label", playing ? "Pausar" : "Reproducir");
+        const g = b.querySelector(".play-glyph");
+        if (g) { g.querySelector(".i-play").style.display = playing ? "none" : ""; g.querySelector(".i-pause").style.display = playing ? "" : "none"; }
+      });
+    }
+
+    audio.addEventListener("play", syncCurrent);
+    audio.addEventListener("pause", syncCurrent);
+    audio.addEventListener("ended", () => load(current + 1));
+    audio.addEventListener("loadedmetadata", () => {
+      $$('[data-player="dur"]').forEach((el) => (el.textContent = fmt(audio.duration)));
+      const d = $(`[data-dur="${SONGS[current].id}"]`); if (d) d.textContent = fmt(audio.duration);
+    });
+    audio.addEventListener("timeupdate", () => {
+      const p = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      $$('[data-player="cur"]').forEach((el) => (el.textContent = fmt(audio.currentTime)));
+      $$('[data-player="seek"]').forEach((r) => { if (document.activeElement !== r) r.value = p; r.style.setProperty("--p", p + "%"); });
+      $$('[data-player="bar"]').forEach((b) => (b.style.width = p + "%"));
+    });
+    $$('[data-player="seek"]').forEach((r) => r.addEventListener("input", () => {
+      r.style.setProperty("--p", r.value + "%");
+      if (audio.duration) audio.currentTime = (r.value / 100) * audio.duration;
+    }));
+    $('[data-player="vol"]').addEventListener("input", (e) => { audio.volume = e.target.value; e.target.style.setProperty("--p", e.target.value * 100 + "%"); });
+
+    document.addEventListener("click", (e) => {
+      const t = e.target.closest("[data-player]");
+      if (t) {
+        e.stopPropagation();
+        const a = t.dataset.player;
+        if (a === "toggle") toggle();
+        if (a === "next") load(current + 1);
+        if (a === "prev") audio.currentTime > 3 ? (audio.currentTime = 0) : load(current - 1);
+        if (a === "like") { const on = t.getAttribute("aria-pressed") !== "true"; $$('[data-player="like"]').forEach((b) => b.setAttribute("aria-pressed", on)); }
+        return;
+      }
+      if (e.target.closest("[data-stop]")) return;
+      const p = e.target.closest("[data-play]");
+      if (p) {
+        const idx = SONGS.findIndex((s) => s.id === Number(p.dataset.play));
+        idx === current ? toggle() : load(idx);
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      const p = e.target.closest && e.target.closest("[data-play]");
+      if (p && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); p.click(); }
+    });
+    if ("mediaSession" in navigator) {
+      navigator.mediaSession.setActionHandler("nexttrack", () => load(current + 1));
+      navigator.mediaSession.setActionHandler("previoustrack", () => load(current - 1));
+    }
+
+    /* ---------- Hojas (dialog) con arrastre para cerrar ---------- */
+    function openSheet(id) { const d = document.getElementById(id); if (!d.open) d.showModal(); return d; }
+    $$("[data-open]").forEach((b) => b.addEventListener("click", () => {
+      const d = openSheet("sheet-" + b.dataset.open);
+      if (b.dataset.tab) selectPane(d, b.dataset.tab);
+    }));
+    mini.addEventListener("click", () => openSheet("sheet-np"));
+    mini.addEventListener("keydown", (e) => { if (e.key === "Enter") openSheet("sheet-np"); });
+    $$("dialog.sheet").forEach((d) => {
+      d.addEventListener("click", (e) => { if (e.target === d || e.target.closest("[data-close]")) d.close(); });
+      const handle = d.querySelector("[data-drag]");
+      if (!handle) return;
+      let y0 = null, dy = 0;
+      handle.addEventListener("pointerdown", (e) => { if (e.target.closest("button")) return; y0 = e.clientY; dy = 0; d.classList.add("is-dragging"); handle.setPointerCapture(e.pointerId); });
+      handle.addEventListener("pointermove", (e) => { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); d.style.transform = `translateY(${dy}px)`; });
+      const end = () => {
+        if (y0 === null) return;
+        d.classList.remove("is-dragging"); d.style.transform = ""; y0 = null;
+        if (dy > 120) d.close();
+      };
+      handle.addEventListener("pointerup", end);
+      handle.addEventListener("pointercancel", end);
+    });
+
+    function selectPane(d, name) {
+      $$('[role="tab"][data-pane]', d).forEach((t) => t.setAttribute("aria-selected", t.dataset.pane === name));
+      $$("[data-pane-id]", d).forEach((p) => (p.hidden = p.dataset.paneId !== name));
+    }
+    $$('[role="tab"][data-pane]').forEach((t) => t.addEventListener("click", () => selectPane(t.closest("dialog"), t.dataset.pane)));
+
+    /* ---------- Formulario de petición (demo) ---------- */
+    $$("#p-style .chip").forEach((c) => c.addEventListener("click", () => {
+      $$("#p-style .chip").forEach((o) => o.setAttribute("aria-pressed", o === c));
+    }));
+    $("#pedir-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const field = $("#p-idea-field");
+      const ok = $("#p-idea").value.trim().length > 0;
+      field.classList.toggle("field--error", !ok);
+      field.querySelector(".field__hint").textContent = ok ? "Ejemplo: beef amistoso, historia de amor, intro para tu canal." : "Cuéntanos de qué va la canción.";
+      if (!ok) return $("#p-idea").focus();
+      $("#sheet-pedir").close();
+      e.target.reset();
+      toast("Petición enviada · te avisamos cuando esté en producción");
+    });
+
+    /* ---------- Chips, orden, búsqueda y votos ---------- */
+    $$("#genre-chips .chip").forEach((c) => c.addEventListener("click", () => {
+      $$("#genre-chips .chip").forEach((o) => o.setAttribute("aria-pressed", o === c));
+      filterGenre = c.dataset.genre; renderList();
+    }));
+    $$("[data-sort]").forEach((b) => b.addEventListener("click", () => {
+      $$("[data-sort]").forEach((o) => o.setAttribute("aria-selected", o === b));
+      sortMode = b.dataset.sort; renderList();
+    }));
+    $("#search").addEventListener("input", (e) => { query = e.target.value.trim().toLowerCase(); renderList(); });
+    $$(".vote:not([data-player])").forEach((v) => v.addEventListener("click", () => {
+      const group = v.closest(".votes");
+      const on = v.getAttribute("aria-pressed") !== "true";
+      $$(".vote", group).forEach((o) => {
+        const was = o.getAttribute("aria-pressed") === "true";
+        const now = o === v ? on : false;
+        o.setAttribute("aria-pressed", now);
+        const n = o.querySelector(".tabular");
+        if (n && was !== now) n.textContent = Number(n.textContent) + (now ? 1 : -1);
+      });
+      v.classList.remove("pop"); void v.offsetWidth; v.classList.add("pop");
+    }));
+
+    /* ---------- Toast ---------- */
+    let toastTimer;
+    function toast(msg) {
+      const t = $("#toast");
+      t.innerHTML = `<svg class="icon icon--sm"><use href="#i-check"/></svg>${esc(msg)}`;
+      t.classList.add("is-visible");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove("is-visible"), 2800);
+    }
+    $("#toast-demo").addEventListener("click", () => toast("Guardado en tu perfil"));
+    $$("[data-jump]").forEach((b) => b.addEventListener("click", () => { document.getElementById(b.dataset.jump).scrollIntoView(); setTimeout(() => $("#search").focus(), 300); }));
+
+    /* ---------- Pestaña activa según la sección visible ---------- */
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((en) => {
+        if (!en.isIntersecting) return;
+        const key = en.target.dataset.section;
+        $$("[data-nav]").forEach((a) => a.toggleAttribute("aria-current", a.dataset.nav === key) || a.removeAttribute("aria-current"));
+        $$(`[data-nav="${key}"]`).forEach((a) => a.setAttribute("aria-current", "page"));
+      });
+    }, { rootMargin: "-40% 0px -55% 0px" });
+    $$("[data-section]").forEach((s) => io.observe(s));
+
+    renderShelf(); renderList(); renderGallery(); renderSwatches();
+  </script>
+</body>
+</html>
