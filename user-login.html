@@ -2,533 +2,89 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <!-- 👇 ESTA LÍNEA ES LA CLAVE PARA MÓVIL -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BeefMusic – Acceso usuarios</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
-  <style>
-    body {
-      background: radial-gradient(circle at top left, #31112f 0, #050509 45%, #050509 100%);
-    }
-
-    .auth-shell {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 32px 16px;
-    }
-
-    .auth-card {
-      max-width: 860px;
-      width: 100%;
-      border-radius: 28px;
-      padding: 1px; /* borde degradado */
-      background: linear-gradient(
-        135deg,
-        rgba(255,39,87,0.9),
-        rgba(138,77,255,0.9),
-        rgba(255,255,255,0.1)
-      );
-      box-shadow: 0 28px 80px rgba(0,0,0,0.85);
-    }
-
-    .auth-inner {
-      background: radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 55%),
-                  rgba(5,5,9,0.96);
-      border-radius: 26px;
-      padding: 22px 22px 24px;
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-      gap: 22px;
-    }
-
-    .auth-left {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .auth-left-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-      gap: 12px;
-    }
-
-    .auth-badge {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.28);
-      color: var(--fg-muted);
-      background: rgba(0,0,0,0.6);
-      white-space: nowrap;
-    }
-
-    .auth-title {
-      font-size: 1.8rem;
-      margin-bottom: 4px;
-    }
-
-    .auth-subtitle {
-      font-size: 0.92rem;
-      color: var(--fg-muted);
-      max-width: 340px;
-    }
-
-    .auth-pill-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 14px;
-      flex-wrap: wrap;
-    }
-
-    .auth-pill {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--fg-muted);
-    }
-
-    .auth-status {
-      font-size: 0.8rem;
-      color: var(--fg-muted);
-      min-height: 18px;
-      margin-top: 10px;
-      margin-bottom: 8px;
-    }
-
-    .auth-toggle {
-      margin-top: 10px;
-      font-size: 0.8rem;
-      color: var(--fg-muted);
-    }
-
-    .auth-toggle button {
-      background: none;
-      border: none;
-      color: var(--accent-pink);
-      cursor: pointer;
-      padding: 0;
-      font: inherit;
-    }
-
-    .auth-footer-links {
-      margin-top: 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.78rem;
-      color: var(--fg-muted);
-      flex-wrap: wrap;
-    }
-
-    .auth-footer-links a {
-      text-decoration: none;
-      color: var(--fg-muted);
-      opacity: 0.9;
-    }
-
-    .auth-footer-links a:hover {
-      opacity: 1;
-    }
-
-    /* Lado derecho: bloque visual */
-    .auth-right {
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background:
-        radial-gradient(circle at 0 0, rgba(255,39,87,0.6), transparent 55%),
-        radial-gradient(circle at 100% 0, rgba(138,77,255,0.7), transparent 55%),
-        linear-gradient(140deg, #050509, #11111c);
-      position: relative;
-      overflow: hidden;
-      padding: 16px 16px 18px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .auth-tag-top {
-      align-self: flex-start;
-      font-size: 0.75rem;
-      padding: 3px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.4);
-      background: rgba(5,5,9,0.85);
-    }
-
-    .auth-right-main {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-
-    .auth-orb {
-      width: 170px;
-      height: 170px;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 30% 20%, rgba(255,255,255,0.9), transparent 55%),
-        radial-gradient(circle at 80% 80%, rgba(255,39,87,0.9), transparent 55%),
-        radial-gradient(circle at 0 100%, rgba(138,77,255,0.9), transparent 55%);
-      filter: blur(4px);
-      position: relative;
-      box-shadow: 0 0 50px rgba(255,39,87,0.9);
-    }
-
-    .auth-orb::after {
-      content: "BM";
-      position: absolute;
-      inset: 24%;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      color: #050509;
-      background: rgba(255,255,255,0.9);
-    }
-
-    .auth-right-bottom {
-      font-size: 0.8rem;
-      color: rgba(230,230,240,0.9);
-    }
-
-    .auth-right-bottom strong {
-      color: #ffffff;
-    }
-
-    .auth-meta-chip {
-      margin-top: 6px;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: rgba(220,220,235,0.9);
-    }
-
-    /* ====== RESPONSIVE ====== */
-
-    /* Portátiles medianos */
-    @media (max-width: 1024px) {
-      .auth-card {
-        max-width: 720px;
-      }
-      .auth-inner {
-        padding: 20px 18px 22px;
-        gap: 18px;
-      }
-    }
-
-    /* Tablets y pantallas medianas: columnas apiladas */
-    @media (max-width: 780px) {
-      .auth-shell {
-        padding: 24px 12px;
-      }
-
-      .auth-card {
-        max-width: 720px;
-      }
-
-      .auth-inner {
-        grid-template-columns: minmax(0, 1fr);
-        padding: 18px 16px 18px;
-        gap: 18px;
-      }
-
-      .auth-right {
-        order: -1;              /* visual arriba */
-        min-height: 200px;
-      }
-
-      .auth-title {
-        font-size: 1.6rem;
-      }
-
-      .auth-subtitle {
-        max-width: 100%;
-      }
-    }
-
-    /* Móviles pequeños (tipo 360–480px) */
-    @media (max-width: 480px) {
-      html, body {
-        height: 100%;
-      }
-
-      .auth-shell {
-        padding: 0 0 24px;
-        align-items: flex-start;
-      }
-
-      .auth-card {
-        max-width: 100%;
-        border-radius: 0;
-        padding: 0;
-        background: none; /* sin borde degradado para look de app */
-        box-shadow: none;
-      }
-
-      .auth-inner {
-        border-radius: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-        background: transparent;
-      }
-
-      /* HERO superior en móvil */
-      .auth-right {
-        order: -1;
-        border-radius: 0 0 32px 32px;
-        border: none;
-        padding: 32px 18px 72px;
-        align-items: center;
-        text-align: center;
-      }
-
-      .auth-tag-top {
-        font-size: 0.7rem;
-        padding: 3px 10px;
-      }
-
-      .auth-orb {
-        width: 150px;
-        height: 150px;
-        box-shadow: 0 0 40px rgba(255,39,87,0.9);
-      }
-
-      .auth-right-bottom {
-        font-size: 0.8rem;
-        max-width: 280px;
-        text-align: center;
-      }
-
-      .auth-meta-chip {
-        font-size: 0.7rem;
-      }
-
-      /* Card de login flotando encima del fondo (más grande y legible) */
-      .auth-left {
-        position: relative;
-        margin-top: -56px;
-        margin-inline: 16px;
-        padding: 20px 16px 20px;
-        border-radius: 20px;
-        background: rgba(5,5,12,0.98);
-        border: 1px solid rgba(255,255,255,0.14);
-        box-shadow: 0 18px 42px rgba(0,0,0,0.9);
-      }
-
-      .auth-left-header {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        margin-bottom: 14px;
-      }
-
-      .auth-title {
-        font-size: 1.55rem;
-      }
-
-      .auth-subtitle {
-        font-size: 0.9rem;
-        max-width: 100%;
-      }
-
-      .auth-pill-row {
-        margin-top: 10px;
-      }
-
-      .auth-status {
-        margin-top: 10px;
-        font-size: 0.8rem;
-      }
-
-      /* Inputs más grandes y cómodos */
-      .auth-left .field label {
-        font-size: 0.9rem;
-      }
-
-      .auth-left .field input,
-      .auth-left .field textarea {
-        padding: 11px 12px;
-        font-size: 0.96rem;
-      }
-
-      /* Botón grande y a ancho completo */
-      .auth-left .modal-footer {
-        margin-top: 16px !important;
-        justify-content: center !important;
-      }
-
-      .auth-left .btn.btn-primary {
-        width: 100%;
-        justify-content: center;
-        padding: 11px 0;
-        font-size: 0.96rem;
-      }
-
-      .auth-toggle {
-        margin-top: 12px;
-        font-size: 0.85rem;
-      }
-
-      .auth-footer-links {
-        margin-top: 14px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-        font-size: 0.8rem;
-      }
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#09090b" />
+  <title>Entrar · BeefMusic</title>
+  <link rel="icon" href="img/logo.gif" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="design-system/tokens.css" />
+  <link rel="stylesheet" href="design-system/components.css" />
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="css/auth.css" />
 </head>
-<body>
-  <div class="auth-shell">
-    <div class="auth-card">
-      <div class="auth-inner">
-        <!-- LADO IZQUIERDO: LOGO + FORM -->
-        <div class="auth-left">
-          <div class="auth-left-header">
-            <div class="logo">
-              <div class="logo-mark"></div>
-              <span>BeefMusic</span>
-            </div>
-            <div class="auth-badge">Acceso comunidad</div>
-          </div>
+<body data-mode="login">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+    <symbol id="i-login" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></symbol>
+    <symbol id="i-library" viewBox="0 0 24 24"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></symbol>
+  </svg>
 
-          <h1 class="auth-title" id="auth-title">Entrar</h1>
-          <p class="auth-subtitle" id="auth-subtitle">
-            Accede para enviar peticiones y seguir la pista a tus temas dentro de la colección.
-          </p>
+  <div class="auth">
+    <section class="auth__showcase" aria-hidden="false">
+      <div class="auth__brand">
+        <a class="logo" href="index.html#/canciones" aria-label="BeefMusic">
+          <span class="logo__mark" aria-hidden="true"></span>
+          <span class="logo__word">BeefMusic</span>
+        </a>
+        <a class="btn btn--sm" href="index.html#/canciones"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-library"/></svg>Escuchar</a>
+      </div>
+      <div class="auth__mosaic" id="mosaic"></div>
+      <div class="auth__pitch">
+        <div class="t-kicker" style="color:var(--text)">Taller de temas a la carta</div>
+        <p class="t-display">Tu historia, hecha tema</p>
+        <p class="t-body">Manda tu idea, sigue cómo se cocina en Discord y escúchala en la colección.</p>
+      </div>
+    </section>
 
-          <div class="auth-pill-row">
-            <div class="auth-pill">Peticiones guardadas</div>
-            <div class="auth-pill">Discord conectado</div>
-            <div class="auth-pill">Beefs y dembows</div>
-          </div>
+    <main class="auth__panel">
+      <form class="auth__form" id="auth-form" novalidate>
+        <header class="auth__head">
+          <p class="t-kicker">Acceso comunidad</p>
+          <h1 class="auth__title">Entrar</h1>
+          <p class="t-meta">Para pedir canciones, votar, comentar y seguir tus temas.</p>
+        </header>
 
-          <div class="auth-status" id="auth-status"></div>
+        <div class="auth__alert" id="auth-alert" hidden></div>
 
-          <form id="auth-form" style="margin-top:12px;">
-            <div class="field">
-              <label for="username">Usuario</label>
-              <input id="username" name="username" type="text" required />
-            </div>
-            <div class="field">
-              <label for="password">Contraseña</label>
-              <input id="password" name="password" type="password" required />
-            </div>
-            <div class="modal-footer" style="margin-top:14px; justify-content:flex-end;">
-              <button class="btn btn-primary" type="submit" id="auth-submit-btn">
-                Entrar
-              </button>
-            </div>
-          </form>
-
-          <div class="auth-toggle">
-            <span>¿No tienes cuenta?</span>
-            <a href="registro-usuario.html" style="color: var(--accent-pink); text-decoration: none;">
-              Registrarme
-            </a>
-          </div>
-
-          <div class="auth-footer-links">
-            <a href="index.html">← Ir a la portada</a>
-            <a href="login.html">Login admin</a>
-          </div>
+        <div class="field">
+          <label class="field__label" for="username">Usuario</label>
+          <input class="input" id="username" name="username" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" required />
         </div>
 
-        <!-- LADO DERECHO: VISUAL -->
-        <aside class="auth-right">
-          <div class="auth-tag-top">Digital Beat Access</div>
-          <div class="auth-right-main">
-            <div class="auth-orb"></div>
+        <div class="field">
+          <label class="field__label" for="password">Contraseña</label>
+          <div class="password">
+            <input class="input" id="password" name="password" type="password" autocomplete="current-password" enterkeyhint="go" required />
+            <button class="icon-btn password__toggle" type="button" id="password-toggle" aria-pressed="false" aria-label="Mostrar contraseña" aria-controls="password">
+              <svg class="icon icon--sm i-eye" aria-hidden="true"><use href="#i-eye"/></svg>
+              <svg class="icon icon--sm i-eye-off" aria-hidden="true"><use href="#i-eye-off"/></svg>
+            </button>
           </div>
-          <div class="auth-right-bottom">
-            <strong>Tu usuario BeefMusic</strong> te conecta con el flujo completo:
-            peticiones desde la web, seguimiento desde Discord y temas publicados
-            en la colección.
-            <div class="auth-meta-chip">Beef · Drill · Dembow · Trap</div>
-          </div>
-        </aside>
-      </div>
-    </div>
+          <span class="field__hint caps" id="caps">Las mayúsculas están activadas.</span>
+        </div>
+
+        <button class="btn btn--primary btn--block" type="submit" id="auth-submit">
+          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-login"/></svg>Entrar
+        </button>
+
+        <p class="auth__switch">¿No tienes cuenta? <a href="registro-usuario.html" data-keep-next>Créala gratis</a></p>
+        <div class="auth__divider" role="presentation"></div>
+        <nav class="auth__links" aria-label="Más enlaces">
+          <a href="index.html#/canciones">Escuchar sin cuenta</a>
+          <a href="index.html#/terminos">Términos</a>
+          <a href="index.html#/privacidad">Privacidad</a>
+          <a href="login.html">Acceso admin</a>
+        </nav>
+      </form>
+    </main>
   </div>
-  <script>
-    const API_URL = "https://beefmusic-backend.onrender.com";
 
-    // Si ya estás logueado como usuario, manda directo al home
-    (function () {
-      const userToken = localStorage.getItem("beefmusic_user_token");
-      if (userToken) {
-        window.location.href = "index.html";
-      }
-    })();
-
-    const form = document.getElementById("auth-form");
-    const statusEl = document.getElementById("auth-status");
-    const submitBtn = document.getElementById("auth-submit-btn");
-
-    form.addEventListener("submit", async function (e) {
-      e.preventDefault();
-      statusEl.textContent = "Comprobando credenciales...";
-
-      const data = {
-        username: this.username.value,
-        password: this.password.value,
-      };
-
-      const url = API_URL + "/api/login-user";
-
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-
-        const json = await res.json();
-
-        if (!res.ok) {
-          statusEl.textContent =
-            "❌ " + (json.error || "Usuario o contraseña incorrectos");
-          return;
-        }
-
-        localStorage.setItem("beefmusic_user_token", json.token);
-        localStorage.setItem("beefmusic_user_name", json.username);
-
-        statusEl.textContent = "✅ Login correcto, redirigiendo...";
-        submitBtn.disabled = true;
-
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 800);
-      } catch (err) {
-        console.error(err);
-        statusEl.textContent = "❌ Error conectando con el servidor.";
-      }
-    });
-  </script>
+  <script src="design-system/covers.js"></script>
+  <script type="module" src="js/auth-page.js"></script>
 </body>
 </html>

@@ -1,1992 +1,343 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BeefMusic – Crea canciones desde peticiones</title>
-
-    <!-- Fuente futurista y limpia -->
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-
-    <style>
-        /* LAYOUT GENERAL */
-        .page {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px 20px 80px;
-        }
-
-        /* HEADER CON BOTONES AND USER */
-        .header-actions {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            flex-wrap: wrap;
-            padding: 12px 0;
-            background: rgba(0,0,0,0.35);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            margin-bottom: 18px;
-        }
-
-        /* ==========================================================
-           MENÚ MÓVIL (header)
-           ========================================================== */
-        .nav-actions{
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .mobile-menu-btn{
-            display: none; /* solo móvil */
-        }
-
-        @media (max-width: 768px){
-            .mobile-menu-btn{
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                width: auto;
-            }
-
-            .nav-actions{
-                position: absolute;
-                left: 8px;
-                right: 8px;
-                top: calc(100% + 10px);
-                z-index: 70;
-
-                display: none;            /* cerrado por defecto */
-                flex-direction: column;
-                gap: 8px;
-                padding: 10px;
-
-                border-radius: 18px;
-                border: 1px solid rgba(255,255,255,.14);
-                background: rgba(0,0,0,0.75);
-                backdrop-filter: blur(14px);
-                -webkit-backdrop-filter: blur(14px);
-                box-shadow: 0 18px 45px rgba(0,0,0,.55);
-            }
-
-            .nav-actions.open{
-                display: flex;
-            }
-
-            /* En móvil, NO estiramos los botones del header,
-               solo los del desplegable */
-            .nav-actions .btn,
-            .nav-actions a.btn{
-                width: auto;
-            }
-
-            .nav-actions .btn,
-            .nav-actions a.btn{
-                width: 100%;
-                justify-content: center;
-                text-align: center;
-            }
-        }
-
-        @media (max-width: 700px){
-            .nav-actions .btn,
-            .nav-actions a.btn{
-                width: auto;
-            }
-            .nav-actions .btn,
-            .nav-actions a.btn{
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-right: auto;
-        }
-
-        .user-profile-text {
-            display: flex;
-            flex-direction: column;
-            font-size: 0.8rem;
-        }
-
-        .user-profile-label {
-            opacity: 0.7;
-        }
-
-        .user-profile-name {
-            font-weight: 500;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-        }
-
-        /* HERO */
-        .hero {
-            display: flex;
-            gap: 32px;
-            align-items: stretch;
-            margin-bottom: 56px;
-        }
-
-        .hero-left,
-        .hero-right {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .hero-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 18px 0;
-        }
-
-        .hero-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-
-        .hero-meta-item {
-            min-width: 220px;
-        }
-
-        /* GRID SECCIONES */
-        .section {
-            margin-bottom: 56px;
-        }
-
-        .section-header {
-            max-width: 720px;
-            margin-bottom: 24px;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 18px;
-        }
-
-        .songs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 18px;
-        }
-
-        .song-card {
-            display: flex;
-            flex-direction: row;
-            gap: 12px;
-        }
-
-        .song-thumb {
-            flex-shrink: 0;
-            width: 60px;
-        }
-
-        .song-body {
-            flex: 1;
-            min-width: 0;
-        }
-
-        /* STATS */
-        .stats-section {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .stats-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 18px;
-        }
-
-        /* DISCORD CTA reutiliza .hero-actions */
-
-        /* FOOTER */
-        footer {
-            margin-top: 40px;
-            padding-top: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            font-size: 0.85rem;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        /* MODALES */
-        .modal-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: none; /* se pasa a flex desde JS */
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            z-index: 50;
-        }
-
-        .modal {
-            width: 100%;
-            max-width: 550px;
-            max-height: 90vh;
-            overflow: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .modal-status {
-            font-size: 0.8rem;
-            opacity: 0.85;
-        }
-
-        /* BOTÓN FLOTANTE ASISTENTE IA */
-.assistant-fab {
-    position: fixed;
-    right: 24px;
-    bottom: 24px;
-    z-index: 60;
-    border-radius: 999px;
-    padding-inline: 18px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9rem;
-
-    /* empieza escondido hacia abajo; se muestra con la clase visible */
-    transform: translateY(80px);
-    opacity: 0;
-    pointer-events: none;
-    transition:
-        transform 0.25s ease,
-        opacity 0.25s ease;
-}
-
-.assistant-fab.assistant-fab-visible {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-}
-
-/* PANEL FLOTANTE DEL ASISTENTE */
-.assistant-float {
-    position: fixed;
-    right: 24px;
-    bottom: 24px;
-    z-index: 59;
-    width: min(420px, 100% - 32px);
-    /* 🔁 que crezca hasta el 70% de alto de pantalla */
-    height: auto;
-    max-height: 70vh;
-    transform: translateY(calc(100% + 24px)); /* escondido bajo el borde inferior */
-    opacity: 0;
-    pointer-events: none;
-    transition:
-        transform 0.28s ease-out,
-        opacity 0.22s ease-out;
-}
-
-.assistant-float-open {
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.assistant-float-inner {
-    /* usamos max-height en vez de height fija */
-    max-height: 70vh;
-    border-radius: 20px;
-    padding: 14px 14px 12px;
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.04),
-        rgba(0, 0, 0, 0.75)
-    );
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
-    backdrop-filter: blur(18px);
-    display: flex;
-    flex-direction: column;
-}
-
-.assistant-float-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.assistant-float-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-}
-
-.assistant-float-subtitle {
-    font-size: 0.75rem;
-    opacity: 0.75;
-}
-
-.assistant-float-close {
-    border: none;
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 4px;
-    border-radius: 999px;
-}
-
-.assistant-float-close:hover {
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.assistant-float-body {
-    flex: 1;
-    min-height: 0;          /* 🔁 necesario para que el scroll funcione bien */
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 0.85rem;
-    overflow-y: auto;       /* 🔁 scroll interno cuando la letra es muy larga */
-    padding-right: 4px;
-}
-
-.assistant-float-text {
-    margin: 0;
-    opacity: 0.85;
-}
-
-.assistant-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.prompt-chip {
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 5px 9px;
-    font-size: 0.75rem;
-    background: rgba(0, 0, 0, 0.35);
-    cursor: pointer;
-    color: #ffffff;
-    transition:
-        transform 0.12s ease,
-        box-shadow 0.12s ease,
-        border-color 0.12s ease;
-}
-
-.prompt-chip:hover {
-    transform: translateY(-1px);
-    border-color: rgba(255, 255, 255, 0.35);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-}
-
-.assistant-label {
-    font-size: 0.75rem;
-    opacity: 0.8;
-}
-
-.assistant-textarea {
-    width: 100%;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 8px 9px;
-    background: rgba(0, 0, 0, 0.55);
-    color: inherit;
-    resize: none;
-    min-height: 90px;
-    max-height: 140px;
-    font-family: inherit;
-    font-size: 0.8rem;
-}
-
-.assistant-textarea:focus {
-    outline: none;
-    border-color: rgba(245, 239, 239, 0.45);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
-}
-
-.assistant-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.assistant-submit[disabled] {
-    opacity: 0.55;
-    cursor: not-allowed;
-}
-
-.assistant-footer {
-    font-size: 0.75rem;
-    opacity: 0.8;
-}
-
-.assistant-status {
-    display: block;
-}
-
-/* ⭐ RESPUESTA DEL ASISTENTE (copiable y con saltos de línea, sin recorte fijo) */
-#assistant-float-status {
-    white-space: pre-wrap;       /* respeta los saltos de línea \n */
-    word-break: break-word;      /* evita desbordes raros */
-    font-size: 0.8rem;
-    line-height: 1.45;
-    margin-top: 6px;
-    padding: 8px 10px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(0, 0, 0, 0.6);
-}
-
-/* MOBILE */
-@media (max-width: 480px) {
-    .assistant-fab {
-        right: 12px;
-        bottom: 12px;
-        padding-inline: 14px;
-        font-size: 0.8rem;
-    }
-
-    .assistant-float {
-        right: 8px;
-        left: 8px;
-        width: auto;
-        height: auto;
-        max-height: 75vh;   /* un pelín más alto en móvil */
-    }
-}
-        /* BREAKPOINTS */
-
-        @media (max-width: 960px) {
-            .hero {
-                flex-direction: column;
-            }
-
-            .hero-right {
-                order: -1; /* visual arriba si quieres, quita esta línea si no te mola */
-            }
-
-            .hero-meta {
-                flex-direction: column;
-            }
-
-            .stats-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .page {
-                padding: 20px 16px 60px;
-            }
-
-            .header-actions {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 10px;
-            flex-wrap: wrap;
-            padding: 12px 0;
-            background: rgba(0,0,0,0.35);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            margin-bottom: 18px;
-        }
-
-                .nav-actions .btn {
-                    /* width movido a .nav-actions */
-                    width: auto;
-                    text-align: center;
-                }
-
-            .user-profile {
-                margin-right: 0;
-                width: 100%;
-                justify-content: flex-start;
-            }
-
-            .song-card {
-                flex-direction: column;
-            }
-
-            .song-thumb {
-                width: 100%;
-            }
-
-            .hero-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-                .hero-actions .btn {
-                    width: 100%;
-                }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            footer {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .page {
-                padding: 16px 12px 48px;
-            }
-
-            .hero-title {
-                font-size: 2.2rem;
-            }
-
-            .section-header {
-                margin-bottom: 18px;
-            }
-
-            .modal {
-                max-width: 100%;
-                border-radius: 16px;
-            }
-        }
-
-        @media (max-width: 700px) {
-            .header-actions {
-                justify-content: space-between;
-                padding: 12px 0;
-            }
-            .nav-actions .btn,
-            .nav-actions a.btn {
-                width: 100%;
-                justify-content: center;
-            }
-            .user-profile {
-                width: 100%;
-            }
-        }
-
-/* ==========================================================
-   NOTIFICACIONES (campana + panel)
-   ========================================================== */
-.notif-btn { position: relative; }
-.notif-badge{
-  position:absolute;
-  top:-6px; right:-6px;
-  min-width:18px; height:18px;
-  padding:0 6px;
-  border-radius:999px;
-  font-size:.72rem;
-  display:flex; align-items:center; justify-content:center;
-  background: rgba(255,0,80,.95);
-  color:#fff;
-  border: 1px solid rgba(255,255,255,.25);
-  pointer-events: none;
-}
-
-.notif-panel{
-  position:absolute;
-  right: 12px;
-  top: calc(100% + 10px);
-  width: min(420px, calc(100vw - 32px));
-  max-height: 70vh;
-  overflow: hidden;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(0,0,0,.75);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: 0 18px 45px rgba(0,0,0,.55);
-  z-index: 80;
-}
-
-.notif-panel-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  padding:12px 12px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
-}
-
-.notif-panel-body{
-  padding: 10px 12px;
-  overflow:auto;
-  max-height: calc(70vh - 54px);
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-
-.notif-item{
-  padding:10px 10px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.04);
-  cursor:pointer;
-}
-.notif-item.unread{
-  border-color: rgba(255,255,255,.22);
-  background: rgba(255,255,255,.06);
-}
-.notif-item-title{ font-weight:600; font-size:.9rem; }
-.notif-item-body{ opacity:.85; font-size:.82rem; margin-top:4px; white-space:pre-wrap; }
-.notif-item-time{ opacity:.7; font-size:.75rem; margin-top:6px; }
-
-/* En móvil, evitamos que se salga por la derecha */
-@media (max-width: 768px) {
-  .notif-panel { right: 8px; left: 8px; width: auto; }
-}
-
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#09090b" />
+  <meta name="description" content="BeefMusic: manda tu historia y vuelve convertida en canción." />
+  <title>BeefMusic</title>
+  <link rel="icon" href="img/logo.gif" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="design-system/tokens.css" />
+  <link rel="stylesheet" href="design-system/components.css" />
+  <link rel="stylesheet" href="css/app.css" />
 </head>
 <body>
-    <div class="page">
-        <div class="header-actions">
-            <div class="user-profile">
-                <div class="user-avatar" id="user-avatar">U</div>
-                <div class="user-profile-text">
-                    <span class="user-profile-label">Conectado</span>
-                    <span class="user-profile-name" id="user-name-display">@usuario</span>
-                </div>
-            </div>
+  <!-- ==================== ICONOS (Lucide, inline) ==================== -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-library" viewBox="0 0 24 24"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 5.5v13a1 1 0 0 0 1.53.85l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 5 5.5Z"/><rect x="17" y="4" width="2.5" height="16" rx="1"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M19 5.5v13a1 1 0 0 1-1.53.85l-10-6.5a1 1 0 0 1 0-1.7l10-6.5A1 1 0 0 1 19 5.5Z"/><rect x="4.5" y="4" width="2.5" height="16" rx="1"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/></symbol>
+    <symbol id="i-comment" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M21 15V6"/><path d="M18.5 18a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/><path d="M12 12H3"/><path d="M16 6H3"/><path d="M12 18H3"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></symbol>
+    <symbol id="i-login" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></symbol>
+    <symbol id="i-user-plus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></symbol>
+    <symbol id="i-user-check" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+  </svg>
 
-            <!-- NOTIFICACIONES (se queda visible siempre) -->
-            <button class="btn btn-ghost notif-btn" id="notif-btn" title="Notificaciones">
-                🔔
-                <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
-            </button>
+  <a class="skip-link" href="#view">Saltar al contenido</a>
 
-            <div class="notif-panel" id="notif-panel" style="display:none;">
-                <div class="notif-panel-head">
-                    <strong>Notificaciones</strong>
-                    <button class="btn btn-ghost" id="notif-readall-btn">Marcar todo leído</button>
-                </div>
-                <div class="notif-panel-body" id="notif-list">
-                    <div style="opacity:.75;">Cargando…</div>
-                </div>
-            </div>
+  <div class="app">
+    <!-- ==================== SIDEBAR (escritorio) ==================== -->
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="sidebar__block">
+        <a class="logo" href="#/" aria-label="BeefMusic, inicio">
+          <span class="logo__mark" aria-hidden="true"></span>
+          <span class="logo__word">BeefMusic</span>
+        </a>
+        <nav class="nav">
+          <a class="nav__item" href="#/" data-nav="inicio"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg>Inicio</a>
+          <a class="nav__item" href="#/canciones" data-nav="canciones"><svg class="icon" aria-hidden="true"><use href="#i-library"/></svg>Canciones</a>
+          <a class="nav__item" href="#/comunidad" data-nav="comunidad"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Comunidad</a>
+          <a class="nav__item" href="#/perfil" data-nav="perfil"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>Perfil sonoro</a>
+        </nav>
+        <button class="btn btn--primary btn--block" style="margin-top:var(--s-3)" data-action="pedir">
+          <svg class="icon icon--sm" aria-hidden="true"><use href="#i-plus"/></svg>Pedir canción
+        </button>
+      </div>
 
-            <!-- BOTÓN MENÚ MÓVIL -->
-            <button class="btn btn-ghost mobile-menu-btn" id="mobile-menu-btn"
-                    aria-expanded="false" aria-controls="mobile-menu" title="Menú">
-                ☰
-            </button>
-
-            <!-- ACCIONES / NAVEGACIÓN -->
-            <div class="nav-actions" id="mobile-menu">
-                <button class="btn btn-ghost" id="open-request-1">
-                    Enviar petición
-                </button>
-
-                <!-- NUEVO BOTÓN: PETICIONES EN CURSO (transparencia) -->
-                <button class="btn btn-ghost" onclick="window.location.href='peticiones.html'">
-                    Peticiones en curso
-                </button>
-
-                <!-- NUEVOS BOTONES -->
-                <button class="btn btn-ghost" id="open-suggestion">
-                    Sugerencia
-                </button>
-                <button class="btn btn-ghost" id="open-report">
-                    Reportar problema
-                </button>
-
-                <!-- NUEVO BOTÓN PERFIL SONORO -->
-                <button class="btn btn-ghost" onclick="window.location.href='perfil.html'">
-                    Perfil sonoro
-                </button>
-
-                <!-- NUEVO BOTÓN: COMUNIDAD -->
-                <button class="btn btn-ghost" onclick="window.location.href='comunidad.html'">
-                    Comunidad
-                </button>
-
-                <button class="btn btn-primary" onclick="window.location.href='canciones.html'">
-                    <span class="btn-icon">▶</span>
-                    Ver canciones
-                </button>
-
-                <button class="btn btn-ghost" id="user-logout-btn">
-                    Cerrar sesión
-                </button>
-            </div>
+      <div class="sidebar__block sidebar__block--grow">
+        <div class="t-kicker nav__label">Más</div>
+        <nav class="nav">
+          <a class="nav__item" href="#/peticiones" data-nav="peticiones"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg>Peticiones en curso</a>
+          <button class="nav__item nav__item--btn" data-action="asistente"><svg class="icon" aria-hidden="true"><use href="#i-sparkles"/></svg>Asistente de letras</button>
+          <button class="nav__item nav__item--btn" data-action="sugerencia"><svg class="icon" aria-hidden="true"><use href="#i-bulb"/></svg>Enviar sugerencia</button>
+          <button class="nav__item nav__item--btn" data-action="reporte"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>Reportar problema</button>
+        </nav>
+        <div class="sidebar__legal">
+          <a href="#/terminos">Términos</a>
+          <a href="#/privacidad">Privacidad</a>
+          <a href="#/contacto">Contacto</a>
         </div>
+      </div>
+    </aside>
 
-        <!-- HERO -->
-        <section class="hero">
-            <div class="hero-left">
-                <div class="hero-kicker">
-                    <div class="hero-kicker-dot"></div>
-                    <span>Taller de temas a la carta</span>
-                </div>
-
-                <h1 class="hero-title">
-                    <span class="hero-title-main">BEEF</span>
-                    <span class="hero-title-sub">MUSIC</span>
-                </h1>
-
-                <div class="hero-highlight">
-                    Me mandas la idea → pasa por Discord → sale convertida en canción
-                </div>
-
-                <p class="hero-desc">
-                    <strong>BeefMusic</strong> es un sitio donde las historias de la gente acaban
-                    hechas canción. Tú escribes la movida que quieres contar, la petición entra
-                    en el <strong>Discord</strong> y desde ahí se trabaja hasta que sale un tema
-                    listo para escuchar y compartir desde la web.
-                </p>
-
-                <div class="hero-meta">
-                    <div class="hero-meta-item">
-                        <span>Comunidad</span>
-                        <div>
-                            <span class="hero-meta-accent" id="hero-requests">—</span>
-                            peticiones registradas
-                        </div>
-                    </div>
-                    <div class="hero-meta-item">
-                        <span>Estilo</span>
-                        <div id="hero-style-line">Drill, trap, dembow, boom bap y lo que se venga</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- HERO VISUAL -->
-            <div class="hero-right">
-                <div class="hero-visual">
-                    <div class="hero-visual-overlay"></div>
-                    <div class="hero-visual-main">
-                        <div class="hero-visual-content">
-                            <div class="hero-tag">Beats, letras y piques</div>
-
-                            <div class="hero-character-silhouette">
-                                <div class="hero-character-circle"></div>
-                            </div>
-
-                            <div class="hero-chip-row">
-                                <div class="hero-chip">
-                                    <div class="hero-chip-label">Estado</div>
-                                    <div class="hero-chip-value">
-                                        <span class="hero-chip-dot"></span>
-                                        Aceptando nuevas historias
-                                    </div>
-                                </div>
-                                <div class="hero-chip">
-                                    <div class="hero-chip-label">Modo</div>
-                                    <div class="hero-chip-value">Beat a medida + letra si hace falta</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CÓMO FUNCIONA -->
-        <section id="como-funciona" class="section">
-            <div class="section-header">
-                <div class="section-kicker">Flow BeefMusic</div>
-                <h2 class="section-title">De lo que cuentas al tema final</h2>
-                <p class="section-subtitle">
-                    Aquí no hay plantillas: cada canción sale de una historia real que alguien ha pedido.
-                    Todo pasa por la web, por Discord y acaba guardado en la colección de BeefMusic.
-                </p>
-            </div>
-
-            <div class="grid-3">
-                <article class="feature-card">
-                    <div class="feature-icon">1</div>
-                    <h3 class="feature-title">Manda la historia</h3>
-                    <p class="feature-desc">
-                        Rellena el formulario con nombres, detalles, frases que quieras que salgan
-                        y el estilo que te gusta. La petición llega directa a un canal privado
-                        del servidor de Discord.
-                    </p>
-                </article>
-
-                <article class="feature-card">
-                    <div class="feature-icon">2</div>
-                    <h3 class="feature-title">Se cocina en Discord</h3>
-                    <p class="feature-desc">
-                        Se revisa la petición, se decide el enfoque, se monta el beat, se escribe la letra
-                        y se ajusta todo para que suene como tiene que sonar: serio y con actitud.
-                    </p>
-                </article>
-
-                <article class="feature-card">
-                    <div class="feature-icon">3</div>
-                    <h3 class="feature-title">Sale a la luz</h3>
-                    <p class="feature-desc">
-                        Cuando el tema está listo, se sube a BeefMusic con su portada y detalles.
-                        Así puedes escucharlo, compartirlo y enseñar de dónde salió la idea.
-                    </p>
-                </article>
-            </div>
-        </section>
-
-        <!-- STATS -->
-        <section id="stats" class="stats-section section">
-            <div class="stats-header">
-                <div>
-                    <div class="section-kicker">Actividad del proyecto</div>
-                    <h2 class="stats-title">Cómo se está moviendo BeefMusic</h2>
-                </div>
-                <div class="stats-tagline">
-                    Cada vez que entra una petición nueva o se publica un tema, estos números cambian.
-                </div>
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Canciones en la colección</div>
-                    <div class="stat-value" id="stat-songs">—</div>
-                    <div class="stat-extra">Número real de canciones cargadas desde la API.</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Peticiones totales</div>
-                    <div class="stat-value" id="stat-requests">—</div>
-                    <div class="stat-extra">Total real contando todas las peticiones públicas.</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Gente implicada</div>
-                    <div class="stat-value" id="stat-people">—</div>
-                    <div class="stat-extra">Autores únicos detectados en la colección.</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Sabores distintos</div>
-                    <div class="stat-value" id="stat-genres">—</div>
-                    <div class="stat-extra">Estilos únicos detectados en la colección.</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CANCIONES -->
-        <section id="canciones" class="section">
-            <div class="section-header">
-                <div class="section-kicker">Últimos lanzamientos</div>
-                <h2 class="section-title">Algunos de los temas que han salido de aquí</h2>
-                <p class="section-subtitle">
-                    Esta sección se alimenta sola desde tu backend (últimas canciones publicadas).
-                </p>
-            </div>
-
-            <div class="songs-grid" id="home-songs-grid">
-                <article class="song-card" style="grid-column:1/-1;">
-                    <div class="song-body">
-                        <div class="song-title">Cargando canciones…</div>
-                        <div class="song-req">Conectando con BeefMusic backend.</div>
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <!-- DISCORD / CTA -->
-        <section id="discord" class="section">
-            <div class="stats-section">
-                <div class="stats-header">
-                    <div>
-                        <div class="section-kicker">Comunidad</div>
-                        <h2 class="stats-title">Tu petición acaba en el Discord y vuelve hecha canción</h2>
-                    </div>
-                    <div class="stats-tagline">
-                        Cada idea que mandas desde la web se guarda y se manda a un canal del servidor,
-                        donde se revisa y se decide cómo convertirla en tema.
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FOOTER -->
-        <footer>
-            <span>© <span id="year"></span> BeefMusic. Todos los derechos reservados.</span>
-            <div class="footer-links">
-                <a href="#">Términos</a>
-                <a href="#">Privacidad</a>
-                <a href="#">Contacto</a>
-            </div>
-        </footer>
-    </div>
-
-    <!-- MODAL PETICIÓN -->
-    <div class="modal-backdrop" id="request-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title">Enviar petición de canción</h3>
-                <button class="modal-close" id="modal-close">✕</button>
-            </div>
-            <p class="modal-desc">
-                Describe qué tipo de canción quieres y qué historia debe contar.
-                Esta petición se enviará a un canal de Discord desde tu backend.
-            </p>
-
-            <form id="request-form">
-                <div class="field">
-                    <label for="nick">Tu nick o usuario</label>
-                    <input id="nick" name="nick" type="text" placeholder="@tu_usuario" required />
-                </div>
-                <div class="field">
-                    <label for="style">Estilo / género</label>
-                    <input id="style" name="style" type="text" placeholder="Drill, trap, dembow, boom bap…" required />
-                </div>
-                <div class="field">
-                    <label for="idea">Idea de la canción</label>
-                    <textarea id="idea" name="idea" rows="4" placeholder="Cuéntanos la historia, nombres, frases clave, referencias..." required></textarea>
-                    <small>Ejemplo: beef amistoso, historia de amor, intro para tu canal, etc.</small>
-                </div>
-
-                <div class="modal-footer">
-                    <span class="modal-status" id="modal-status">
-                        Rellena la info y envía tu petición.
-                    </span>
-                    <button class="btn btn-primary" type="submit">
-                        Enviar petición
-                    </button>
-                </div>
-            </form>
+    <!-- ==================== CONTENIDO ==================== -->
+    <main class="app__main" id="main">
+      <header class="appbar">
+        <div class="appbar__brand">
+          <a class="logo" href="#/" aria-label="BeefMusic, inicio">
+            <span class="logo__mark" aria-hidden="true"></span>
+            <span class="logo__word">BeefMusic</span>
+          </a>
         </div>
-    </div>
+        <a class="icon-btn" href="#/canciones?buscar=1" aria-label="Buscar canciones"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg></a>
+        <div class="appbar__user" id="appbar-user"></div>
+      </header>
 
-    <!-- MODAL SUGERENCIA -->
-    <div class="modal-backdrop" id="suggestion-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title">Enviar sugerencia</h3>
-                <button class="modal-close" id="suggestion-modal-close">✕</button>
-            </div>
-            <p class="modal-desc">
-                ¿Qué mejorarías en BeefMusic? ¿Qué te gustaría que añadiera a la web o al proyecto?
-            </p>
+      <div class="app__content" id="view" tabindex="-1"></div>
+    </main>
 
-            <form id="suggestion-form">
-                <div class="field">
-                    <label for="suggestion-nick">Tu nick o usuario (opcional)</label>
-                    <input id="suggestion-nick" name="nick" type="text" placeholder="@tu_usuario" />
-                </div>
-                <div class="field">
-                    <label for="suggestion-message">Tu sugerencia</label>
-                    <textarea id="suggestion-message" name="mensaje" rows="4" placeholder="Cuéntame tu idea, mejora o feedback..." required></textarea>
-                </div>
-
-                <div class="modal-footer">
-                    <span class="modal-status" id="suggestion-status">
-                        Tus sugerencias ayudan a pulir BeefMusic.
-                    </span>
-                    <button class="btn btn-primary" type="submit">
-                        Enviar sugerencia
-                    </button>
-                </div>
-            </form>
+    <!-- ==================== BARRA DE REPRODUCTOR (escritorio) ==================== -->
+    <footer class="playerbar" aria-label="Reproductor">
+      <div class="playerbar__now">
+        <div class="cover cover--empty" data-player="cover"></div>
+        <div style="min-width:0">
+          <button class="playerbar__title t-ui clamp-1" data-player="title" data-action="song-current">Nada sonando</button>
+          <div class="t-meta clamp-1" data-player="artist">Elige una canción</div>
         </div>
-    </div>
-
-    <!-- MODAL REPORTE -->
-    <div class="modal-backdrop" id="report-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 class="modal-title">Reportar problema</h3>
-                <button class="modal-close" id="report-modal-close">✕</button>
-            </div>
-            <p class="modal-desc">
-                Si algo no funciona bien (bug, error, fallo visual...), repórtalo y lo reviso.
-            </p>
-
-            <form id="report-form">
-                <div class="field">
-                    <label for="report-nick">Tu nick o usuario (opcional)</label>
-                    <input id="report-nick" name="nick" type="text" placeholder="@tu_usuario" />
-                </div>
-                <div class="field">
-                    <label for="report-message">¿Qué ha pasado?</label>
-                    <textarea id="report-message" name="mensaje" rows="4" placeholder="Explica el problema, qué estabas haciendo, pasos para reproducirlo..." required></textarea>
-                </div>
-
-                <div class="modal-footer">
-                    <span class="modal-status" id="report-status">
-                        Cuantos más detalles des, más fácil es arreglarlo.
-                    </span>
-                    <button class="btn btn-primary" type="submit">
-                        Enviar reporte
-                    </button>
-                </div>
-            </form>
+        <button class="icon-btn" aria-label="Me gusta" aria-pressed="false" data-player="like" disabled><svg class="icon icon--sm" aria-hidden="true"><use href="#i-up"/></svg></button>
+      </div>
+      <div class="playerbar__center">
+        <div class="playerbar__controls">
+          <button class="icon-btn" aria-label="Anterior" data-player="prev" disabled><svg class="icon icon--sm icon--fill" aria-hidden="true"><use href="#i-prev"/></svg></button>
+          <button class="play" aria-label="Reproducir" data-player="toggle" disabled><svg class="icon icon--sm icon--fill i-play" aria-hidden="true"><use href="#i-play"/></svg><svg class="icon icon--sm icon--fill i-pause" aria-hidden="true"><use href="#i-pause"/></svg></button>
+          <button class="icon-btn" aria-label="Siguiente" data-player="next" disabled><svg class="icon icon--sm icon--fill" aria-hidden="true"><use href="#i-next"/></svg></button>
         </div>
-    </div>
-
-    <!-- BOTÓN FLOTANTE ASISTENTE -->
-    <button class="btn btn-primary assistant-fab" id="assistant-fab">
-        ✦ BeefMusic IA ✦
-    </button>
-
-    <!-- PANEL FLOTANTE DEL ASISTENTE -->
-    <div class="assistant-float" id="assistant-float">
-        <div class="assistant-float-inner">
-            <div class="assistant-float-header">
-                <div>
-                    <div class="assistant-float-title">Asistente BeefMusic</div>
-                    <div class="assistant-float-subtitle">
-                        Ideas de letras, títulos y planes de lanzamiento.
-                    </div>
-                </div>
-                <button class="assistant-float-close" id="assistant-float-close">✕</button>
-            </div>
-
-            <div class="assistant-float-body">
-                <p class="assistant-float-text">
-                    Escribe tu petición como si se la mandaras a un ChatGPT especializado en música,
-                    o toca uno de estos ejemplos:
-                </p>
-
-                <div class="assistant-chips">
-                    <button type="button" class="prompt-chip"
-                        data-prompt="Hazme una letra de reggaetón triste sobre una ruptura, en primera persona y con un estribillo muy pegado.">
-                        Letra reggaetón triste
-                    </button>
-                    <button type="button" class="prompt-chip"
-                        data-prompt="Dame 5 ideas de títulos y conceptos para un tema de drill sobre traición en el barrio.">
-                        Títulos + conceptos de drill
-                    </button>
-                    <button type="button" class="prompt-chip"
-                        data-prompt="Hazme un plan de lanzamiento de 7 días para mi nuevo single de dembow, con ideas de posts para TikTok e Instagram.">
-                        Plan de lanzamiento 7 días
-                    </button>
-                </div>
-
-                <label for="assistant-float-prompt" class="assistant-label">
-                    Petición para el asistente BeefMusic
-                </label>
-                <textarea id="assistant-float-prompt" rows="4" class="assistant-textarea"
-                    placeholder="Ejemplo: Quiero un tema de trap oscuro sobre crecer en el barrio, con estribillo agresivo y referencias a videojuegos."></textarea>
-
-                <div class="assistant-actions">
-                    <!-- ⭐ Texto actualizado, ya no es demo -->
-                    <button type="button" class="btn btn-primary assistant-submit" id="assistant-float-send" disabled>
-                        Enviar
-                    </button>
-                    <button type="button" class="btn btn-ghost assistant-clear" id="assistant-float-clear">
-                        Limpiar
-                    </button>
-                    <!-- ⭐ Nuevo botón copiar letra -->
-                    <button type="button" class="btn btn-ghost assistant-copy" id="assistant-copy-btn">
-                        Copiar letra
-                    </button>
-                </div>
-
-                <div class="assistant-footer">
-                    <span class="assistant-status" id="assistant-float-status">
-                        Escribe tu idea o usa un ejemplo y aquí aparecerá la letra generada.
-                    </span>
-                </div>
-            </div>
+        <div class="playerbar__scrub">
+          <span data-player="cur">0:00</span>
+          <input class="range" type="range" min="0" max="100" step="0.1" value="0" aria-label="Posición de la canción" data-player="seek" disabled />
+          <span data-player="dur">0:00</span>
         </div>
+      </div>
+      <div class="playerbar__end">
+        <button class="icon-btn" aria-label="Comentarios de la canción" data-action="song-current" data-player="comments" disabled><svg class="icon icon--sm" aria-hidden="true"><use href="#i-comment"/></svg></button>
+        <svg class="icon icon--sm" style="color:var(--text-2)" aria-hidden="true"><use href="#i-volume"/></svg>
+        <input class="range" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volumen" data-player="vol" style="--p:100%" />
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==================== MINI‑PLAYER (móvil) ==================== -->
+  <div class="mini" id="mini" hidden role="button" tabindex="0" aria-label="Abrir reproductor">
+    <div class="cover" data-player="cover"></div>
+    <div class="mini__text">
+      <div class="mini__title clamp-1" data-player="title">—</div>
+      <div class="mini__artist clamp-1" data-player="artist">—</div>
     </div>
-
-    <script>
-        const API_URL = "https://beefmusic-backend.onrender.com";
-
-        (function () {
-            const userToken = localStorage.getItem("beefmusic_user_token");
-            if (!userToken) {
-                // redirige al login de usuario
-                window.location.href = "user-login.html";
-            }
-        })();
-
-        // 👤 Mostrar el nombre de usuario en el header, avatar e autocompletar nicks
-        const storedUserName = localStorage.getItem("beefmusic_user_name");
-        if (storedUserName) {
-            const userNameDisplay = document.getElementById("user-name-display");
-            if (userNameDisplay) {
-                userNameDisplay.textContent = "@" + storedUserName;
-            }
-
-            const avatarEl = document.getElementById("user-avatar");
-            if (avatarEl) {
-                avatarEl.textContent = storedUserName.charAt(0).toUpperCase();
-            }
-
-            const nickInput = document.getElementById("nick");
-            if (nickInput && !nickInput.value) {
-                nickInput.value = "@" + storedUserName;
-            }
-
-            const suggestionNickInput = document.getElementById("suggestion-nick");
-            if (suggestionNickInput && !suggestionNickInput.value) {
-                suggestionNickInput.value = "@" + storedUserName;
-            }
-
-            const reportNickInput = document.getElementById("report-nick");
-            if (reportNickInput && !reportNickInput.value) {
-                reportNickInput.value = "@" + storedUserName;
-            }
-        }
-
-        // Año dinámico en el footer
-        document.getElementById("year").textContent = new Date().getFullYear();
-
-        // Modales
-        const requestModal = document.getElementById("request-modal");
-        const suggestionModal = document.getElementById("suggestion-modal");
-        const reportModal = document.getElementById("report-modal");
-
-        const requestStatusEl = document.getElementById("modal-status");
-        const suggestionStatusEl = document.getElementById("suggestion-status");
-        const reportStatusEl = document.getElementById("report-status");
-
-        function openRequestModal() {
-            if (!requestModal) return;
-            requestModal.style.display = "flex";
-            if (requestStatusEl) {
-                requestStatusEl.textContent = "Rellena la info y envía tu petición.";
-            }
-        }
-
-        function closeRequestModal() {
-            if (!requestModal) return;
-            requestModal.style.display = "none";
-        }
-
-        function openSuggestionModal() {
-            if (!suggestionModal) return;
-            suggestionModal.style.display = "flex";
-            if (suggestionStatusEl) {
-                suggestionStatusEl.textContent = "Tus sugerencias ayudan a pulir BeefMusic.";
-            }
-        }
-
-        function closeSuggestionModal() {
-            if (!suggestionModal) return;
-            suggestionModal.style.display = "none";
-        }
-
-        function openReportModal() {
-            if (!reportModal) return;
-            reportModal.style.display = "flex";
-            if (reportStatusEl) {
-                reportStatusEl.textContent = "Cuantos más detalles des, más fácil es arreglarlo.";
-            }
-        }
-
-        function closeReportModal() {
-            if (!reportModal) return;
-            reportModal.style.display = "none";
-        }
-
-        // Botones que abren el modal de petición
-        ["open-request-1", "open-request-2", "open-request-3"].forEach((id) => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                btn.addEventListener("click", openRequestModal);
-            }
-        });
-
-        const modalCloseBtn = document.getElementById("modal-close");
-        if (modalCloseBtn) {
-            modalCloseBtn.addEventListener("click", closeRequestModal);
-        }
-
-        if (requestModal) {
-            requestModal.addEventListener("click", (e) => {
-                if (e.target === requestModal) closeRequestModal();
-            });
-        }
-
-        // Botones para sugerencias
-        const openSuggestionBtn = document.getElementById("open-suggestion");
-        if (openSuggestionBtn) {
-            openSuggestionBtn.addEventListener("click", openSuggestionModal);
-        }
-
-        const suggestionCloseBtn = document.getElementById("suggestion-modal-close");
-        if (suggestionCloseBtn) {
-            suggestionCloseBtn.addEventListener("click", closeSuggestionModal);
-        }
-
-        if (suggestionModal) {
-            suggestionModal.addEventListener("click", (e) => {
-                if (e.target === suggestionModal) closeSuggestionModal();
-            });
-        }
-
-        // Botones para reportes
-        const openReportBtn = document.getElementById("open-report");
-        if (openReportBtn) {
-            openReportBtn.addEventListener("click", openReportModal);
-        }
-
-        const reportCloseBtn = document.getElementById("report-modal-close");
-        if (reportCloseBtn) {
-            reportCloseBtn.addEventListener("click", closeReportModal);
-        }
-
-        if (reportModal) {
-            reportModal.addEventListener("click", (e) => {
-                if (e.target === reportModal) closeReportModal();
-            });
-        }
-
-        // ✅ Envío REAL del formulario de petición a tu backend (Render)
-        const requestForm = document.getElementById("request-form");
-        if (requestForm) {
-            requestForm.addEventListener("submit", function (e) {
-                e.preventDefault();
-
-                const data = {
-                    nick: this.nick.value,
-                    style: this.style.value,
-                    idea: this.idea.value,
-                };
-
-                if (requestStatusEl) {
-                    requestStatusEl.textContent = "Enviando petición...";
-                }
-
-                const requestToken = localStorage.getItem("beefmusic_user_token");
-                const requestHeaders = { "Content-Type": "application/json" };
-                if (requestToken) requestHeaders.Authorization = `Bearer ${requestToken}`;
-
-                fetch(API_URL + "/api/peticiones", {
-                    method: "POST",
-                    headers: requestHeaders,
-                    body: JSON.stringify(data),
-                })
-                    .then((res) => res.json())
-                    .then((json) => {
-                        if (json.error) {
-                            if (requestStatusEl) {
-                                requestStatusEl.textContent = "❌ Error: " + json.error;
-                            }
-                        } else {
-                            if (requestStatusEl) {
-                                requestStatusEl.textContent =
-                                    "✅ Petición enviada correctamente. ID: " + json.id;
-                            }
-                            this.reset();
-
-                            const storedUserName = localStorage.getItem("beefmusic_user_name");
-                            if (storedUserName) {
-                                this.nick.value = "@" + storedUserName;
-                            }
-
-                            // ⭐ refrescar contadores “reales” tras enviar
-                            refreshHomeRealData();
-                        }
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        if (requestStatusEl) {
-                            requestStatusEl.textContent = "❌ Error enviando la petición.";
-                        }
-                    });
-            });
-        }
-
-        // ✅ Envío REAL de sugerencias
-        const suggestionForm = document.getElementById("suggestion-form");
-        if (suggestionForm) {
-            suggestionForm.addEventListener("submit", function (e) {
-                e.preventDefault();
-
-                const data = {
-                    nick: this.nick.value,
-                    mensaje: this.mensaje.value,
-                };
-
-                if (suggestionStatusEl) {
-                    suggestionStatusEl.textContent = "Enviando sugerencia...";
-                }
-
-                const suggestionToken = localStorage.getItem("beefmusic_user_token");
-                const suggestionHeaders = { "Content-Type": "application/json" };
-                if (suggestionToken) suggestionHeaders.Authorization = `Bearer ${suggestionToken}`;
-
-                fetch(API_URL + "/api/sugerencias", {
-                    method: "POST",
-                    headers: suggestionHeaders,
-                    body: JSON.stringify(data),
-                })
-                    .then((res) => res.json())
-                    .then((json) => {
-                        if (json.error) {
-                            if (suggestionStatusEl) {
-                                suggestionStatusEl.textContent = "❌ Error: " + json.error;
-                            }
-                        } else {
-                            if (suggestionStatusEl) {
-                                suggestionStatusEl.textContent =
-                                    "✅ Sugerencia enviada correctamente. ID: " + json.id;
-                            }
-                            this.reset();
-
-                            const storedUserName = localStorage.getItem("beefmusic_user_name");
-                            if (storedUserName) {
-                                this.nick.value = "@" + storedUserName;
-                            }
-                        }
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        if (suggestionStatusEl) {
-                            suggestionStatusEl.textContent = "❌ Error enviando la sugerencia.";
-                        }
-                    });
-            });
-        }
-
-        // ✅ Envío REAL de reportes
-        const reportForm = document.getElementById("report-form");
-        if (reportForm) {
-            reportForm.addEventListener("submit", function (e) {
-                e.preventDefault();
-
-                const data = {
-                    nick: this.nick.value,
-                    mensaje: this.mensaje.value,
-                };
-
-                if (reportStatusEl) {
-                    reportStatusEl.textContent = "Enviando reporte...";
-                }
-
-                const reportToken = localStorage.getItem("beefmusic_user_token");
-                const reportHeaders = { "Content-Type": "application/json" };
-                if (reportToken) reportHeaders.Authorization = `Bearer ${reportToken}`;
-
-                fetch(API_URL + "/api/reportes", {
-                    method: "POST",
-                    headers: reportHeaders,
-                    body: JSON.stringify(data),
-                })
-                    .then((res) => res.json())
-                    .then((json) => {
-                        if (json.error) {
-                            if (reportStatusEl) {
-                                reportStatusEl.textContent = "❌ Error: " + json.error;
-                            }
-                        } else {
-                            if (reportStatusEl) {
-                                reportStatusEl.textContent =
-                                    "✅ Reporte enviado correctamente. ID: " + json.id;
-                            }
-                            this.reset();
-
-                            const storedUserName = localStorage.getItem("beefmusic_user_name");
-                            if (storedUserName) {
-                                this.nick.value = "@" + storedUserName;
-                            }
-                        }
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        if (reportStatusEl) {
-                            reportStatusEl.textContent = "❌ Error enviando el reporte.";
-                        }
-                    });
-            });
-        }
-
-        // ==========================================================
-        // ✅ DATOS REALES HOME (stats + últimos lanzamientos)
-        // ==========================================================
-        function escapeHtml(s) {
-            const div = document.createElement("div");
-            div.textContent = s ?? "";
-            return div.innerHTML;
-        }
-
-        function formatDuration(d) {
-            if (d == null) return "—";
-            // si ya viene como "3:02"
-            if (typeof d === "string" && d.includes(":")) return d;
-            const n = Number(d);
-            if (!Number.isFinite(n) || n <= 0) return "—";
-            const mins = Math.floor(n / 60);
-            const secs = Math.floor(n % 60);
-            return mins + ":" + String(secs).padStart(2, "0");
-        }
-
-        async function fetchSongs() {
-            const token = localStorage.getItem("beefmusic_user_token");
-            const headers = token ? { Authorization: "Bearer " + token } : {};
-            const res = await fetch(API_URL + "/api/canciones", { headers });
-            const data = await res.json().catch(() => ([]));
-            if (!res.ok) throw new Error(data.error || "Error cargando canciones");
-            if (!Array.isArray(data)) throw new Error("La API de canciones no devolvió lista");
-            return data;
-        }
-
-        async function countAllPublicRequests({ pageSize = 100, maxPages = 60 } = {}) {
-            // /api/peticiones-publicas: paginación por offset/limit
-            let offset = 0;
-            let total = 0;
-
-            for (let i = 0; i < maxPages; i++) {
-                const url = API_URL + `/api/peticiones-publicas?limit=${pageSize}&offset=${offset}`;
-                const res = await fetch(url);
-                const data = await res.json().catch(() => ([]));
-                if (!res.ok) throw new Error(data.error || "Error cargando peticiones públicas");
-                if (!Array.isArray(data)) throw new Error("La API de peticiones no devolvió lista");
-
-                total += data.length;
-
-                if (data.length < pageSize) break;
-                offset += pageSize;
-            }
-
-            // Si se llegó al límite de páginas, devolvemos un “aprox”
-            const capped = maxPages * pageSize;
-            if (total >= capped) return { total: capped, capped: true };
-            return { total, capped: false };
-        }
-
-        function renderHomeSongs(list) {
-            const grid = document.getElementById("home-songs-grid");
-            if (!grid) return;
-
-            if (!Array.isArray(list) || list.length === 0) {
-                grid.innerHTML = `
-                  <article class="song-card" style="grid-column:1/-1;">
-                    <div class="song-body">
-                      <div class="song-title">Aún no hay canciones</div>
-                      <div class="song-req">Cuando publiques canciones en la API, saldrán aquí.</div>
-                    </div>
-                  </article>
-                `;
-                return;
-            }
-
-            grid.innerHTML = list.slice(0, 3).map((song) => {
-                const titulo = song.titulo || "Sin título";
-                const estilo = song.estilo || "—";
-                const dur = formatDuration(song.duracion);
-                const autor = song.autor || "Anónimo";
-                const estado = song.estado || "—";
-                const desc = (song.descripcion || "").trim();
-
-                const extraLine = desc
-                    ? desc
-                    : `Autor: @${autor}`;
-
-                return `
-                  <article class="song-card">
-                    <div class="song-thumb">
-                      <div class="song-wave"></div>
-                    </div>
-                    <div class="song-body">
-                      <div class="song-title">“${escapeHtml(titulo)}”</div>
-                      <div class="song-meta">
-                        <span>Estilo: ${escapeHtml(estilo)}</span>
-                        <span>Duración: ${escapeHtml(dur)}</span>
-                      </div>
-                      <div class="song-req">
-                        ${escapeHtml(extraLine)}
-                      </div>
-                      <div class="song-meta">
-                        <span class="song-badge">${escapeHtml(estado)}</span>
-                        <span style="cursor:pointer;" onclick="window.location.href='canciones.html'">Ver detalles →</span>
-                      </div>
-                    </div>
-                  </article>
-                `;
-            }).join("");
-        }
-
-        function setText(id, value) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = value;
-        }
-
-        async function refreshHomeRealData() {
-            // placeholders
-            setText("stat-songs", "—");
-            setText("stat-requests", "—");
-            setText("stat-people", "—");
-            setText("stat-genres", "—");
-            setText("hero-requests", "—");
-
-            try {
-                // 1) canciones
-                const songs = await fetchSongs();
-
-                const songsCount = songs.length;
-
-                const styles = new Set(
-                    songs.map(s => String(s.estilo || "").trim().toLowerCase()).filter(Boolean)
-                );
-                const genresCount = styles.size;
-
-                const authors = new Set(
-                    songs.map(s => String(s.autor || "").trim().toLowerCase()).filter(Boolean)
-                );
-                const peopleCount = authors.size;
-
-                setText("stat-songs", String(songsCount));
-                setText("stat-genres", String(genresCount));
-                setText("stat-people", String(peopleCount));
-
-                // 2) peticiones (paginando)
-                const { total: requestsCount, capped } = await countAllPublicRequests({ pageSize: 100, maxPages: 60 });
-
-                setText("stat-requests", capped ? `${requestsCount}+` : String(requestsCount));
-                setText("hero-requests", capped ? `${requestsCount}+` : String(requestsCount));
-
-                // 3) “últimos lanzamientos”
-                renderHomeSongs(songs);
-
-                // 4) línea de estilos del hero (dinámica si hay datos)
-                const heroStyleLine = document.getElementById("hero-style-line");
-                if (heroStyleLine && genresCount) {
-                    // sacamos hasta 6 estilos “bonitos” desde los originales
-                    const pretty = Array.from(new Set(songs.map(s => (s.estilo || "").trim()).filter(Boolean))).slice(0, 6);
-                    if (pretty.length) heroStyleLine.textContent = pretty.join(", ") + (genresCount > pretty.length ? " y más" : "");
-                }
-            } catch (e) {
-                console.error("Error cargando datos reales del home:", e);
-                // fallback visual suave, sin romper la página
-                const grid = document.getElementById("home-songs-grid");
-                if (grid) {
-                    grid.innerHTML = `
-                      <article class="song-card" style="grid-column:1/-1;">
-                        <div class="song-body">
-                          <div class="song-title">No se pudieron cargar datos</div>
-                          <div class="song-req">Revisa conexión o endpoints del backend.</div>
-                        </div>
-                      </article>
-                    `;
-                }
-            }
-        }
-
-        // ==========================================================
-        // Botón flotante Asistente IA + panel desplegable
-        // ==========================================================
-        const assistantFab = document.getElementById("assistant-fab");
-        const assistantFloat = document.getElementById("assistant-float");
-        const assistantFloatClose = document.getElementById("assistant-float-close");
-
-        // Mostrar / ocultar el botón según el scroll (se “mueve” con el scroll)
-        if (assistantFab) {
-            const toggleAssistantFab = () => {
-                const scrollY = window.scrollY || document.documentElement.scrollTop;
-                if (scrollY > 200) {
-                    assistantFab.classList.add("assistant-fab-visible");
-                } else {
-                    assistantFab.classList.remove("assistant-fab-visible");
-                    if (assistantFloat) {
-                        assistantFloat.classList.remove("assistant-float-open");
-                    }
-                }
-            };
-
-            toggleAssistantFab();
-            window.addEventListener("scroll", toggleAssistantFab);
-        }
-
-        // Abrir / cerrar panel al clicar el botón
-        if (assistantFab && assistantFloat) {
-            assistantFab.addEventListener("click", () => {
-                assistantFloat.classList.toggle("assistant-float-open");
-            });
-        }
-
-        // Botón de cierre ✕ dentro del panel
-        if (assistantFloatClose && assistantFloat) {
-            assistantFloatClose.addEventListener("click", () => {
-                assistantFloat.classList.remove("assistant-float-open");
-            });
-        }
-
-        // Cerrar panel si clicas fuera (pero no si clicas en el botón)
-        window.addEventListener("click", (e) => {
-            if (!assistantFloat || !assistantFab) return;
-            if (!assistantFloat.classList.contains("assistant-float-open")) return;
-
-            const clickInsidePanel = assistantFloat.contains(e.target);
-            const clickOnFab = assistantFab.contains(e.target);
-
-            if (!clickInsidePanel && !clickOnFab) {
-                assistantFloat.classList.remove("assistant-float-open");
-            }
-        });
-
-        // === Asistente IA casera: lógica (chips + llamada al backend) ===
-        const assistantFloatPrompt = document.getElementById("assistant-float-prompt");
-        const assistantFloatStatus = document.getElementById("assistant-float-status");
-        const assistantFloatSend = document.getElementById("assistant-float-send");
-        const assistantFloatClear = document.getElementById("assistant-float-clear");
-        const assistantCopyBtn = document.getElementById("assistant-copy-btn"); // ⭐ nuevo
-        const promptChips = document.querySelectorAll(".prompt-chip");
-
-        if (assistantFloatPrompt && assistantFloatSend && assistantFloatStatus) {
-            // Función para activar/desactivar el botón de enviar
-            const updateSendButtonState = () => {
-                const hasText = assistantFloatPrompt.value.trim().length > 0;
-                assistantFloatSend.disabled = !hasText;
-            };
-
-            // Al pulsar un chip, se carga el texto en el textarea
-            if (promptChips.length) {
-                promptChips.forEach((chip) => {
-                    chip.addEventListener("click", () => {
-                        const prompt = chip.getAttribute("data-prompt") || "";
-                        assistantFloatPrompt.value = prompt;
-
-                        assistantFloatStatus.textContent =
-                            "Prompt cargado. Pulsa en Enviar para que se genere la letra.";
-                        updateSendButtonState();
-                    });
-                });
-            }
-
-            // Habilitar el botón cuando el usuario escribe
-            assistantFloatPrompt.addEventListener("input", updateSendButtonState);
-
-            // Enviar prompt a la API del backend (IA casera)
-            assistantFloatSend.addEventListener("click", async () => {
-                const prompt = assistantFloatPrompt.value.trim();
-                if (!prompt) return;
-
-                const token = localStorage.getItem("beefmusic_user_token");
-                if (!token) {
-                    assistantFloatStatus.textContent =
-                        "❌ No estás logueado. Inicia sesión para usar el asistente.";
-                    return;
-                }
-
-                const originalText = assistantFloatSend.textContent;
-                assistantFloatSend.disabled = true;
-                assistantFloatSend.textContent = "Generando letra…";
-                assistantFloatStatus.textContent = "Montando tu letra con BeefMusic...";
-
-                try {
-                    const res = await fetch(API_URL + "/api/assistant", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${token}`,
-                        },
-                        body: JSON.stringify({ prompt }),
-                    });
-
-                    const data = await res.json();
-                    console.log("Respuesta /api/assistant:", data);
-
-                    if (!res.ok || data.error) {
-                        const msgBackend = data.error || "Error desconocido en el servidor.";
-                        assistantFloatStatus.textContent =
-                            "❌ Error generando la letra: " + msgBackend;
-                    } else {
-                        // Aquí pintamos la letra generada
-                        assistantFloatStatus.textContent =
-                            data.text || "No se pudo generar letra.";
-                    }
-                } catch (err) {
-                    console.error(err);
-                    assistantFloatStatus.textContent =
-                        "❌ Error de conexión con el servidor de BeefMusic.";
-                } finally {
-                    assistantFloatSend.textContent = originalText;
-                    updateSendButtonState();
-                }
-            });
-
-            // Botón de limpiar
-            if (assistantFloatClear) {
-                assistantFloatClear.addEventListener("click", () => {
-                    assistantFloatPrompt.value = "";
-                    assistantFloatStatus.textContent =
-                        "Petición limpia. Escribe algo nuevo o toca uno de los ejemplos.";
-                    updateSendButtonState();
-                });
-            }
-
-            // ⭐ Botón de copiar letra
-            if (assistantCopyBtn && assistantFloatStatus) {
-                assistantCopyBtn.addEventListener("click", async () => {
-                    const text = assistantFloatStatus.textContent || "";
-                    if (!text.trim()) return;
-
-                    try {
-                        await navigator.clipboard.writeText(text);
-                        const oldLabel = assistantCopyBtn.textContent;
-                        assistantCopyBtn.textContent = "Copiado ✔";
-                        setTimeout(() => {
-                            assistantCopyBtn.textContent = oldLabel;
-                        }, 1500);
-                    } catch (err) {
-                        console.error("Error copiando la letra:", err);
-                    }
-                });
-            }
-
-            // Estado inicial del botón
-            updateSendButtonState();
-        }
-
-        // Logout
-        const userLogoutBtn = document.getElementById("user-logout-btn");
-        if (userLogoutBtn) {
-            userLogoutBtn.addEventListener("click", () => {
-                localStorage.removeItem("beefmusic_user_token");
-                localStorage.removeItem("beefmusic_user_name");
-                window.location.href = "user-login.html";
-            });
-        }
-
-        // Discord
-        const discordBtn = document.getElementById("discord-join-btn");
-        if (discordBtn) {
-            discordBtn.addEventListener("click", () => {
-                window.open("https://discord.gg/DywmTT78Wx", "_blank");
-            });
-        }
-
-        
-        // ==========================================================
-        // 🔔 NOTIFICACIONES (campana + panel + polling)
-        // ==========================================================
-        (function initNotifications(){
-            const btn = document.getElementById("notif-btn");
-            const panel = document.getElementById("notif-panel");
-            const badge = document.getElementById("notif-badge");
-            const list = document.getElementById("notif-list");
-            const readAllBtn = document.getElementById("notif-readall-btn");
-
-            if (!btn || !panel || !badge || !list || !readAllBtn) return;
-
-            const token = localStorage.getItem("beefmusic_user_token");
-            if (!token) return;
-
-            let lastServerTime = null;
-
-            function escapeHtml(s){
-                const d = document.createElement("div");
-                d.textContent = s ?? "";
-                return d.innerHTML;
-            }
-
-            function timeAgo(iso){
-                const t = new Date(iso).getTime();
-                if (!Number.isFinite(t)) return "";
-                const diff = Date.now() - t;
-                const mins = Math.floor(diff / 60000);
-                if (mins < 1) return "Ahora";
-                if (mins < 60) return `Hace ${mins} min`;
-                const h = Math.floor(mins / 60);
-                if (h < 24) return `Hace ${h} h`;
-                const d = Math.floor(h / 24);
-                return `Hace ${d} d`;
-            }
-
-            async function api(path, opts={}){
-                const res = await fetch(API_URL + path, {
-                    method: opts.method || "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + token,
-                        ...(opts.headers || {}),
-                    },
-                    body: opts.body ? JSON.stringify(opts.body) : undefined,
-                });
-                const json = await res.json().catch(()=> ({}));
-                if (!res.ok) throw new Error(json.error || "Error API");
-                return json;
-            }
-
-            function render(items){
-                if (!items || !items.length){
-                    list.innerHTML = `<div style="opacity:.75;">No tienes notificaciones.</div>`;
-                    return;
-                }
-                list.innerHTML = items.map(n => {
-                    const unread = !n.read_at;
-                    const link = n.link_url || "";
-                    return `
-                        <div class="notif-item ${unread ? "unread" : ""}" data-id="${n.id}" data-link="${escapeHtml(link)}">
-                            <div class="notif-item-title">${escapeHtml(n.title || "")}</div>
-                            ${n.body ? `<div class="notif-item-body">${escapeHtml(n.body)}</div>` : ""}
-                            <div class="notif-item-time">${timeAgo(n.created_at)}</div>
-                        </div>
-                    `;
-                }).join("");
-            }
-
-            async function refreshBadgeAndMaybeList({updateList=false}={}){
-                // polling incremental para no traer todo cada vez
-                const params = new URLSearchParams();
-                params.set("limit","15");
-                params.set("offset","0");
-                if (lastServerTime) params.set("after", lastServerTime);
-
-                const data = await api("/api/notifications?" + params.toString());
-
-                const unread = data.unreadCount || 0;
-                if (unread > 0){
-                    badge.style.display = "flex";
-                    badge.textContent = String(unread);
-                } else {
-                    badge.style.display = "none";
-                }
-
-                // si hay nuevas o si está abierto el panel, refrescamos lista completa
-                const hasNew = Array.isArray(data.items) && data.items.length > 0;
-                const panelOpen = panel.style.display !== "none";
-
-                if (updateList || panelOpen || hasNew){
-                    const full = await api("/api/notifications?limit=30&offset=0");
-                    render(full.items || []);
-                }
-
-                lastServerTime = data.serverTime || new Date().toISOString();
-            }
-
-            // toggle panel
-            btn.addEventListener("click", async () => {
-                const isOpen = panel.style.display !== "none";
-                panel.style.display = isOpen ? "none" : "block";
-                if (!isOpen) {
-                    await refreshBadgeAndMaybeList({updateList:true});
-                }
-            });
-
-            // cerrar al clicar fuera (sin pisar el listener del asistente)
-            window.addEventListener("click", (e) => {
-                if (panel.style.display === "none") return;
-                if (panel.contains(e.target) || btn.contains(e.target)) return;
-                panel.style.display = "none";
-            });
-
-            // marcar todo leído
-            readAllBtn.addEventListener("click", async () => {
-                try{
-                    await api("/api/notifications/read-all", { method:"POST" });
-                } catch (e) {
-                    console.error(e);
-                }
-                await refreshBadgeAndMaybeList({updateList:true});
-            });
-
-            // click en noti: marcar leída y navegar
-            list.addEventListener("click", async (e) => {
-                const item = e.target.closest(".notif-item");
-                if (!item) return;
-
-                const id = item.getAttribute("data-id");
-                const link = item.getAttribute("data-link");
-
-                try { await api("/api/notifications/" + id + "/read", { method:"PATCH" }); } catch {}
-                await refreshBadgeAndMaybeList({updateList:true});
-
-                if (link) window.location.href = link;
-            });
-
-            // init + polling
-            refreshBadgeAndMaybeList({updateList:false}).catch(()=>{});
-            setInterval(() => refreshBadgeAndMaybeList({updateList:false}).catch(()=>{}), 45000);
-        })();
-
-
-
-
-        // ==========================================================
-        // ☰ MENÚ MÓVIL (desplegable header)
-        // ==========================================================
-        (function initMobileMenu(){
-            const btn = document.getElementById("mobile-menu-btn");
-            const menu = document.getElementById("mobile-menu");
-            if (!btn || !menu) return;
-
-            function setOpen(isOpen){
-                menu.classList.toggle("open", isOpen);
-                btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-            }
-
-            btn.addEventListener("click", () => {
-                const isOpen = menu.classList.contains("open");
-                setOpen(!isOpen);
-            });
-
-            // Cierra al click fuera
-            window.addEventListener("click", (e) => {
-                if (!menu.classList.contains("open")) return;
-                if (menu.contains(e.target) || btn.contains(e.target)) return;
-                setOpen(false);
-            });
-
-            // Cierra con ESC
-            window.addEventListener("keydown", (e) => {
-                if (e.key === "Escape") setOpen(false);
-            });
-
-            // En móvil: si pulsas una opción del menú, se cierra
-            menu.addEventListener("click", (e) => {
-                const item = e.target.closest("button, a");
-                if (!item) return;
-                if (window.innerWidth <= 768) setOpen(false);
-            });
-        })();
-
-        // INIT: carga datos reales
-        refreshHomeRealData();
-    </script>
+    <button class="icon-btn" aria-label="Me gusta" aria-pressed="false" data-player="like" style="color:var(--text)"><svg class="icon" aria-hidden="true"><use href="#i-up"/></svg></button>
+    <button class="icon-btn icon-toggle" aria-label="Reproducir" data-player="toggle" style="color:var(--text)"><svg class="icon icon--fill i-play" aria-hidden="true"><use href="#i-play"/></svg><svg class="icon icon--fill i-pause" aria-hidden="true"><use href="#i-pause"/></svg></button>
+    <div class="mini__progress"><span data-player="bar"></span></div>
+  </div>
+
+  <!-- ==================== TAB BAR (móvil) ==================== -->
+  <nav class="tabbar" aria-label="Navegación principal">
+    <a class="tabbar__item" href="#/" data-nav="inicio"><svg class="icon" aria-hidden="true"><use href="#i-home"/></svg>Inicio</a>
+    <a class="tabbar__item" href="#/canciones" data-nav="canciones"><svg class="icon" aria-hidden="true"><use href="#i-library"/></svg>Canciones</a>
+    <button class="tabbar__item" data-action="pedir"><span class="tabbar__create"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></span>Pedir</button>
+    <a class="tabbar__item" href="#/comunidad" data-nav="comunidad"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Comunidad</a>
+    <a class="tabbar__item" href="#/perfil" data-nav="perfil"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>Perfil</a>
+  </nav>
+
+  <!-- ==================== HOJA: REPRODUCTOR COMPLETO (móvil) ==================== -->
+  <dialog class="sheet nowplaying" id="sheet-np" aria-label="Reproduciendo">
+    <div class="sheet__head np__head" data-drag>
+      <button class="icon-btn" aria-label="Cerrar reproductor" data-close style="color:var(--text)"><svg class="icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></button>
+      <div style="flex:1;text-align:center" class="t-kicker">Reproduciendo</div>
+      <button class="icon-btn" aria-label="Detalles y comentarios" data-action="song-current" style="color:var(--text)"><svg class="icon" aria-hidden="true"><use href="#i-more"/></svg></button>
+    </div>
+    <div class="sheet__body">
+      <div class="cover" data-player="cover"></div>
+      <div style="display:flex;align-items:center;gap:var(--s-3)">
+        <div style="flex:1;min-width:0">
+          <div class="np__title clamp-1" data-player="title">—</div>
+          <div class="t-meta clamp-1" data-player="artist">—</div>
+        </div>
+        <div class="votes">
+          <button class="vote" aria-pressed="false" aria-label="Me gusta" data-player="like"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-up"/></svg><span class="tabular" data-player="likes">0</span></button>
+          <button class="vote" aria-pressed="false" aria-label="No me gusta" data-player="dislike"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-down"/></svg></button>
+        </div>
+      </div>
+      <div class="scrub">
+        <input class="range" type="range" min="0" max="100" step="0.1" value="0" aria-label="Posición de la canción" data-player="seek" />
+        <div class="scrub__times"><span data-player="cur">0:00</span><span data-player="dur">0:00</span></div>
+      </div>
+      <div class="np__controls">
+        <button class="icon-btn" aria-label="Comentarios" data-action="song-current"><svg class="icon" aria-hidden="true"><use href="#i-comment"/></svg></button>
+        <button class="icon-btn" aria-label="Anterior" data-player="prev"><svg class="icon icon--fill" aria-hidden="true"><use href="#i-prev"/></svg></button>
+        <button class="play play--lg play--light" aria-label="Reproducir" data-player="toggle"><svg class="icon icon--fill i-play" aria-hidden="true"><use href="#i-play"/></svg><svg class="icon icon--fill i-pause" aria-hidden="true"><use href="#i-pause"/></svg></button>
+        <button class="icon-btn" aria-label="Siguiente" data-player="next"><svg class="icon icon--fill" aria-hidden="true"><use href="#i-next"/></svg></button>
+        <button class="icon-btn" aria-label="Compartir enlace" data-player="share"><svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ==================== HOJA: CANCIÓN (detalle + comentarios) ==================== -->
+  <dialog class="sheet sheet--tall" id="sheet-song" aria-labelledby="song-title">
+    <div class="sheet__grab" data-drag></div>
+    <div class="sheet__head">
+      <div class="t-kicker" style="margin-right:auto">Canción</div>
+      <button class="icon-btn" aria-label="Cerrar" data-close><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="sheet__body" id="song-sheet-body"></div>
+  </dialog>
+
+  <!-- ==================== HOJA: PEDIR ==================== -->
+  <dialog class="sheet" id="sheet-pedir" aria-labelledby="pedir-title">
+    <div class="sheet__grab" data-drag></div>
+    <div class="sheet__head">
+      <h2 class="t-h2" id="pedir-title" style="margin-right:auto">Pedir canción</h2>
+      <button class="icon-btn" aria-label="Cerrar" data-close><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="sheet__body">
+      <div class="segmented segmented--full" role="tablist" aria-label="Tipo de petición">
+        <button role="tab" aria-selected="true" data-pane="form" id="tab-form" aria-controls="pane-form">Petición</button>
+        <button role="tab" aria-selected="false" data-pane="ia" id="tab-ia" aria-controls="pane-ia"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"/></svg>Asistente IA</button>
+      </div>
+
+      <form id="pedir-form" class="stack" role="tabpanel" data-pane-id="form" aria-labelledby="tab-form" novalidate>
+        <p class="t-meta">Cuenta la historia que quieres convertir en canción. Llega directa al canal privado de Discord.</p>
+        <div class="field">
+          <label class="field__label" for="p-nick">Tu nick o usuario</label>
+          <input class="input" id="p-nick" name="nick" autocomplete="nickname" placeholder="@tu_usuario" required />
+        </div>
+        <div class="field">
+          <label class="field__label" for="p-style">Estilo / género</label>
+          <input class="input" id="p-style" name="style" placeholder="Drill, trap, dembow, boom bap…" required />
+          <div class="chips chips--tight" id="p-style-chips" aria-label="Estilos rápidos"></div>
+        </div>
+        <div class="field">
+          <label class="field__label" for="p-idea">Idea de la canción</label>
+          <textarea class="textarea" id="p-idea" name="idea" rows="4" placeholder="Nombres, detalles, frases que quieras que salgan, referencias…" required></textarea>
+          <span class="field__hint">Ejemplo: beef amistoso, historia de amor, intro para tu canal.</span>
+        </div>
+        <p class="form-status" id="pedir-status" role="status" aria-live="polite"></p>
+        <button class="btn btn--primary btn--block" type="submit"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-send"/></svg>Enviar petición</button>
+        <a class="btn btn--ghost btn--block" href="#/peticiones" data-close><svg class="icon icon--sm" aria-hidden="true"><use href="#i-list"/></svg>Ver peticiones en curso</a>
+      </form>
+
+      <div class="stack" id="pane-ia" role="tabpanel" data-pane-id="ia" aria-labelledby="tab-ia" hidden>
+        <p class="t-meta">Ideas de letras, títulos y planes de lanzamiento. Escribe tu idea o toca un ejemplo.</p>
+        <div class="chips chips--tight" id="ia-chips">
+          <button type="button" class="chip" data-prompt="Hazme una letra de reggaetón triste sobre una ruptura, en primera persona y con un estribillo muy pegado.">Letra reggaetón triste</button>
+          <button type="button" class="chip" data-prompt="Dame 5 ideas de títulos y conceptos para un tema de drill sobre traición en el barrio.">Títulos de drill</button>
+          <button type="button" class="chip" data-prompt="Hazme un plan de lanzamiento de 7 días para mi nuevo single de dembow, con ideas de posts para TikTok e Instagram.">Plan de lanzamiento 7 días</button>
+        </div>
+        <div class="field">
+          <label class="field__label" for="ia-prompt">Tu petición al asistente</label>
+          <textarea class="textarea" id="ia-prompt" rows="4" placeholder="Quiero un tema de trap oscuro sobre crecer en el barrio, con estribillo agresivo…"></textarea>
+        </div>
+        <button class="btn btn--primary btn--block" type="button" id="ia-send" disabled><svg class="icon icon--sm" aria-hidden="true"><use href="#i-sparkles"/></svg>Generar</button>
+        <div class="output" id="ia-output" hidden>
+          <div class="output__head">
+            <span class="t-kicker">Resultado</span>
+            <button class="btn btn--ghost btn--sm" type="button" id="ia-copy"><svg class="icon icon--sm" aria-hidden="true"><use href="#i-copy"/></svg>Copiar</button>
+          </div>
+          <div class="output__text" id="ia-text" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ==================== HOJA: SUGERENCIA / REPORTE ==================== -->
+  <dialog class="sheet" id="sheet-feedback" aria-labelledby="feedback-title">
+    <div class="sheet__grab" data-drag></div>
+    <div class="sheet__head">
+      <h2 class="t-h2" id="feedback-title" style="margin-right:auto">Enviar sugerencia</h2>
+      <button class="icon-btn" aria-label="Cerrar" data-close><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="sheet__body">
+      <form id="feedback-form" class="stack" novalidate>
+        <p class="t-meta" id="feedback-desc"></p>
+        <div class="field">
+          <label class="field__label" for="fb-nick">Tu nick (opcional)</label>
+          <input class="input" id="fb-nick" name="nick" placeholder="@tu_usuario" />
+        </div>
+        <div class="field">
+          <label class="field__label" for="fb-msg" id="fb-msg-label">Tu sugerencia</label>
+          <textarea class="textarea" id="fb-msg" name="mensaje" rows="5" required></textarea>
+        </div>
+        <p class="form-status" id="feedback-status" role="status" aria-live="polite"></p>
+        <button class="btn btn--primary btn--block" type="submit" id="feedback-submit">Enviar</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- ==================== HOJA: EDITAR PERFIL ==================== -->
+  <dialog class="sheet sheet--tall" id="sheet-profile" aria-labelledby="profile-title">
+    <div class="sheet__grab" data-drag></div>
+    <div class="sheet__head">
+      <h2 class="t-h2" id="profile-title" style="margin-right:auto">Editar perfil</h2>
+      <button class="icon-btn" aria-label="Cerrar" data-close><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="sheet__body">
+      <form id="profile-form" class="stack" novalidate>
+        <div class="avatar-field">
+          <div id="pe-avatar-preview"></div>
+          <div class="field" style="flex:1;min-width:0">
+            <label class="field__label" for="pe-avatar">Foto de perfil (URL)</label>
+            <input class="input" id="pe-avatar" type="url" inputmode="url" placeholder="https://…" autocomplete="off" />
+            <span class="field__hint">Pega el enlace de una imagen.</span>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field__row"><label class="field__label" for="pe-bio">Bio</label><span class="t-caption tabular" id="pe-bio-count">0/280</span></div>
+          <textarea class="textarea" id="pe-bio" maxlength="280" rows="3" placeholder="Quién eres, qué escuchas, qué haces…"></textarea>
+        </div>
+        <fieldset class="fieldset">
+          <legend class="field__label">Enlaces</legend>
+          <div class="field"><label class="field__hint" for="pe-instagram">Instagram</label><input class="input" id="pe-instagram" type="url" inputmode="url" placeholder="https://instagram.com/…" /></div>
+          <div class="field"><label class="field__hint" for="pe-youtube">YouTube</label><input class="input" id="pe-youtube" type="url" inputmode="url" placeholder="https://youtube.com/…" /></div>
+          <div class="field"><label class="field__hint" for="pe-soundcloud">SoundCloud</label><input class="input" id="pe-soundcloud" type="url" inputmode="url" placeholder="https://soundcloud.com/…" /></div>
+          <div class="field"><label class="field__hint" for="pe-spotify">Spotify</label><input class="input" id="pe-spotify" type="url" inputmode="url" placeholder="https://open.spotify.com/…" /></div>
+        </fieldset>
+        <label class="switch-row" for="pe-public">
+          <span><span class="field__label">Perfil público</span><span class="field__hint" style="display:block">Si lo desactivas, solo tú podrás ver tu perfil.</span></span>
+          <input type="checkbox" class="switch" id="pe-public" role="switch" />
+        </label>
+        <p class="form-status" id="profile-status" role="status" aria-live="polite"></p>
+        <button class="btn btn--primary btn--block" type="submit">Guardar cambios</button>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- ==================== HOJA: NOTIFICACIONES ==================== -->
+  <dialog class="sheet" id="sheet-notifs" aria-labelledby="notifs-title">
+    <div class="sheet__grab" data-drag></div>
+    <div class="sheet__head">
+      <h2 class="t-h2" id="notifs-title" style="margin-right:auto">Notificaciones</h2>
+      <button class="btn btn--ghost btn--sm" id="notifs-readall">Marcar leídas</button>
+      <button class="icon-btn" aria-label="Cerrar" data-close><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="sheet__body sheet__body--flush" id="notifs-list"></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="design-system/covers.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
-    

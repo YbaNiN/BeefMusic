@@ -1,0 +1,127 @@
+/* ==========================================================================
+   BeefMusic · Tokens del sistema de diseño
+   Única fuente de verdad para colores, tipografía, espacios y movimiento.
+   Las páginas y componentes usan SIEMPRE estas variables, nunca hex sueltos.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap");
+
+:root {
+  color-scheme: dark;
+
+  /* ---------- Superficies (capas por luminosidad, no por bordes) ---------- */
+  --bg: #09090b;          /* lienzo de la app */
+  --surface-1: #131316;   /* paneles: sidebar, contenido */
+  --surface-2: #1b1b1f;   /* tarjetas, filas al pasar el ratón */
+  --surface-3: #25252a;   /* inputs, chips, hover sobre tarjetas */
+  --surface-4: #303036;   /* pressed / seleccionado */
+  --overlay: rgba(9, 9, 11, 0.72);
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.14);
+
+  /* ---------- Texto ---------- */
+  --text: #f4f4f5;        /* 18:1 sobre --bg */
+  --text-2: #a1a1aa;      /* 7.7:1 secundario */
+  --text-3: #8b8b94;      /* 5.1:1 sobre --surface-2, metadatos */
+  --text-on-accent: #0b0b0c;
+
+  /* ---------- Marca ---------- */
+  --beef: #ff3358;        /* acción principal: play, pedir, activo */
+  --beef-hover: #ff5573;
+  --beef-press: #e62647;
+  --beef-soft: rgba(255, 51, 88, 0.14);
+  --violet: #8b5cf6;
+  --grad-beef: linear-gradient(135deg, #ff3358 0%, #ff4f8b 48%, #8b5cf6 100%);
+
+  /* ---------- Estados de petición / feedback ---------- */
+  --ok: #34d399;          /* publicada / terminada */
+  --warn: #fbbf24;        /* pendiente */
+  --info: #60a5fa;        /* en producción */
+  --danger: #f87171;
+
+  /* ---------- Géneros (tiñen portadas y chips) ---------- */
+  --g-trap: #8b5cf6;
+  --g-drill: #38bdf8;
+  --g-dembow: #fb923c;
+  --g-reggaeton: #f472b6;
+  --g-boombap: #f59e0b;
+  --g-salsa: #22c55e;
+
+  /* ---------- Tipografía ---------- */
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-ui: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --fs-caption: 0.75rem;   /* 12 · etiquetas de tab, captions */
+  --fs-meta: 0.8125rem;    /* 13 · autor, duración */
+  --fs-ui: 0.875rem;       /* 14 · botones, filas */
+  --fs-body: 1rem;         /* 16 · texto de lectura */
+  --fs-h3: 1.125rem;       /* 18 */
+  --fs-h2: 1.375rem;       /* 22 · títulos de sección */
+  --fs-h1: clamp(1.75rem, 1.2rem + 2.4vw, 2.5rem);        /* 28 → 40 */
+  --fs-display: clamp(3rem, 1.6rem + 7vw, 6.5rem);         /* 48 → 104 */
+
+  --lh-tight: 1.05;
+  --lh-snug: 1.25;
+  --lh-body: 1.5;
+
+  /* ---------- Espaciado (base 4px) ---------- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+
+  /* ---------- Radios ---------- */
+  --r-xs: 4px;     /* portadas en filas */
+  --r-sm: 6px;     /* portadas en tarjetas */
+  --r-md: 8px;     /* paneles, tarjetas */
+  --r-lg: 12px;    /* mini-player, menús */
+  --r-xl: 20px;    /* hojas inferiores */
+  --r-pill: 999px; /* botones, chips, buscador */
+
+  /* ---------- Elevación (solo para lo que flota) ---------- */
+  --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-sheet: 0 -8px 40px rgba(0, 0, 0, 0.6);
+
+  /* ---------- Movimiento ---------- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);      /* entradas */
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);       /* salidas */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);   /* cambios de estado */
+  --dur-press: 120ms;
+  --dur-fast: 180ms;
+  --dur-base: 240ms;
+  --dur-sheet: 380ms;
+  --press-scale: 0.96;
+
+  /* ---------- Layout del shell ---------- */
+  --appbar-h: 56px;
+  --tabbar-h: 64px;
+  --mini-h: 56px;
+  --sidebar-w: 272px;
+  --playerbar-h: 80px;
+  --gutter: 16px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+  --content-max: 1280px;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-press: 0ms;
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-sheet: 0ms;
+  }
+}

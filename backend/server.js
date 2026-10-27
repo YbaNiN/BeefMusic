@@ -7,6 +7,9 @@ const axios = require("axios");
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
+// Render pone un proxy delante: así req.ip es la IP real del visitante
+// (se usa para limitar el formulario de contacto).
+app.set("trust proxy", 1);
 app.use(cors());
 app.use(express.json());
 
@@ -433,6 +436,13 @@ const DISCORD_WEBHOOK_SUGERENCIAS =
 const DISCORD_WEBHOOK_REPORTES =
     process.env.DISCORD_WEBHOOK_REPORTES || process.env.DISCORD_WEBHOOK_URL;
 
+const DISCORD_WEBHOOK_CONTACTO =
+    process.env.DISCORD_WEBHOOK_CONTACTO || process.env.DISCORD_WEBHOOK_URL;
+
+// Los textos vienen de usuarios sin cuenta: Discord no debe convertir
+// "@everyone", "@here" ni menciones a usuarios o roles en avisos.
+const DISCORD_SIN_MENCIONES = { parse: [] };
+
 // === DISCORD: PETICIONES ===
 async function enviarAPeticionDiscord({ nick, style, idea, idPeticion }) {
     const url = DISCORD_WEBHOOK_PETICIONES;
@@ -445,7 +455,7 @@ async function enviarAPeticionDiscord({ nick, style, idea, idPeticion }) {
         `📝 Idea:\n${idea}\n\n` +
         `🆔 ID petición: ${idPeticion}`;
 
-    await axios.post(url, { content });
+    await axios.post(url, { content, allowed_mentions: DISCORD_SIN_MENCIONES });
 }
 
 // === DISCORD: SUGERENCIAS ===
@@ -459,7 +469,7 @@ async function enviarASugerenciaDiscord({ nick, mensaje, idSugerencia }) {
         `📝 Sugerencia:\n${mensaje}\n\n` +
         `🆔 ID sugerencia: ${idSugerencia}`;
 
-    await axios.post(url, { content });
+    await axios.post(url, { content, allowed_mentions: DISCORD_SIN_MENCIONES });
 }
 
 // === DISCORD: REPORTES ===
@@ -473,7 +483,7 @@ async function enviarAReporteDiscord({ nick, mensaje, idReporte }) {
         `📝 Detalle del problema:\n${mensaje}\n\n` +
         `🆔 ID reporte: ${idReporte}`;
 
-    await axios.post(url, { content });
+    await axios.post(url, { content, allowed_mentions: DISCORD_SIN_MENCIONES });
 }
 
 // === RUTA TEST ===
@@ -779,6 +789,162 @@ app.post("/api/reportes", async (req, res) => {
     } catch (error) {
         console.error("Error en POST /api/reportes:", error);
         res.status(500).json({ error: "Error en el servidor" });
+    }
+});
+
+// ======================================================
+// CONTACTO (PÚBLICO)
+// Guarda en la tabla "contactos" (ver backend/sql/contactos.sql) y avisa
+// por Discord. Si una de las dos cosas falla, la otra basta para no perder
+// el mensaje. Protegido con límite por IP y un campo trampa para bots.
+// ======================================================
+const CONTACTO_TIPOS = {
+    soporte: "Soporte",
+    reporte: "Reportar problema",
+    sugerencia: "Sugerencia",
+    derechos: "Derechos de autor",
+    privacidad: "Privacidad",
+    otro: "Otro",
+};
+
+const contactoRate = new Map(); // ip -> { lastAt, windowStart, count }
+const CONTACTO_COOLDOWN_MS = 30 * 1000; // 1 mensaje cada 30 s
+const CONTACTO_WINDOW_MS = 60 * 60 * 1000; // ventana de 1 h
+const CONTACTO_MAX_POR_HORA = 5;
+
+function puedeContactar(ip) {
+    const now = Date.now();
+    const row = contactoRate.get(ip);
+    if (!row) return { ok: true };
+    if (now - row.lastAt < CONTACTO_COOLDOWN_MS) {
+        return { ok: false, reason: "Espera unos segundos antes de enviar otro mensaje." };
+    }
+    if (now - row.windowStart < CONTACTO_WINDOW_MS && row.count >= CONTACTO_MAX_POR_HORA) {
+        return { ok: false, reason: "Has enviado varios mensajes seguidos. Inténtalo más tarde." };
+    }
+    return { ok: true };
+}
+
+function registrarContacto(ip) {
+    const now = Date.now();
+    const row = contactoRate.get(ip) || { lastAt: 0, windowStart: now, count: 0 };
+    if (now - row.windowStart >= CONTACTO_WINDOW_MS) {
+        row.windowStart = now;
+        row.count = 0;
+    }
+    row.lastAt = now;
+    row.count += 1;
+    contactoRate.set(ip, row);
+
+    // Limpieza para que el mapa no crezca sin fin.
+    if (contactoRate.size > 5000) {
+        for (const [key, r] of contactoRate) {
+            if (now - r.windowStart >= CONTACTO_WINDOW_MS) contactoRate.delete(key);
+        }
+    }
+}
+
+const textoLimpio = (v) => (typeof v === "string" ? v.trim() : "");
+const recortar = (s, max) => (s.length > max ? s.slice(0, max - 1) + "…" : s);
+
+// Mismas reglas que el formulario de la web (js/views/contact.js).
+function validarContacto(body) {
+    const data = {
+        nombre: textoLimpio(body.name),
+        email: textoLimpio(body.email),
+        tipo: textoLimpio(body.type),
+        usuario: textoLimpio(body.username),
+        asunto: textoLimpio(body.subject),
+        mensaje: textoLimpio(body.message),
+    };
+    if (!data.nombre) return { error: "Escribe tu nombre." };
+    if (data.nombre.length > 80) return { error: "El nombre es demasiado largo (máx. 80)." };
+    if (!data.email) return { error: "Escribe tu email." };
+    if (data.email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        return { error: "El email no parece válido." };
+    }
+    if (!CONTACTO_TIPOS[data.tipo]) return { error: "Selecciona el tipo." };
+    if (data.usuario.length > 40) return { error: "El usuario es demasiado largo (máx. 40)." };
+    if (!data.asunto) return { error: "Escribe el asunto." };
+    if (data.asunto.length > 120) return { error: "El asunto es demasiado largo (máx. 120)." };
+    if (!data.mensaje) return { error: "Escribe tu mensaje." };
+    if (data.mensaje.length > 2000) return { error: "El mensaje es demasiado largo (máx. 2000)." };
+    if (body.consent !== true) return { error: "Debes confirmar la casilla de consentimiento." };
+    data.usuario = data.usuario || null;
+    return { data };
+}
+
+// Tarjeta (embed): admite textos largos; un mensaje normal se corta en 2000.
+async function enviarAContactoDiscord({ nombre, email, tipo, usuario, asunto, mensaje, idContacto }) {
+    const url = DISCORD_WEBHOOK_CONTACTO;
+    if (!url) return false;
+
+    await axios.post(url, {
+        allowed_mentions: DISCORD_SIN_MENCIONES,
+        embeds: [
+            {
+                title: recortar(`📨 ${asunto}`, 256),
+                description: recortar(mensaje, 4000),
+                color: 0xff3358,
+                fields: [
+                    { name: "Tipo", value: CONTACTO_TIPOS[tipo], inline: true },
+                    { name: "Nombre", value: recortar(nombre, 1024), inline: true },
+                    { name: "Email", value: recortar(email, 1024), inline: true },
+                    { name: "Usuario", value: usuario ? recortar(usuario, 1024) : "—", inline: true },
+                    { name: "ID contacto", value: idContacto ? String(idContacto) : "sin guardar", inline: true },
+                ],
+                timestamp: new Date().toISOString(),
+            },
+        ],
+    });
+    return true;
+}
+
+app.post("/api/contacto", async (req, res) => {
+    try {
+        const body = req.body || {};
+
+        // Campo trampa: invisible para personas. Si llega relleno, es un bot:
+        // se responde como si todo fuera bien, pero no se guarda nada.
+        if (textoLimpio(body.website)) {
+            return res.status(201).json({ message: "Mensaje enviado correctamente" });
+        }
+
+        const { data, error: errorValidacion } = validarContacto(body);
+        if (errorValidacion) return res.status(400).json({ error: errorValidacion });
+
+        const ip = req.ip || "desconocida";
+        const rate = puedeContactar(ip);
+        if (!rate.ok) return res.status(429).json({ error: rate.reason });
+
+        let idContacto = null;
+        const { data: fila, error: errorInsert } = await supabase
+            .from("contactos")
+            .insert(data)
+            .select("id")
+            .single();
+        if (errorInsert) {
+            console.error("Supabase error (insert contacto):", errorInsert);
+        } else {
+            idContacto = fila.id;
+        }
+
+        let enviadoDiscord = false;
+        try {
+            enviadoDiscord = await enviarAContactoDiscord({ ...data, idContacto });
+        } catch (err) {
+            console.error("Error enviando contacto a Discord:", err.message);
+        }
+
+        if (!idContacto && !enviadoDiscord) {
+            return res.status(500).json({ error: "No se pudo enviar el mensaje. Inténtalo más tarde." });
+        }
+
+        registrarContacto(ip);
+        return res.status(201).json({ message: "Mensaje enviado correctamente", id: idContacto });
+    } catch (error) {
+        console.error("Error en POST /api/contacto:", error);
+        return res.status(500).json({ error: "Error en el servidor" });
     }
 });
 
